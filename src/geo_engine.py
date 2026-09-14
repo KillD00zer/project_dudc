@@ -238,7 +238,9 @@ def validate_and_enrich_parcel(parcel):
             dist_m = 0.01
         fwd_az = round(fwd_az % 360, 1)
         
+        default_side_keys = ["north", "east", "south", "west"]
         if n_pts == 4 and i < 4:
+            side = default_side_keys[i]
             dir_name = default_dir_names[i]
         else:
             dx = p2["lon"] - p1["lon"]

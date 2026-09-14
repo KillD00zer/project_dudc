@@ -74,8 +74,8 @@ d:\Work\GIS_tools\project_dudc\
     │   │   └── <اسم_الملف>.xls/.csv     <-- Exact copy of input survey file for archival integrity
     │   └── ...
     │
-    ├── احمد فؤاد محمد الحناوى أجا انشاء.docx      <-- Full sample approved certificate (with photos)
-    └── احمد فؤاد محمد الحناوى أجا انشاء - Copy.docx <-- Clean sample base used to update template
+    ├── نموذج_شهادة_رسمية_عينة.docx      <-- Full sample approved certificate (with photos)
+    └── نموذج_شهادة_رسمية_عينة - Copy.docx <-- Clean sample base used to update template
 
 ----------------------------------------------------------------------------------------------------
 3. RECENT CHANGES & MILESTONES COMPLETED (التعديلات الأخيرة التي تمت)
@@ -123,7 +123,7 @@ The following critical improvements and architectural fixes were recently implem
   - If the user types neighbor names, they appear outside the CAD perimeter in bold blue and populate Table 0 Column 1.
 
 [Change 5] Official Word Certificate Template Upgrade (7-Column Layout):
-  - Upgraded to the official 7-column layout based on `احمد فؤاد محمد الحناوى أجا انشاء.docx`.
+  - Upgraded to the official 7-column layout based on `نموذج_شهادة_رسمية_عينة.docx`.
   - `شهادة.docx` in both `project_dudc/` and `src/` matches the official template.
   - `docx_builder.py` maps:
     * Col 0: Direction / Point Name (الحد البحري، الحد الشرقي، إلخ)

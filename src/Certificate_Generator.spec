@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['D:/Work/GIS_tools/project_dudc/src/app_server.py'],
+    ['d:/Work/GIS_tools/project_dudc/src/app_server.py'],
     pathex=[],
     binaries=[],
-    datas=[('D:/Work/GIS_tools/project_dudc/src/شهادة.docx', '.'), ('D:/Work/GIS_tools/project_dudc/src/Google Maps Satellite.lyr', '.'), ('D:/Work/GIS_tools/project_dudc/src/ف.xls', '.'), ('D:/Work/GIS_tools/project_dudc/src/index.html', '.')],
+    datas=[('d:/Work/GIS_tools/project_dudc/src/شهادة.docx', '.'), ('d:/Work/GIS_tools/project_dudc/src/Google Maps Satellite.lyr', '.'), ('d:/Work/GIS_tools/project_dudc/src/ف.xls', '.'), ('d:/Work/GIS_tools/project_dudc/src/index.html', '.')],
     hiddenimports=['openpyxl', 'xlrd', 'pyproj', 'shapely', 'PIL', 'matplotlib', 'docx'],
     hookspath=[],
     hooksconfig={},

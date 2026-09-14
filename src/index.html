@@ -686,8 +686,14 @@
       </label>
       <div class="output-dir-input-wrap">
         <input type="text" id="outputDirInput" placeholder="d:\Work\certi_processing\output" />
+        <button type="button" class="btn btn-secondary" onclick="browseOutputDir()" style="padding: 6px 14px; font-size: 0.82rem; border-color: #38bdf8; color: #38bdf8;">
+          📁 استعراض...
+        </button>
         <button type="button" class="btn btn-secondary" onclick="saveOutputDir()" style="padding: 6px 14px; font-size: 0.82rem;">
           💾 حفظ
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="openOutputFolder()" style="padding: 6px 14px; font-size: 0.82rem;">
+          📂 فتح المجلد
         </button>
       </div>
       <div class="output-dir-status" id="outputDirStatus"></div>
@@ -991,6 +997,34 @@
     let currentParcels = [];
     let currentFile = "";
     let originalSegments = [];
+
+    // Browse Native Windows Directory Dialog
+    async function browseOutputDir() {
+      const statusEl = document.getElementById('outputDirStatus');
+      const curDir = document.getElementById('outputDirInput').value.trim();
+      if (statusEl) statusEl.textContent = '⏳ جاري فتح نافذة اختيار المجلد...';
+
+      try {
+        const res = await fetch('/api/browse-output-dir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initial_dir: curDir })
+        });
+        const data = await res.json();
+        if (data.folder_path) {
+          document.getElementById('outputDirInput').value = data.folder_path;
+          if (statusEl) {
+            statusEl.textContent = '✔ تم تحديد وتحديث مجلد الحفظ بنجاح';
+            setTimeout(() => { statusEl.textContent = ''; }, 4000);
+          }
+        } else {
+          if (statusEl) statusEl.textContent = '';
+        }
+      } catch (err) {
+        alert('تعذر فتح نافذة اختيار المجلد: ' + err.message);
+        if (statusEl) statusEl.textContent = '';
+      }
+    }
 
     // Load current output directory on page load
     async function loadOutputDir() {

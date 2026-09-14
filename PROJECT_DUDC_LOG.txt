@@ -74,8 +74,8 @@ d:\Work\GIS_tools\project_dudc\
     │   │   └── <اسم_الملف>.xls/.csv     <-- Exact copy of input survey file for archival integrity
     │   └── ...
     │
-    ├── احمد فؤاد محمد الحناوى أجا انشاء.docx      <-- Full sample approved certificate (with photos)
-    └── احمد فؤاد محمد الحناوى أجا انشاء - Copy.docx <-- Clean sample base used to update template
+    ├── نموذج_شهادة_رسمية_عينة.docx      <-- Full sample approved certificate (with photos)
+    └── نموذج_شهادة_رسمية_عينة - Copy.docx <-- Clean sample base used to update template
 
 ----------------------------------------------------------------------------------------------------
 3. RECENT CHANGES & MILESTONES COMPLETED (التعديلات الأخيرة التي تمت)
@@ -123,7 +123,7 @@ The following critical improvements and architectural fixes were recently implem
   - If the user types neighbor names, they appear outside the CAD perimeter in bold blue and populate Table 0 Column 1.
 
 [Change 5] Official Word Certificate Template Upgrade (7-Column Layout):
-  - Upgraded to the official 7-column layout based on `احمد فؤاد محمد الحناوى أجا انشاء.docx`.
+  - Upgraded to the official 7-column layout based on `نموذج_شهادة_رسمية_عينة.docx`.
   - `شهادة.docx` in both `project_dudc/` and `src/` matches the official template.
   - `docx_builder.py` maps:
     * Col 0: Direction / Point Name (الحد البحري، الحد الشرقي، إلخ)
@@ -284,3 +284,14 @@ C. Rebuilding the Standalone Binary (.exe):
   * Completely removed the dimension summation formula string from the neighbor description (e.g. removed `(89.04+31.76)`) keeping the neighbor description clean and professional.
   * Guaranteed zero coordinate overlap: every single vertex of the polygon is mapped directly to its parent boundary row.
 
+
+[Change 16] Bugfix: UnboundLocalError 'side' Variable in geo_engine.py:
+  * Fixed UnboundLocalError: cannot access local variable 'side' where it is not associated with a value when parsing 4-point parcels (n_pts == 4).
+  * Explicitly mapped default_side_keys = ['north', 'east', 'south', 'west'] to ensure every segment has a valid direction assigned.
+  * Re-compiled and synchronized the standalone Windows executable (Certificate_Generator.exe) and distribution zip archive (project_dudc.zip).
+
+[Change 17] Dynamic Output Directory Browser & Persistent Configuration:
+  * Added a native Windows folder browser button ('📁 استعراض...') in the top config bar to let users visually pick any output directory on their system.
+  * Added /api/browse-output-dir endpoint utilizing Tkinter and PowerShell fallback dialogs.
+  * Added persistent configuration storage (app_config.json) so the chosen output directory is remembered across restarts.
+  * Re-compiled and synchronized Certificate_Generator.exe and project_dudc.zip.

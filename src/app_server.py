@@ -38,7 +38,72 @@ else:
     BUNDLE_DIR = APP_DIR
 
 # OUTPUT_DIR is always created in APP_DIR (next to Certificate_Generator.exe, NEVER in _internal!)
-OUTPUT_DIR = os.path.join(APP_DIR, "generated_certificates")
+
+CONFIG_FILE = os.path.join(APP_DIR, "app_config.json")
+
+def load_saved_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_persistent_config(key, val):
+    cfg = load_saved_config()
+    cfg[key] = val
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def open_folder_picker(initial_dir=""):
+    """
+    Open Windows native folder selection dialog and return absolute path.
+    """
+    init_dir = initial_dir if (initial_dir and os.path.exists(initial_dir)) else (OUTPUT_DIR if os.path.exists(OUTPUT_DIR) else os.getcwd())
+
+    # Method 1: Tkinter filedialog (Modern Windows native folder dialog)
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        root = tk.Tk()
+        root.withdraw()
+        root.wm_attributes("-topmost", 1)
+        root.focus_force()
+        folder = filedialog.askdirectory(
+            title="اختر مجلد حفظ الشهادات المساحية",
+            initialdir=init_dir
+        )
+        root.destroy()
+        if folder:
+            return os.path.normpath(folder)
+    except Exception:
+        pass
+
+    # Method 2: PowerShell Windows Forms FolderBrowserDialog fallback
+    try:
+        import subprocess
+        ps_cmd = (
+            "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
+            "$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
+            "$f.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
+            f"$f.SelectedPath = '{init_dir}'; "
+            "if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $f.SelectedPath }"
+        )
+        res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True, timeout=120)
+        out = res.stdout.strip()
+        if out and os.path.exists(out):
+            return os.path.normpath(out)
+    except Exception:
+        pass
+
+    return ""
+
+_saved_cfg = load_saved_config()
+OUTPUT_DIR = _saved_cfg.get("output_dir") or os.path.join(APP_DIR, "generated_certificates")
 TEMP_ASSETS_DIR = os.path.join(APP_DIR, "temp_assets")
 
 def resolve_asset(filename):
@@ -341,6 +406,21 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(e)}, status=500)
 
         # 5. Set Output Directory
+        elif path == '/api/browse-output-dir':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                init_dir = req_data.get('initial_dir') or OUTPUT_DIR
+                folder = open_folder_picker(init_dir)
+                if folder:
+                    OUTPUT_DIR = folder
+                    os.makedirs(OUTPUT_DIR, exist_ok=True)
+                    save_persistent_config("output_dir", OUTPUT_DIR)
+                self._send_json({"folder_path": folder, "output_dir": OUTPUT_DIR})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         elif path == '/api/set-output-dir':
             try:
                 length = int(self.headers.get('Content-Length', 0))
@@ -354,6 +434,7 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                     
                 os.makedirs(new_dir, exist_ok=True)
                 OUTPUT_DIR = new_dir
+                save_persistent_config("output_dir", OUTPUT_DIR)
                 self._send_json({"success": True, "output_dir": OUTPUT_DIR})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
