@@ -63,6 +63,14 @@ def apply_run_font(run, font_name="Arial", size_pt=12, bold=None):
     rFonts.set(docx.oxml.ns.qn('w:hAnsi'), font_name)
     rFonts.set(docx.oxml.ns.qn('w:cs'), font_name)
 
+    if bold:
+        bCs = rPr.find(docx.oxml.ns.qn('w:bCs'))
+        if bCs is None:
+            rPr.append(docx.oxml.OxmlElement('w:bCs'))
+    rtl = rPr.find(docx.oxml.ns.qn('w:rtl'))
+    if rtl is None:
+        rPr.append(docx.oxml.OxmlElement('w:rtl'))
+
 def set_cell_text(cell, text, bold=False, font_size=12, font_color=None, align=WD_ALIGN_PARAGRAPH.CENTER):
     """
     Clears cell content and sets new text with strict Arial typography,
@@ -88,26 +96,63 @@ def update_signature_names(doc, survey_tech="محمد ابراهيم بدير", 
     """
     Updates the employee signature blocks at the bottom of the certificate
     with the surveyor's and GIS officer's official names using Arial 12 Bold.
+    Maintains exact 4-column spacing across the line to ensure strict 1-page fit.
     """
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                for para in cell.paragraphs:
-                    txt = para.text
-                    if "فني المساحة" in txt:
-                        para.text = f"فني المساحة / {survey_tech}"
-                        para.paragraph_format.space_before = Pt(0)
-                        para.paragraph_format.space_after = Pt(0)
-                        para.paragraph_format.line_spacing = 1.0
-                        if para.runs:
-                            apply_run_font(para.runs[0], "Arial", 12, bold=True)
-                    elif "مسؤول النظم" in txt or "مسئول النظم" in txt:
-                        para.text = f"مسؤول النظم / {sys_officer}"
-                        para.paragraph_format.space_before = Pt(0)
-                        para.paragraph_format.space_after = Pt(0)
-                        para.paragraph_format.line_spacing = 1.0
-                        if para.runs:
-                            apply_run_font(para.runs[0], "Arial", 12, bold=True)
+    col1 = f"أ / {str(survey_tech).strip()}"
+    gap1 = " " * max(4, 35 - len(col1))
+    col2 = f"أ / {str(sys_officer).strip()}"
+    cur_len = len(col1) + len(gap1) + len(col2)
+    gap2 = " " * max(4, 65 - cur_len)
+    col3 = "م / محمد مصطفى"
+    cur_len2 = cur_len + len(gap2) + len(col3)
+    gap3 = " " * max(4, 95 - cur_len2)
+    col4 = "م / السيد زين العابدين"
+    new_sig_line = f"{col1}{gap1}{col2}{gap2}{col3}{gap3}{col4}"
+
+    # 1. Primary: Search in document paragraphs (where official template places signatures)
+    updated = False
+    for p in doc.paragraphs:
+        txt = p.text
+        if any(k in txt for k in ["السيد زين العابدين", "محمد مصطفى", "ابراهيم بدير"]):
+            p.text = new_sig_line
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(0)
+            p.paragraph_format.line_spacing = 1.0
+            if p.runs:
+                apply_run_font(p.runs[0], "Arial", 12, bold=True)
+            updated = True
+            break
+
+    # 2. Fallback: Search in tables in case template is ever converted to table format
+    if not updated:
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for p in cell.paragraphs:
+                        txt = p.text
+                        if any(k in txt for k in ["السيد زين العابدين", "محمد مصطفى", "ابراهيم بدير"]):
+                            p.text = new_sig_line
+                            p.paragraph_format.space_before = Pt(0)
+                            p.paragraph_format.space_after = Pt(0)
+                            p.paragraph_format.line_spacing = 1.0
+                            if p.runs:
+                                apply_run_font(p.runs[0], "Arial", 12, bold=True)
+                            updated = True
+                            break
+                        elif "فني المساحة" in txt or "فني مساحة" in txt:
+                            p.text = f"فني مساحة / {survey_tech}"
+                            p.paragraph_format.space_before = Pt(0)
+                            p.paragraph_format.space_after = Pt(0)
+                            p.paragraph_format.line_spacing = 1.0
+                            if p.runs:
+                                apply_run_font(p.runs[0], "Arial", 12, bold=True)
+                        elif "مسؤول النظم" in txt or "مسئول النظم" in txt:
+                            p.text = f"مسئول النظم / {sys_officer}"
+                            p.paragraph_format.space_before = Pt(0)
+                            p.paragraph_format.space_after = Pt(0)
+                            p.paragraph_format.line_spacing = 1.0
+                            if p.runs:
+                                apply_run_font(p.runs[0], "Arial", 12, bold=True)
 
 def format_all_document_typography(doc):
     """

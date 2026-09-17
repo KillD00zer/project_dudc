@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastral Certificate Generator - Project DUDC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 27, 34, 0.85);
+      --card-border: rgba(48, 54, 61, 0.7);
+      --border: #30363d;
+      --text: #f0f6fc;
+      --text-muted: #8b949e;
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --blue-glow: rgba(37, 99, 235, 0.25);
+      --sky: #38bdf8;
+      --green: #238636;
+      --green-hover: #2ea043;
+      --amber: #d97706;
+      --red: #dc2626;
+      --font-ar: 'Cairo', system-ui, sans-serif;
+      --font-en: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: var(--font-ar);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Output Directory Config Bar */
+    .output-dir-section {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .output-dir-section label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--sky);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .output-dir-input-wrap {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .output-dir-input-wrap input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-family: var(--font-mono);
+      outline: none;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .output-dir-input-wrap input:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .output-dir-status {
+      font-size: 0.8rem;
+      color: #3fb950;
+      font-weight: 600;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding-bottom: 8px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: var(--sky);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    header h1 {
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    header h1 span.logo-highlight {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    /* Step Cards */
+    .step-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--sky));
+      color: white;
+      font-weight: 800;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--blue-glow);
+      flex-shrink: 0;
+    }
+
+    .step-title h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .step-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Upload Area */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 34px 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--sky);
+      background: rgba(56, 189, 248, 0.04);
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .upload-zone h4 {
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .upload-zone p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Meta Grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .meta-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .meta-box .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .meta-box .meta-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      word-break: break-word;
+    }
+
+    /* Area Validation Banner */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .status-pass {
+      background: rgba(35, 134, 54, 0.18);
+      border: 1px solid rgba(46, 160, 67, 0.45);
+      color: #3fb950;
+    }
+
+    .status-warn {
+      background: rgba(217, 119, 6, 0.18);
+      border: 1px solid rgba(217, 119, 6, 0.45);
+      color: #fbbf24;
+    }
+
+    /* DUAL PREVIEW: CAD Croquis Demo & Google Satellite */
+    .dual-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .dual-preview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .croquis-preview-container, .sat-preview-container {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .croquis-header, .sat-header {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .croquis-header {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-bottom-color: #cbd5e1;
+    }
+
+    .croquis-preview-container img, .sat-preview-container img {
+      width: 100%;
+      height: 380px;
+      object-fit: contain;
+      background: #ffffff;
+      display: block;
+    }
+
+    .sat-preview-container img {
+      background: #0f172a;
+    }
+
+    /* EDIT SECTION (AFTER CAD DEMO) */
+    .edit-section-container {
+      background: rgba(2, 132, 199, 0.04);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .edit-section-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .edit-section-title h4 {
+      font-size: 1.05rem;
+      color: var(--sky);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edit-section-title p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* 4 Directions Summary Cards */
+    .dir-sums-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 860px) {
+      .dir-sums-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .dir-sum-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .dir-sum-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .dir-sum-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    .dir-sum-val {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--sky);
+      font-family: var(--font-mono);
+    }
+
+    /* Segments Table Styling */
+    .segments-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow-x: auto;
+      max-height: 320px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .segments-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .segments-table th {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      padding: 10px 8px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .segments-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .segments-table tr:hover {
+      background: rgba(56, 189, 248, 0.04);
+    }
+
+    /* Segment Controls */
+    .seg-dir-select {
+      background: #0f172a;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      font-family: var(--font-ar);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .seg-dir-select:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .seg-len-input {
+      width: 95px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .seg-len-input:focus {
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+      border-color: #7dd3fc;
+    }
+
+    .badge-calc-len {
+      display: inline-block;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Boundary Inputs */
+    .boundary-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 650px) {
+      .boundary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-field label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .input-field input, .input-field select {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border);
+      color: white;
+      padding: 9px 12px;
+      border-radius: 7px;
+      font-size: 0.92rem;
+      font-family: var(--font-ar);
+      outline: none;
+      transition: border 0.15s;
+    }
+
+    .input-field input:focus, .input-field select:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Employee Card */
+    .employee-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .employee-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 650px) {
+      .employee-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      font-family: var(--font-ar);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--blue-hover);
+      box-shadow: 0 0 14px var(--blue-glow);
+    }
+
+    .btn-process {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-process:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #15803d, #22c55e);
+      color: white;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: linear-gradient(135deg, #166534, #16a34a);
+      box-shadow: 0 4px 18px rgba(34, 197, 94, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: #8b949e;
+    }
+
+    /* Toast */
+    .toast {
+      padding: 14px 20px;
+      border-radius: 10px;
+      background: rgba(35, 134, 54, 0.2);
+      border: 1px solid var(--green);
+      color: #3fb950;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast code {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      direction: ltr;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Config Bar: Custom Output Directory -->
+    <div class="output-dir-section">
+      <label for="outputDirInput">
+        <span>📂</span>
+        <span>مجلد حفظ الشهادات (Output Directory):</span>
+      </label>
+      <div class="output-dir-input-wrap">
+        <input type="text" id="outputDirInput" placeholder="d:\Work\certi_processing\output" />
+        <button type="button" class="btn btn-secondary" onclick="browseOutputDir()" style="padding: 6px 14px; font-size: 0.82rem; border-color: #38bdf8; color: #38bdf8;">
+          📁 استعراض...
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="saveOutputDir()" style="padding: 6px 14px; font-size: 0.82rem;">
+          💾 حفظ
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="openOutputFolder()" style="padding: 6px 14px; font-size: 0.82rem;">
+          📂 فتح المجلد
+        </button>
+      </div>
+      <div class="output-dir-status" id="outputDirStatus"></div>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+      <div class="header-badge">
+        <span>🏛️</span>
+        <span>الهيئة العامة للتخطيط العمراني - نظام إصدار شهادات المطابقة المساحية</span>
+      </div>
+      <h1>
+        <span class="logo-highlight">Project DUDC</span>
+        <span>| مولّد الشهادات المساحية الذكي</span>
+      </h1>
+      <p>معاينة فورية لكروكي CAD والصورة الفضائية مع ضبط الأطوال وتجميع الحدود الأربعة تلقائياً</p>
+    </header>
+
+    <!-- STEP 1: Upload Survey File -->
+    <section class="step-card" id="step1">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">
+          <h3>رفع ومطابقة ملف الرفع المساحي (Excel / XLS)</h3>
+          <p>اختر ملف إكسيل يحتوي على إحداثيات الأركان، اسم المواطن، والمساحة المسجلة</p>
+        </div>
+      </div>
+
+      <div class="upload-zone" id="dropArea" onclick="document.getElementById('fileInput').click()">
+        <span class="upload-icon">📊</span>
+        <h4 id="filePrompt">اضغط هنا لاختيار الملف أو اسحبه وأفلته مباشرة</h4>
+        <p>يدعم ملفات .xls و .xlsx و .csv بنظام إحداثيات WGS84 و ETM</p>
+        <input type="file" id="fileInput" accept=".xls,.xlsx,.csv" style="display: none;" onchange="handleFileSelect(event)" />
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="loadSampleFile()">
+          📁 تجربة عينة مدمجة (Load Sample Parcel)
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: Review CAD Demo, Satellite Map & Interactive Edit Section -->
+    <section class="step-card" id="step2" style="display: none;">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">
+          <h3>المعاينة الفنية وضبط أضلاع وحدود الكروكي</h3>
+          <p>معاينة كروكي CAD والصورة الفضائية وتحديد اتجاهات وأطوال الحدود الأربعة قبل التوليد النهائي</p>
+        </div>
+      </div>
+
+      <!-- Area Validation Banner -->
+      <div class="status-banner status-pass" id="valBanner">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.1rem;">⚖️</span>
+          <span id="valStatusText">جاري التحقق من مطابقة المساحة...</span>
+        </div>
+        <div id="valDiffText" style="font-family: var(--font-mono); font-size: 0.95rem;">Δ = 0.00 م²</div>
+      </div>
+
+      <!-- Metadata Grid -->
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">اسم المواطن / مقدم الطلب</div>
+          <div class="meta-val" id="metaName">--</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">المحافظة والمركز والقرية</div>
+          <div class="meta-val" id="metaLoc">--</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">المساحة المسجلة في العقد</div>
+          <div class="meta-val" id="metaStatedArea">--</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">المساحة المحسوبة من الإحداثيات</div>
+          <div class="meta-val" id="metaCalcArea">--</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">الرقم القومي</div>
+          <div class="meta-val" id="metaNid">--</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">عدد أركان القطعة (Vertices)</div>
+          <div class="meta-val" id="metaPoints">--</div>
+        </div>
+      </div>
+
+      <!-- DUAL PREVIEW: CAD Croquis Demo & Google Satellite Imagery -->
+      <div class="dual-preview-grid">
+        <!-- CAD Croquis Demo -->
+        <div class="croquis-preview-container" id="croquisPreviewBox">
+          <div class="croquis-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>📐</span>
+              <span>كروكي الموقع (CAD Croquis Demo)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="file" id="customCroqInput" accept="image/*" style="display:none" onchange="uploadCustomImage(event, 'croquis')" />
+              <button class="btn btn-secondary" onclick="document.getElementById('customCroqInput').click()" style="padding: 4px 10px; font-size: 0.75rem;">
+                📁 كروكي مخصص
+              </button>
+              <span style="color:#0284c7; font-size: 0.75rem; font-weight:700;">High-Res 300 DPI</span>
+            </div>
+          </div>
+          <img id="imgCroq" alt="CAD Croquis Drawing" />
+        </div>
+
+        <!-- Satellite View -->
+        <div class="sat-preview-container" id="satPreviewBox">
+          <div class="sat-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>🛰️</span>
+              <span>صورة القمر الصناعي (Google Satellite)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="file" id="customSatInput" accept="image/*" style="display:none" onchange="uploadCustomImage(event, 'satellite')" />
+              <button class="btn btn-secondary" onclick="document.getElementById('customSatInput').click()" style="padding: 4px 10px; font-size: 0.75rem;">
+                📁 صورة مخصصة
+              </button>
+              <span style="color:#38bdf8; font-size: 0.75rem; font-weight:700;">Scale 1:500</span>
+            </div>
+          </div>
+          <img id="imgSat" alt="Google Maps Satellite" />
+        </div>
+      </div>
+
+      <!-- INTERACTIVE EDIT SECTION (AFTER CAD DEMO) -->
+      <div class="edit-section-container">
+        
+        <div class="edit-section-title">
+          <h4>
+            <span>✍️</span>
+            <span>قسم مراجعة وتعديل بيانات الأضلاع والحدود (Interactive Review &amp; Edit Section)</span>
+          </h4>
+          <p>
+            حدد اتجاه الحد (بحري، قبلي، شرقي، غربي) لكل ضلع وعدل الأطوال إذا لزم الأمر، وسيتم تجميع أطوال الحدود المتشابهة تلقائياً في الشهادة والتقرير الرسمي:
+          </p>
+        </div>
+
+        <!-- 4 Cardinal Direction Sum Badges -->
+        <div class="dir-sums-grid">
+          <div class="dir-sum-card" id="cardNorth">
+            <div class="dir-sum-title">
+              <span>🌊</span>
+              <span>الحد البحري (North)</span>
+            </div>
+            <div class="dir-sum-val"><span id="sumNorth">0.00</span> <small style="font-size:0.75rem; font-weight:normal;">م</small></div>
+            <div id="countNorth" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">(0 ضلع)</div>
+          </div>
+
+          <div class="dir-sum-card" id="cardEast">
+            <div class="dir-sum-title">
+              <span>🌅</span>
+              <span>الحد الشرقي (East)</span>
+            </div>
+            <div class="dir-sum-val"><span id="sumEast">0.00</span> <small style="font-size:0.75rem; font-weight:normal;">م</small></div>
+            <div id="countEast" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">(0 ضلع)</div>
+          </div>
+
+          <div class="dir-sum-card" id="cardSouth">
+            <div class="dir-sum-title">
+              <span>☀️</span>
+              <span>الحد القبلي (South)</span>
+            </div>
+            <div class="dir-sum-val"><span id="sumSouth">0.00</span> <small style="font-size:0.75rem; font-weight:normal;">م</small></div>
+            <div id="countSouth" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">(0 ضلع)</div>
+          </div>
+
+          <div class="dir-sum-card" id="cardWest">
+            <div class="dir-sum-title">
+              <span>🌇</span>
+              <span>الحد الغربي (West)</span>
+            </div>
+            <div class="dir-sum-val"><span id="sumWest">0.00</span> <small style="font-size:0.75rem; font-weight:normal;">م</small></div>
+            <div id="countWest" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">(0 ضلع)</div>
+          </div>
+
+          <div class="dir-sum-card" style="border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.05);">
+            <div class="dir-sum-title" style="color: #c4b5fd;">
+              <span>📏</span>
+              <span>إجمالي المحيط (Total)</span>
+            </div>
+            <div class="dir-sum-val" style="color: #c4b5fd;"><span id="sumTotal">0.00</span> <small style="font-size:0.75rem; font-weight:normal;">م</small></div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">مجموع الأضلاع</div>
+          </div>
+        </div>
+
+        <!-- Segments Table -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <h5 style="font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 6px; margin: 0;">
+            <span>📐</span>
+            <span>جدول تفصيل أضلاع الكروكي وتحديد الحدود</span>
+          </h5>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="resetSegmentLengths()" style="padding: 5px 12px; font-size: 0.8rem;">
+              ↺ استعادة الأطوال والاتجاهات الأصلية
+            </button>
+            <button type="button" class="btn btn-process" id="btnProcessCad" onclick="processCadCroquis()" style="padding: 5px 14px; font-size: 0.82rem;">
+              🔄 تحديث رسم الكروكي
+            </button>
+          </div>
+        </div>
+
+        <div class="segments-table-wrap">
+          <table class="segments-table">
+            <thead>
+              <tr>
+                <th style="padding: 10px;">الضلع (Segment)</th>
+                <th style="padding: 10px; color: #38bdf8;">الحد (بحري ، قبلي ، شرقي ، غربي)</th>
+                <th style="padding: 10px;">الطول المحسوب (م)</th>
+                <th style="padding: 10px; color: #38bdf8;">الطول المطلوب على الكروكي والشهادة (م)</th>
+              </tr>
+            </thead>
+            <tbody id="segmentsTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Boundary Neighbors Input -->
+        <div class="boundary-section">
+          <h5 style="font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 6px; margin: 0;">
+            <span>✍️</span>
+            <span>أسماء وأوصاف الجار للحدود الأربعة (Boundary Neighbors)</span>
+          </h5>
+          <div class="boundary-grid">
+            <div class="input-field">
+              <label>🌊 الحد البحري (North Boundary)</label>
+              <input type="text" id="inNorth" placeholder="اتركه فارغاً أو اكتب اسم الجار / الشارع" />
+            </div>
+            <div class="input-field">
+              <label>🌅 الحد الشرقي (East Boundary)</label>
+              <input type="text" id="inEast" placeholder="اتركه فارغاً أو اكتب اسم الجار / الشارع" />
+            </div>
+            <div class="input-field">
+              <label>☀️ الحد القبلي (South Boundary)</label>
+              <input type="text" id="inSouth" placeholder="اتركه فارغاً أو اكتب اسم الجار / الشارع" />
+            </div>
+            <div class="input-field">
+              <label>🌇 الحد الغربي (West Boundary)</label>
+              <input type="text" id="inWest" placeholder="اتركه فارغاً أو اكتب اسم الجار / الشارع" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Employee Selection Section (توقيعات الموظفين) -->
+        <div class="employee-card">
+          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+            <span>✍️</span>
+            <span>اعتماد وتوقيعات الموظفين (Official Signatures)</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+            اختر فني المساحة ومسؤول النظم لاعتماد أسمائهم الرسمية أسفل الشهادة:
+          </p>
+          <div class="employee-grid">
+            <div class="input-field">
+              <label for="selSurveyTech">فني المساحة (Survey Technician)</label>
+              <select id="selSurveyTech" class="form-select">
+                <option value="محمد السيد بدير">أ / محمد السيد بدير</option>
+                <option value="وائل فاروق">أ / وائل فاروق</option>
+                <option value="محمد حبيب">أ / محمد حبيب</option>
+                <option value="محمد ابراهيم بدير" selected>أ / محمد ابراهيم بدير</option>
+              </select>
+            </div>
+            <div class="input-field">
+              <label for="selSysOfficer">مسؤول النظم (GIS / Systems Officer)</label>
+              <select id="selSysOfficer" class="form-select">
+                <option value="مصطفي فراج">أ / مصطفي فراج</option>
+                <option value="شريف محمد" selected>أ / شريف محمد</option>
+                <option value="علاء البنا">أ / علاء البنا</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Action Buttons -->
+        <div class="button-group" style="margin-top: 6px;">
+          <button class="btn btn-success" id="btnGenerate" onclick="generateCertificates()" style="padding: 12px 24px; font-size: 1rem;">
+            📄 تأكيد وتوليد الشهادة الرسمية (.docx)
+          </button>
+          <button class="btn btn-secondary" onclick="openOutputFolder()">
+            📂 فتح مجلد الإخراج
+          </button>
+        </div>
+
+        <!-- Toast Msg -->
+        <div class="toast" id="toastMsg"></div>
+
+      </div>
+
+    </section>
+
+    <!-- Backward compatibility hidden anchor -->
+    <div id="step3" style="display: none;"></div>
+
+  </div>
+
+  <script>
+    let currentParcels = [];
+    let currentFile = "";
+    let originalSegments = [];
+
+    // Browse Native Windows Directory Dialog
+    async function browseOutputDir() {
+      const statusEl = document.getElementById('outputDirStatus');
+      const curDir = document.getElementById('outputDirInput').value.trim();
+      if (statusEl) statusEl.textContent = '⏳ جاري فتح نافذة اختيار المجلد...';
+
+      try {
+        const res = await fetch('/api/browse-output-dir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initial_dir: curDir })
+        });
+        const data = await res.json();
+        if (data.folder_path) {
+          document.getElementById('outputDirInput').value = data.folder_path;
+          if (statusEl) {
+            statusEl.textContent = '✔ تم تحديد وتحديث مجلد الحفظ بنجاح';
+            setTimeout(() => { statusEl.textContent = ''; }, 4000);
+          }
+        } else {
+          if (statusEl) statusEl.textContent = '';
+        }
+      } catch (err) {
+        alert('تعذر فتح نافذة اختيار المجلد: ' + err.message);
+        if (statusEl) statusEl.textContent = '';
+      }
+    }
+
+    // Load current output directory on page load
+    async function loadOutputDir() {
+      try {
+        const res = await fetch('/api/get-output-dir');
+        const data = await res.json();
+        document.getElementById('outputDirInput').value = data.output_dir || '';
+      } catch (err) {
+        console.error('Could not load output dir:', err);
+      }
+    }
+
+    // Save output directory
+    async function saveOutputDir() {
+      const dirInput = document.getElementById('outputDirInput');
+      const statusEl = document.getElementById('outputDirStatus');
+      const newDir = dirInput.value.trim();
+      if (!newDir) { alert('الرجاء إدخال مسار المجلد.'); return; }
+      try {
+        const res = await fetch('/api/set-output-dir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ output_dir: newDir })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        statusEl.textContent = '✔ تم الحفظ بنجاح';
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      } catch (err) {
+        alert('فشل حفظ المجلد: ' + err.message);
+      }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', loadOutputDir);
+
+    // Step 1: Load Built-in Sample
+    async function loadSampleFile() {
+      try {
+        const res = await fetch('/api/load-sample', { method: 'POST' });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        
+        currentParcels = data.parcels;
+        currentFile = data.filename;
+        displayStep2();
+      } catch (err) {
+        alert('خطأ في تحميل العينة: ' + err.message);
+      }
+    }
+
+    // Step 1: File Upload
+    async function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        document.getElementById('filePrompt').textContent = 'جاري رفع وتحليل الملف ' + file.name + '...';
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        currentParcels = data.parcels;
+        currentFile = data.filename;
+        displayStep2();
+      } catch (err) {
+        alert('خطأ في قراءة الملف: ' + err.message);
+        document.getElementById('filePrompt').textContent = 'اضغط هنا لاختيار الملف أو اسحبه وأفلته مباشرة';
+      }
+    }
+
+    // Drag & Drop
+    const dropArea = document.getElementById('dropArea');
+    ['dragenter', 'dragover'].forEach(name => {
+      dropArea.addEventListener(name, (e) => { e.preventDefault(); dropArea.style.borderColor = '#38bdf8'; });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropArea.addEventListener(name, (e) => { e.preventDefault(); dropArea.style.borderColor = '#30363d'; });
+    });
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length) {
+        document.getElementById('fileInput').files = files;
+        handleFileSelect({ target: { files } });
+      }
+    });
+
+    // Populate Editable Segments Table with Direction Dropdown
+    function renderSegmentsTable(segments) {
+      originalSegments = segments ? JSON.parse(JSON.stringify(segments)) : [];
+      const tbody = document.getElementById('segmentsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      if (!segments || segments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 12px; color: var(--text-muted);">لا توجد أضلاع متاحة</td></tr>';
+        updateDirectionSums();
+        return;
+      }
+      
+      segments.forEach((seg, idx) => {
+        const tr = document.createElement('tr');
+        const fromPt = seg.from_point;
+        const toPt = seg.to_point;
+        const calcLen = typeof seg.length_m === 'number' ? seg.length_m.toFixed(2) : seg.length_m;
+        const dir = (seg.direction || 'north').toLowerCase();
+        
+        tr.innerHTML = `
+          <td><strong>نقطة ${fromPt} ➔ نقطة ${toPt}</strong></td>
+          <td>
+            <select class="seg-dir-select" id="seg_dir_${idx}" data-idx="${idx}" onchange="onSegmentParamChange()">
+              <option value="north" ${dir === 'north' ? 'selected' : ''}>🌊 الحد البحري</option>
+              <option value="east" ${dir === 'east' ? 'selected' : ''}>🌅 الحد الشرقي</option>
+              <option value="south" ${dir === 'south' ? 'selected' : ''}>☀️ الحد القبلي</option>
+              <option value="west" ${dir === 'west' ? 'selected' : ''}>🌇 الحد الغربي</option>
+            </select>
+          </td>
+          <td><span class="badge-calc-len">${calcLen} م</span></td>
+          <td>
+            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+              <input type="number" step="0.01" min="0" class="seg-len-input" id="seg_len_${idx}" data-idx="${idx}" value="${calcLen}" oninput="onSegmentParamChange()" />
+              <span style="font-size: 0.8rem; color: var(--text-muted);">م</span>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateDirectionSums();
+    }
+
+    // Real-time Sum Calculation for 4 Directions
+    function onSegmentParamChange() {
+      updateDirectionSums();
+    }
+
+    function updateDirectionSums() {
+      const sums = { north: 0, east: 0, south: 0, west: 0 };
+      const counts = { north: 0, east: 0, south: 0, west: 0 };
+      let total = 0;
+
+      if (originalSegments && originalSegments.length > 0) {
+        for (let i = 0; i < originalSegments.length; i++) {
+          const lenInp = document.getElementById(`seg_len_${i}`);
+          const dirSel = document.getElementById(`seg_dir_${i}`);
+          const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
+          const dir = dirSel ? dirSel.value : (originalSegments[i].direction || 'north');
+          if (sums[dir] !== undefined) {
+            sums[dir] += len;
+            counts[dir] += 1;
+          }
+          total += len;
+        }
+      }
+
+      const elNorth = document.getElementById('sumNorth');
+      const elEast = document.getElementById('sumEast');
+      const elSouth = document.getElementById('sumSouth');
+      const elWest = document.getElementById('sumWest');
+      const elTotal = document.getElementById('sumTotal');
+
+      if (elNorth) elNorth.textContent = sums.north.toFixed(2);
+      if (elEast) elEast.textContent = sums.east.toFixed(2);
+      if (elSouth) elSouth.textContent = sums.south.toFixed(2);
+      if (elWest) elWest.textContent = sums.west.toFixed(2);
+      if (elTotal) elTotal.textContent = total.toFixed(2);
+
+      const cntNorth = document.getElementById('countNorth');
+      const cntEast = document.getElementById('countEast');
+      const cntSouth = document.getElementById('countSouth');
+      const cntWest = document.getElementById('countWest');
+      if (cntNorth) cntNorth.textContent = `(${counts.north} ضلع)`;
+      if (cntEast) cntEast.textContent = `(${counts.east} ضلع)`;
+      if (cntSouth) cntSouth.textContent = `(${counts.south} ضلع)`;
+      if (cntWest) cntWest.textContent = `(${counts.west} ضلع)`;
+    }
+
+    // Reset Table to Original Lengths & Directions
+    function resetSegmentLengths() {
+      if (!originalSegments || !originalSegments.length) return;
+      originalSegments.forEach((seg, idx) => {
+        const lenInput = document.getElementById(`seg_len_${idx}`);
+        const dirSelect = document.getElementById(`seg_dir_${idx}`);
+        if (lenInput) {
+          lenInput.value = typeof seg.length_m === 'number' ? seg.length_m.toFixed(2) : seg.length_m;
+        }
+        if (dirSelect) {
+          dirSelect.value = seg.direction || 'north';
+        }
+      });
+      updateDirectionSums();
+    }
+
+    // Helper to collect current edited data
+    function getEditedData() {
+      const editedLens = [];
+      const editedDirs = [];
+      const editedSegs = [];
+      for (let i = 0; i < originalSegments.length; i++) {
+        const lenInp = document.getElementById(`seg_len_${i}`);
+        const dirSel = document.getElementById(`seg_dir_${i}`);
+        const len = lenInp ? (parseFloat(lenInp.value) || 0.0) : 0.0;
+        const dir = dirSel ? dirSel.value : (originalSegments[i].direction || 'north');
+        editedLens.push(len);
+        editedDirs.push(dir);
+        editedSegs.push({ length_m: len, direction: dir });
+      }
+      return { editedLens, editedDirs, editedSegs };
+    }
+
+    // Step 2: Display Parcel Metadata & Fetch Both Previews Immediately
+    async function displayStep2() {
+      if (!currentParcels.length) return;
+      const p = currentParcels[0];
+
+      document.getElementById('filePrompt').innerHTML = `✅ <strong>تم تحميل: ${currentFile}</strong> (${currentParcels.length} قطعة، ${p.vertices.length} ركن إحداثي)`;
+      
+      document.getElementById('step2').style.display = 'flex';
+
+      document.getElementById('metaName').textContent = p.applicant_name;
+      document.getElementById('metaLoc').textContent = `${p.district} - ${p.village}`;
+      document.getElementById('metaStatedArea').textContent = `${p.stated_area_m2} _ م2`;
+      document.getElementById('metaCalcArea').textContent = `${p.calculated_area_m2} _ م2`;
+      document.getElementById('metaNid').textContent = p.national_id || 'غير متوفر';
+      document.getElementById('metaPoints').textContent = `${p.vertices.length} أركان (ترتيب هندسي دقيق)`;
+
+      const banner = document.getElementById('valBanner');
+      const valStatus = document.getElementById('valStatusText');
+      const valDiff = document.getElementById('valDiffText');
+
+      if (p.is_area_valid) {
+        banner.className = 'status-banner status-pass';
+        valStatus.textContent = '✔ المساحة متطابقة هندسياً: الفارق ضمن الحد المسموح (±2.0 م²)';
+        valDiff.textContent = `Δ = ${p.area_difference_m2} م² (مقبول)`;
+      } else {
+        banner.className = 'status-banner status-warn';
+        valStatus.textContent = '⚠ تنبيه: فارق المساحة يتجاوز الحد المسموح به (±2.0 م²)';
+        valDiff.textContent = `Δ = ${p.area_difference_m2} م² (يتطلب مراجعة)`;
+      }
+
+      // Pre-fill Boundary fields if available
+      const b = p.boundaries || {};
+      document.getElementById('inNorth').value = b.north || '';
+      document.getElementById('inEast').value = b.east || '';
+      document.getElementById('inSouth').value = b.south || '';
+      document.getElementById('inWest').value = b.west || '';
+
+      // Populate Editable Segments Table
+      renderSegmentsTable(p.segments);
+
+      // Scroll to Step 2
+      document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
+
+      // Automatically fetch Satellite Image & CAD Croquis Demo in parallel
+      const imgSat = document.getElementById('imgSat');
+      const imgCroq = document.getElementById('imgCroq');
+      imgSat.alt = "جاري تحميل خريطة القمر الصناعي عالية الدقة...";
+      imgCroq.alt = "جاري توليد رسم كروكي CAD عالي الدقة...";
+
+      // Satellite fetch
+      fetch('/api/preview-satellite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parcel_index: 0 })
+      }).then(r => r.json()).then(data => {
+        if (data.satellite_url) {
+          imgSat.src = data.satellite_url + '?t=' + Date.now();
+        }
+      }).catch(err => console.error('Satellite preview error:', err));
+
+      // Croquis initial fetch
+      fetch('/api/preview-croquis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          parcel_index: 0, 
+          boundaries: b 
+        })
+      }).then(r => r.json()).then(data => {
+        if (data.croquis_url) {
+          imgCroq.src = data.croquis_url + '?t=' + Date.now();
+        }
+      }).catch(err => console.error('Initial Croquis preview error:', err));
+    }
+
+    // Refresh CAD Croquis Demo with interactive inputs
+    async function processCadCroquis() {
+      const btn = document.getElementById('btnProcessCad');
+      const oldHtml = btn.innerHTML;
+      btn.innerHTML = '⏳ جاري رسم الكروكي...';
+      btn.disabled = true;
+
+      const boundaries = {
+        north: document.getElementById('inNorth').value.trim(),
+        east: document.getElementById('inEast').value.trim(),
+        south: document.getElementById('inSouth').value.trim(),
+        west: document.getElementById('inWest').value.trim()
+      };
+
+      const { editedLens, editedDirs, editedSegs } = getEditedData();
+
+      try {
+        const res = await fetch('/api/preview-croquis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            parcel_index: 0, 
+            boundaries: boundaries,
+            edited_lengths: editedLens,
+            edited_directions: editedDirs,
+            edited_segments: editedSegs
+          })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        // Update Croquis Image
+        const imgCroq = document.getElementById('imgCroq');
+        imgCroq.src = data.croquis_url + '?t=' + Date.now();
+
+        btn.innerHTML = '✔ تم تحديث الكروكي';
+        setTimeout(() => {
+          btn.innerHTML = oldHtml;
+          btn.disabled = false;
+        }, 2000);
+
+        // Smooth scroll to CAD demo preview so user sees it right away
+        document.getElementById('croquisPreviewBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        alert('خطأ في توليد الكروكي: ' + err.message);
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      }
+    }
+
+    // Generate Official Certificate (.docx)
+    async function generateCertificates() {
+      const btn = document.getElementById('btnGenerate');
+      btn.textContent = '⏳ جاري توليد الشهادة الرسمية DOCX...';
+      btn.disabled = true;
+
+      const p = currentParcels[0];
+      const pid = p ? p.parcel_id : 0;
+      const edited = {};
+      if (p) {
+        edited[pid] = {
+          north: document.getElementById('inNorth').value.trim(),
+          east: document.getElementById('inEast').value.trim(),
+          south: document.getElementById('inSouth').value.trim(),
+          west: document.getElementById('inWest').value.trim()
+        };
+      }
+
+      const surveyTech = document.getElementById('selSurveyTech').value;
+      const sysOfficer = document.getElementById('selSysOfficer').value;
+
+      const { editedLens, editedDirs, editedSegs } = getEditedData();
+      const editedLensMap = {};
+      const editedDirsMap = {};
+      const editedSegsMap = {};
+      if (p) {
+        editedLensMap[pid] = editedLens;
+        editedDirsMap[pid] = editedDirs;
+        editedSegsMap[pid] = editedSegs;
+      }
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            edited_boundaries: edited,
+            edited_lengths: editedLensMap,
+            edited_directions: editedDirsMap,
+            edited_segments: editedSegsMap,
+            survey_technician: surveyTech,
+            system_officer: sysOfficer
+          })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        const toast = document.getElementById('toastMsg');
+        toast.style.display = 'flex';
+        toast.innerHTML = `🎉 <strong>تم إصدار الشهادة بنجاح!</strong> المجلد: <code>${data.files[0].folder}</code>`;
+        btn.textContent = '✔ تم إنشاء وتوثيق الشهادة';
+        btn.disabled = false;
+      } catch (err) {
+        alert('خطأ في توليد الشهادة: ' + err.message);
+        btn.textContent = '📄 تأكيد وتوليد الشهادة الرسمية (.docx)';
+        btn.disabled = false;
+      }
+    }
+
+    // Open Output Folder
+    async function openOutputFolder() {
+      try {
+        await fetch('/api/open-folder', { method: 'POST' });
+      } catch (err) {
+        alert('تعذر فتح المجلد تلقائياً: ' + err.message);
+      }
+    }
+
+    // Upload Custom Image (Satellite or CAD Croquis)
+    async function uploadCustomImage(event, type) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Data = e.target.result;
+        try {
+          const res = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              parcel_index: 0,
+              type: type,
+              image_base64: base64Data
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+
+          if (type === 'satellite') {
+            const imgSat = document.getElementById('imgSat');
+            imgSat.src = data.url;
+            alert('✔ تم تحميل صورة القمر الصناعي المخصصة بنجاح!');
+          } else {
+            const imgCroq = document.getElementById('imgCroq');
+            imgCroq.src = data.url;
+            alert('✔ تم تحميل كروكي CAD المخصص بنجاح!');
+          }
+        } catch (err) {
+          alert('فشل تحميل الصورة: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+
+</body>
+</html>
