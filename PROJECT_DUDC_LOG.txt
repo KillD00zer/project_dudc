@@ -311,3 +311,16 @@ C. Rebuilding the Standalone Binary (.exe):
   * Re-architected update_signature_names() to locate signature paragraphs in doc.paragraphs (with fallback to doc.tables).
   * Applied dynamic spacing algorithm preserving exact 4-column alignment (indices 0, 35, 65, 95) with Arial 12 Bold, complex script RTL tags (w:bCs, w:rtl), and strict single-page printout guarantee.
 
+
+[Change 20] Target PC Startup Repair & Portable Runtime Whitelisting:
+  * Diagnosed and fixed startup crash on target PCs ([PYI-18484:ERROR] Failed to start embedded python interpreter: Failed to import encodings module).
+  * Root Cause: Blanket rules in repository .gitignore (*.zip, *.py[cod], *.docx) stripped critical portable binaries upon clone/transfer:
+    - _internal/base_library.zip (Python standard library bytecode)
+    - 118 compiled C-extension binary modules (*.pyd) including socket, SSL, unicodedata, NumPy, Pandas, PyProj, Shapely, Matplotlib
+    - Official template certificate (شهادة.docx)
+  * Restored complete set of 118 *.pyd modules, base_library.zip, and official template شهادة.docx.
+  * Whitelisted all critical runtime binaries, templates, and packages in .gitignore using negative pattern rules (!).
+  * Bundled Microsoft Visual C++ 2015-2022 runtime DLLs (msvcp140.dll, msvcp140_1.dll, msvcp140_2.dll, msvcp140_atomic_wait.dll, msvcp140_codecvt_ids.dll) into _internal/ to guarantee execution on fresh Windows installations without requiring separate runtime installation.
+  * Upgraded app_server.py with resilient port fallback (attempts 8765, sequentially testing up to 8780 on WinError 10048 address-in-use errors).
+  * Upgraded Run_DUDC_App.bat with automated preflight checks (verifies Certificate_Generator.exe and _internal/base_library.zip) and error trap pausing with Arabic/English diagnostic guidance instead of silent exit.
+  * Packaged self-contained, verified standalone distribution archive project_dudc_V2_Portable.zip.
