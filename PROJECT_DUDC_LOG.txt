@@ -4,7 +4,7 @@
                  Dakahlia Utility Data Center (DUDC) - مركز معلومات شبكات المرافق
 ====================================================================================================
 Target Directory : d:\Work\GIS_tools\project_dudc
-Last Updated     : 2026-09-14
+Last Updated     : 2026-09-25
 Primary Purpose  : Complete standalone & portable cadastral certificate generation pipeline
 Language / Stack : Python 3.10+, PyInstaller, Vanilla HTML5/CSS3/JS, Matplotlib, python-docx, PyProj
 Architecture     : Local HTTP REST Server + Browser GUI + Standalone Portable Windows Executable
@@ -324,3 +324,37 @@ C. Rebuilding the Standalone Binary (.exe):
   * Upgraded app_server.py with resilient port fallback (attempts 8765, sequentially testing up to 8780 on WinError 10048 address-in-use errors).
   * Upgraded Run_DUDC_App.bat with automated preflight checks (verifies Certificate_Generator.exe and _internal/base_library.zip) and error trap pausing with Arabic/English diagnostic guidance instead of silent exit.
   * Packaged self-contained, verified standalone distribution archive project_dudc_V2_Portable.zip.
+
+[Change 21] Planning & Architecture: Lightweight Anti-Cropping & Anti-Forgery Protection (تأمين الشهادات والكروكي):
+  * Strategic Objective (الهدف):
+    - Protect issued cadastral certificates and CAD croquis drawings from unauthorized cropping, tampering, and counterfeiting.
+    - Provide a bulletproof mechanism to verify authentic certificates and catch forged ones in seconds without any database or internet requirement.
+    - Keep the solution lightweight (zero perceptible overhead for surveyors), simple, and strictly isolated (decryption keys remain exclusively with the developer and Director).
+
+  * Technical Specifications & User Requirements (المتطلبات الدقيقة):
+    1. Human-Readable Code by Naked Eye (نقل الكود بالعين المجردة):
+       - Replaced traditional heavy RSA/300-char blobs with high-density compact bit-packing and lightweight stream encryption (e.g. ChaCha20 / AES-CTR).
+       - Target Output Format: 5 readable alphanumeric blocks separated by hyphens (e.g., DUDC-7K9P2-4W1QM-8V3NB-9X5ZL-2F8TR).
+       - Character Set: Safe Alphanumeric (Base32/Base58, omitting confusing glyphs like 0/O, 1/I) allowing quick visual transcription in 10-15 seconds.
+    2. Data Payload to Encrypt (البيانات المشفرة):
+       - Full Citizen Name (الاسم بالكامل).
+       - Payment Receipt Number(s) (رقم إيصال السداد، حتى 6 أرقام، أو إيصالين مفصولين بـ '-' مثل 104523-104524).
+       - Two Anchor Coordinate Points (نقطتين إحداثي مثل P1 و P2 للتحقق من موقع وميل الأرض بدقة).
+       - Certificate Issue Date (تاريخ إصدار الشهادة).
+    3. Visual Anti-Cropping Watermark (العلامة المائية المانعة للقص):
+       - Generated code is rendered as a semi-transparent (alpha ~0.10), rotated diagonal text grid across the CAD croquis diagram (croquis_engine.py) and Google Satellite overlay (satellite_engine.py), intersecting the parcel polygon boundary lines.
+       - Also printed as a discreet security footer strip in the Word certificate (docx_builder.py).
+    4. Director's Standalone Verifier Tool (أداة فك التشفير المستقلة):
+       - Separate standalone tool (admin_tools/DUDC_Director_Verifier.py / Tkinter GUI) kept strictly on a private USB flash drive or Director's PC.
+       - Never bundled into the staff's distribution (build_exe.py excludes admin_tools/).
+       - Allows the Director to type/paste the 5-block code to instantly decrypt and display the authentic owner name, receipt numbers, issue date, and anchor coordinates.
+    5. Key Security Policy (سياسة حماية المفتاح السري):
+       - Encryption key is embedded/obfuscated in the generator for issuing certificates.
+       - Decryption key is secured with a Master Passphrase known only to the developer and Director.
+
+  * Current Progress & Next Steps (الوضع الحالي والخطوات القادمة):
+    - Detailed action plan saved in CERTIFICATE_SECURITY_PLAN.md.
+    - Key generation script initialized in admin_tools/keygen.py.
+    - Dependencies: 'cryptography' package installed in the Python environment.
+    - Coding paused by request: Ready to implement compact bit-packer and stream encryption module upon resuming on the target PC.
+
