@@ -1,0 +1,28 @@
+﻿# Cadastral Survey & Citizen Data
+*.docx
+!شهادة.docx
+*.csv
+~$*.docx
+~$*.xlsx
+
+# Generated outputs & packages
+generated_certificates/
+temp_assets/
+output_test_folder/
+project_dudc_V2_Portable.zip
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.pyc
+build/
+venv/
+.venv/
+
+# System & Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+.vscode/
+.idea/
