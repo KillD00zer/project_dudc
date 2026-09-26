@@ -22,6 +22,27 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls, qn
+from datetime import datetime
+import security_overlay
+
+ARABIC_DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
+
+def format_issue_date(issue_date_val=None):
+    if isinstance(issue_date_val, str) and issue_date_val.strip():
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d/%m/%Y"):
+            try:
+                dt = datetime.strptime(issue_date_val.strip(), fmt)
+                break
+            except ValueError:
+                dt = datetime.now()
+    elif isinstance(issue_date_val, datetime):
+        dt = issue_date_val
+    else:
+        dt = datetime.now()
+    day_name = ARABIC_DAYS[dt.weekday()]
+    display_text = f"تحريراً في : {day_name} الموافق {dt.year:04d}/{dt.month:02d}/{dt.day:02d}"
+    iso_date = f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
+    return display_text, iso_date
 
 import sys
 if getattr(sys, 'frozen', False):
@@ -184,7 +205,7 @@ def format_all_document_typography(doc):
                 for r in p.runs:
                     apply_run_font(r, "Arial", 12, bold=True)
 
-def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, output_docx_path, template_path=None, survey_tech="محمد ابراهيم بدير", sys_officer="شريف محمد"):
+def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, output_docx_path, template_path=None, survey_tech="محمد ابراهيم بدير", sys_officer="شريف محمد", issue_date_val=None, security_token=None):
     """
     Generates the official Cadastral Survey Certificate Word document (.docx).
     Each boundary has a large vertically merged cell on the left, and across from it
@@ -207,6 +228,20 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
     
     # Ensure table alignment is centered
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    # Inject official issue date right under 'مركز معلومات شبكات المرافق'
+    date_display, _ = format_issue_date(issue_date_val)
+    if len(doc.paragraphs) > 2:
+        p_date = doc.paragraphs[2]
+        p_date.text = date_display
+        p_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_date.paragraph_format.space_before = Pt(2)
+        p_date.paragraph_format.space_after = Pt(2)
+        p_date.paragraph_format.line_spacing = 1.0
+        if p_date.runs:
+            run = p_date.runs[0]
+            apply_run_font(run, font_name="Arial", size_pt=12, bold=True)
+            run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
     
     # 1. Applicant & Parcel Metadata (Rows 1 to 5)
     # Row 1: Applicant Name & Receipt No
@@ -396,6 +431,32 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
 
     # 4. Official Signatures (Survey Technician & GIS Officer)
     update_signature_names(doc, survey_tech=survey_tech, sys_officer=sys_officer)
+
+    # 5. Security Token Verification Line in Certificate (Paragraph 9)
+    if security_token and len(doc.paragraphs) > 9:
+        p_token = doc.paragraphs[9]
+        p_token.text = f"كود التأمين والتحقق الرقمي (DUDC Token): {security_token}"
+        p_token.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_token.paragraph_format.space_before = Pt(0)
+        p_token.paragraph_format.space_after = Pt(0)
+        p_token.paragraph_format.line_spacing = 1.0
+        if p_token.runs:
+            run = p_token.runs[0]
+            apply_run_font(run, font_name="Arial", size_pt=10, bold=True)
+            run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+
+    # 6. Top-Most Protective Security Overlay (Watermark Guard over signatures & canvas)
+    if security_token:
+        applicant_name = parcel.get("applicant_name", "")
+        pid = parcel.get("parcel_id", "cert")
+        overlay_png_path = os.path.join(os.path.dirname(output_docx_path), f"overlay_{pid}.png")
+        try:
+            security_overlay.generate_security_overlay_image(applicant_name, security_token, overlay_png_path)
+            security_overlay.apply_watermark_overlay_to_docx(doc, overlay_png_path)
+            if os.path.exists(overlay_png_path):
+                os.remove(overlay_png_path)
+        except Exception as e:
+            print(f"[!] Warning: Security overlay failed: {e}")
 
     # Save final publication document
     doc.save(output_docx_path)

@@ -294,6 +294,79 @@
       color: #fbbf24;
     }
 
+    /* DUDC Security Badge Card */
+    .security-token-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
+      border: 1.5px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 4px 20px rgba(56, 189, 248, 0.15);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .security-token-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .security-token-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .security-token-code {
+      flex: 1;
+      min-width: 280px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 1.5px;
+      direction: ltr;
+      text-align: center;
+    }
+
+    .btn-copy-token {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: var(--font-ar);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy-token:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+
+    .security-token-info {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
     /* DUAL PREVIEW: CAD Croquis Demo & Google Satellite */
     .dual-preview-grid {
       display: grid;
@@ -332,6 +405,41 @@
       background: #f1f5f9;
       color: #0f172a;
       border-bottom-color: #cbd5e1;
+    }
+
+    .preview-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .preview-spinner {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      z-index: 2;
+    }
+
+    .loading-spin-ring {
+      width: 38px;
+      height: 38px;
+      border: 3.5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spinRing 0.8s linear infinite;
+    }
+
+    @keyframes spinRing {
+      to { transform: rotate(360deg); }
     }
 
     .croquis-preview-container img, .sat-preview-container img {
@@ -755,6 +863,34 @@
         <div id="valDiffText" style="font-family: var(--font-mono); font-size: 0.95rem;">Δ = 0.00 م²</div>
       </div>
 
+      <!-- DUDC Digital Security & Anti-Forgery Badge -->
+      <div class="security-token-card" id="securityTokenCard">
+        <div class="security-token-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.3rem;">🔐</span>
+            <span style="font-weight: 800; font-size: 1.05rem; color: #38bdf8;">كود التأمين والتحقق الرقمي المعتمد (DUDC Token):</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="metaIssueDateBadge" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); color: #e2e8f0; padding: 5px 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700;">
+              📅 تحريراً في : --
+            </span>
+          </div>
+        </div>
+        <div class="security-token-body">
+          <div class="security-token-code" id="metaSecurityToken">
+            DUDC-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX
+          </div>
+          <button type="button" class="btn-copy-token" id="btnCopyToken" onclick="copySecurityToken()">
+            📋 نسخ الكود
+          </button>
+        </div>
+        <div class="security-token-info">
+          <span>✓ يتضمن إحداثيات النقطتين P1 و P2 بدقة مساحية</span>
+          <span>✓ مربوط رقمياً باسم المواطن وأرقام الإيصالات وتاريخ تحرير الشهادة</span>
+          <span>✓ يطبع تلقائياً في الشهادة والكروكي مع العلامة المائية المؤمنة</span>
+        </div>
+      </div>
+
       <!-- Metadata Grid -->
       <div class="meta-grid">
         <div class="meta-box">
@@ -790,17 +926,23 @@
           <div class="croquis-header">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span>📐</span>
-              <span>كروكي الموقع (CAD Croquis Demo)</span>
+              <span style="font-weight: 800;">كروكي الموقع (CAD Croquis Demo)</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <input type="file" id="customCroqInput" accept="image/*" style="display:none" onchange="uploadCustomImage(event, 'croquis')" />
-              <button class="btn btn-secondary" onclick="document.getElementById('customCroqInput').click()" style="padding: 4px 10px; font-size: 0.75rem;">
+              <button type="button" class="btn" onclick="document.getElementById('customCroqInput').click()" style="padding: 5px 12px; font-size: 0.78rem; background: #e2e8f0; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 6px; cursor: pointer;">
                 📁 كروكي مخصص
               </button>
               <span style="color:#0284c7; font-size: 0.75rem; font-weight:700;">High-Res 300 DPI</span>
             </div>
           </div>
-          <img id="imgCroq" alt="CAD Croquis Drawing" />
+          <div class="preview-img-wrapper" style="background: #ffffff;">
+            <div class="preview-spinner" id="croqSpinner" style="color: #0284c7;">
+              <div class="loading-spin-ring" style="border-top-color: #0284c7; border-color: rgba(2, 132, 199, 0.2);"></div>
+              <span>⏳ جاري رسم كروكي CAD الدقيق...</span>
+            </div>
+            <img id="imgCroq" alt="CAD Croquis Drawing" style="width: 100%; height: 380px; object-fit: contain; background: #ffffff; display: none;" onload="this.style.display='block'; document.getElementById('croqSpinner').style.display='none';" />
+          </div>
         </div>
 
         <!-- Satellite View -->
@@ -808,17 +950,23 @@
           <div class="sat-header">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span>🛰️</span>
-              <span>صورة القمر الصناعي (Google Satellite)</span>
+              <span style="font-weight: 800;">صورة القمر الصناعي (Google Satellite)</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <input type="file" id="customSatInput" accept="image/*" style="display:none" onchange="uploadCustomImage(event, 'satellite')" />
-              <button class="btn btn-secondary" onclick="document.getElementById('customSatInput').click()" style="padding: 4px 10px; font-size: 0.75rem;">
+              <button type="button" class="btn" onclick="document.getElementById('customSatInput').click()" style="padding: 5px 12px; font-size: 0.78rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-weight: 700; border-radius: 6px; cursor: pointer;">
                 📁 صورة مخصصة
               </button>
               <span style="color:#38bdf8; font-size: 0.75rem; font-weight:700;">Scale 1:500</span>
             </div>
           </div>
-          <img id="imgSat" alt="Google Maps Satellite" />
+          <div class="preview-img-wrapper" style="background: #0f172a;">
+            <div class="preview-spinner" id="satSpinner" style="color: #38bdf8;">
+              <div class="loading-spin-ring" style="border-top-color: #38bdf8;"></div>
+              <span>🛰️ جاري جلب خريطة القمر الصناعي...</span>
+            </div>
+            <img id="imgSat" alt="Google Maps Satellite" style="width: 100%; height: 380px; object-fit: contain; display: none;" onload="this.style.display='block'; document.getElementById('satSpinner').style.display='none';" />
+          </div>
         </div>
       </div>
 
@@ -1242,6 +1390,22 @@
       return { editedLens, editedDirs, editedSegs };
     }
 
+    // Copy DUDC Security Token to clipboard
+    function copySecurityToken() {
+      const code = document.getElementById('metaSecurityToken').textContent.trim();
+      if (!code || code.includes('XXXXXX')) return;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.getElementById('btnCopyToken');
+        if (btn) {
+          const oldText = btn.innerHTML;
+          btn.innerHTML = '✅ تم النسخ!';
+          setTimeout(() => { btn.innerHTML = oldText; }, 2000);
+        }
+      }).catch(() => {
+        prompt("انسخ كود التأمين الرقمي:", code);
+      });
+    }
+
     // Step 2: Display Parcel Metadata & Fetch Both Previews Immediately
     async function displayStep2() {
       if (!currentParcels.length) return;
@@ -1251,25 +1415,35 @@
       
       document.getElementById('step2').style.display = 'flex';
 
-      document.getElementById('metaName').textContent = p.applicant_name;
-      document.getElementById('metaLoc').textContent = `${p.district} - ${p.village}`;
-      document.getElementById('metaStatedArea').textContent = `${p.stated_area_m2} _ م2`;
-      document.getElementById('metaCalcArea').textContent = `${p.calculated_area_m2} _ م2`;
-      document.getElementById('metaNid').textContent = p.national_id || 'غير متوفر';
-      document.getElementById('metaPoints').textContent = `${p.vertices.length} أركان (ترتيب هندسي دقيق)`;
+      if (document.getElementById('metaName')) document.getElementById('metaName').textContent = p.applicant_name;
+      if (document.getElementById('metaLoc')) document.getElementById('metaLoc').textContent = `${p.district} - ${p.village}`;
+      if (document.getElementById('metaStatedArea')) document.getElementById('metaStatedArea').textContent = `${p.stated_area_m2} _ م2`;
+      if (document.getElementById('metaCalcArea')) document.getElementById('metaCalcArea').textContent = `${p.calculated_area_m2} _ م2`;
+      if (document.getElementById('metaNid')) document.getElementById('metaNid').textContent = p.national_id || 'غير متوفر';
+      if (document.getElementById('metaPoints')) document.getElementById('metaPoints').textContent = `${p.vertices.length} أركان (ترتيب هندسي دقيق)`;
+
+      // Display DUDC Security Token & Issue Date
+      if (p.security_token && document.getElementById('metaSecurityToken')) {
+        document.getElementById('metaSecurityToken').textContent = p.security_token;
+      }
+      if (p.issue_date_display && document.getElementById('metaIssueDateBadge')) {
+        document.getElementById('metaIssueDateBadge').textContent = `📅 ${p.issue_date_display}`;
+      }
 
       const banner = document.getElementById('valBanner');
       const valStatus = document.getElementById('valStatusText');
       const valDiff = document.getElementById('valDiffText');
 
-      if (p.is_area_valid) {
-        banner.className = 'status-banner status-pass';
-        valStatus.textContent = '✔ المساحة متطابقة هندسياً: الفارق ضمن الحد المسموح (±2.0 م²)';
-        valDiff.textContent = `Δ = ${p.area_difference_m2} م² (مقبول)`;
-      } else {
-        banner.className = 'status-banner status-warn';
-        valStatus.textContent = '⚠ تنبيه: فارق المساحة يتجاوز الحد المسموح به (±2.0 م²)';
-        valDiff.textContent = `Δ = ${p.area_difference_m2} م² (يتطلب مراجعة)`;
+      if (banner && valStatus && valDiff) {
+        if (p.is_area_valid) {
+          banner.className = 'status-banner status-pass';
+          valStatus.textContent = '✔ المساحة متطابقة هندسياً: الفارق ضمن الحد المسموح (±2.0 م²)';
+          valDiff.textContent = `Δ = ${p.area_difference_m2} م² (مقبول)`;
+        } else {
+          banner.className = 'status-banner status-warn';
+          valStatus.textContent = '⚠ تنبيه: فارق المساحة يتجاوز الحد المسموح به (±2.0 م²)';
+          valDiff.textContent = `Δ = ${p.area_difference_m2} م² (يتطلب مراجعة)`;
+        }
       }
 
       // Pre-fill Boundary fields if available
@@ -1288,8 +1462,19 @@
       // Automatically fetch Satellite Image & CAD Croquis Demo in parallel
       const imgSat = document.getElementById('imgSat');
       const imgCroq = document.getElementById('imgCroq');
-      imgSat.alt = "جاري تحميل خريطة القمر الصناعي عالية الدقة...";
-      imgCroq.alt = "جاري توليد رسم كروكي CAD عالي الدقة...";
+      const croqSpinner = document.getElementById('croqSpinner');
+      const satSpinner = document.getElementById('satSpinner');
+
+      if (imgSat) imgSat.style.display = 'none';
+      if (imgCroq) imgCroq.style.display = 'none';
+      if (croqSpinner) {
+        croqSpinner.innerHTML = '<div class="loading-spin-ring" style="border-top-color:#0284c7;border-color:rgba(2,132,199,0.2);"></div><span>⏳ جاري رسم كروكي CAD الدقيق...</span>';
+        croqSpinner.style.display = 'flex';
+      }
+      if (satSpinner) {
+        satSpinner.innerHTML = '<div class="loading-spin-ring" style="border-top-color:#38bdf8;"></div><span>🛰️ جاري جلب خريطة القمر الصناعي...</span>';
+        satSpinner.style.display = 'flex';
+      }
 
       // Satellite fetch
       fetch('/api/preview-satellite', {
@@ -1300,7 +1485,10 @@
         if (data.satellite_url) {
           imgSat.src = data.satellite_url + '?t=' + Date.now();
         }
-      }).catch(err => console.error('Satellite preview error:', err));
+      }).catch(err => {
+        console.error('Satellite preview error:', err);
+        if (satSpinner) satSpinner.innerHTML = '<span style="color:#ef4444; font-size:0.85rem;">تعذر تحميل الخريطة</span>';
+      });
 
       // Croquis initial fetch
       fetch('/api/preview-croquis', {
@@ -1314,7 +1502,10 @@
         if (data.croquis_url) {
           imgCroq.src = data.croquis_url + '?t=' + Date.now();
         }
-      }).catch(err => console.error('Initial Croquis preview error:', err));
+      }).catch(err => {
+        console.error('Initial Croquis preview error:', err);
+        if (croqSpinner) croqSpinner.innerHTML = '<span style="color:#ef4444; font-size:0.85rem;">تعذر رسم الكروكي</span>';
+      });
     }
 
     // Refresh CAD Croquis Demo with interactive inputs
@@ -1323,6 +1514,14 @@
       const oldHtml = btn.innerHTML;
       btn.innerHTML = '⏳ جاري رسم الكروكي...';
       btn.disabled = true;
+
+      const croqSpinner = document.getElementById('croqSpinner');
+      const imgCroq = document.getElementById('imgCroq');
+      if (croqSpinner) {
+        croqSpinner.innerHTML = '<div class="loading-spin-ring" style="border-top-color:#0284c7;border-color:rgba(2,132,199,0.2);"></div><span>⏳ جاري تحديث رسم الكروكي...</span>';
+        croqSpinner.style.display = 'flex';
+      }
+      if (imgCroq) imgCroq.style.display = 'none';
 
       const boundaries = {
         north: document.getElementById('inNorth').value.trim(),
@@ -1457,12 +1656,18 @@
           if (data.error) throw new Error(data.error);
 
           if (type === 'satellite') {
+            const satSpinner = document.getElementById('satSpinner');
+            if (satSpinner) satSpinner.style.display = 'none';
             const imgSat = document.getElementById('imgSat');
             imgSat.src = data.url;
+            imgSat.style.display = 'block';
             alert('✔ تم تحميل صورة القمر الصناعي المخصصة بنجاح!');
           } else {
+            const croqSpinner = document.getElementById('croqSpinner');
+            if (croqSpinner) croqSpinner.style.display = 'none';
             const imgCroq = document.getElementById('imgCroq');
             imgCroq.src = data.url;
+            imgCroq.style.display = 'block';
             alert('✔ تم تحميل كروكي CAD المخصص بنجاح!');
           }
         } catch (err) {

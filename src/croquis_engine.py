@@ -34,7 +34,7 @@ def get_edge_cardinal_direction(p1_lon, p1_lat, p2_lon, p2_lat, c_lon, c_lat):
     else:
         return "east" if mid_x > 0 else "west"
 
-def generate_croquis_image(parcel, output_path):
+def generate_croquis_image(parcel, output_path, security_token=None):
     verts = parcel["vertices"]
     segments = parcel.get("segments", [])
     bounds = parcel.get("boundaries", {})
@@ -187,6 +187,18 @@ def generate_croquis_image(parcel, output_path):
     )
     ax.text(0.06, 0.96, 'N', transform=ax.transAxes,
             color='black', fontsize=13, fontweight='bold', fontfamily='Arial', ha='center', va='bottom', alpha=0.45, zorder=6)
+    
+    # 5. Security Token Footer (Raw Code Only, Bold & Enhanced Visibility)
+    if security_token:
+        ax.text(
+            0.5, 0.02,
+            str(security_token).strip(),
+            transform=ax.transAxes,
+            color='#0F172A', fontsize=11.5, fontweight='bold', fontfamily='Arial',
+            ha='center', va='bottom',
+            bbox=dict(boxstyle='round,pad=0.35', facecolor='#F8FAFC', edgecolor='#64748B', linewidth=1.0, alpha=0.96),
+            zorder=7
+        )
     
     # Set view limits with uniform aspect ratio
     ax.set_xlim(min_x - pad_x, max_x + pad_x)

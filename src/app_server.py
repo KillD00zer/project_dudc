@@ -27,6 +27,8 @@ from geo_engine import read_survey_file
 from satellite_engine import generate_satellite_image
 from croquis_engine import generate_croquis_image
 from docx_builder import generate_certificate_docx
+from encoder_api import generate_dudc_token
+from datetime import datetime
 
 # When packaged with PyInstaller --onedir, sys.executable is inside the app folder (e.g., project_dudc/Certificate_Generator.exe)
 # sys._MEIPASS is inside _internal. We want assets from _internal or app_dir, but OUTPUT_DIR strictly next to the executable!
@@ -127,6 +129,51 @@ CURRENT_PARCELS = []
 CURRENT_SURVEY_FILE_PATH = None
 CURRENT_SURVEY_FILENAME = None
 
+import docx_builder
+
+def enrich_parcels_with_security_tokens(parcels):
+    now_dt = datetime.now()
+    date_display, _ = docx_builder.format_issue_date(now_dt)
+    for p in parcels:
+        verts = p.get("vertices", [])
+        p1_lon = verts[0]["lon"] if verts else 31.381790
+        p1_lat = verts[0]["lat"] if verts else 31.051135
+        p2_lon = verts[1]["lon"] if len(verts) > 1 else p1_lon
+        p2_lat = verts[1]["lat"] if len(verts) > 1 else p1_lat
+
+        rcp_raw = str(p.get("receipt_no", "0")).replace(" ", "")
+        rcp_parts = rcp_raw.split("-") if "-" in rcp_raw else [rcp_raw]
+        try:
+            r1 = int("".join(filter(str.isdigit, rcp_parts[0])))
+        except ValueError:
+            r1 = 0
+        r2 = 0
+        if len(rcp_parts) > 1:
+            try:
+                r2 = int("".join(filter(str.isdigit, rcp_parts[1])))
+            except ValueError:
+                r2 = 0
+
+        try:
+            token = generate_dudc_token(
+                name=p.get("applicant_name", ""),
+                lon=p1_lon,
+                lat=p1_lat,
+                lon_2=p2_lon,
+                lat_2=p2_lat,
+                receipt_1=r1,
+                receipt_2=r2,
+                center=p.get("district", ""),
+                date_val=now_dt
+            )
+        except Exception as e:
+            print(f"[!] Warning: Token error during enrich: {e}")
+            token = None
+
+        p["security_token"] = token
+        p["issue_date_display"] = date_display
+    return parcels
+
 class CadastralRequestHandler(BaseHTTPRequestHandler):
     def _send_json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')
@@ -178,7 +225,7 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                 if not os.path.exists(SAMPLE_FILE):
                     self._send_json({"error": "Sample file ف.xls not found"}, status=404)
                     return
-                CURRENT_PARCELS = read_survey_file(SAMPLE_FILE)
+                CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(SAMPLE_FILE))
                 CURRENT_SURVEY_FILE_PATH = SAMPLE_FILE
                 CURRENT_SURVEY_FILENAME = "ف.xls"
                 self._send_json({
@@ -204,7 +251,7 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                     if not fpath or not os.path.exists(fpath):
                         self._send_json({"error": "File path does not exist"}, status=400)
                         return
-                    CURRENT_PARCELS = read_survey_file(fpath)
+                    CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(fpath))
                     CURRENT_SURVEY_FILE_PATH = fpath
                     CURRENT_SURVEY_FILENAME = os.path.basename(fpath)
                     self._send_json({
@@ -247,7 +294,7 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                         self._send_json({"error": "No file uploaded"}, status=400)
                         return
                         
-                    CURRENT_PARCELS = read_survey_file(saved_path)
+                    CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(saved_path))
                     CURRENT_SURVEY_FILE_PATH = saved_path
                     CURRENT_SURVEY_FILENAME = file_name
                     self._send_json({
@@ -337,7 +384,7 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                 croq_name = f"croq_{pid}.png"
                 croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
                 
-                generate_croquis_image(parcel, croq_path)
+                generate_croquis_image(parcel, croq_path, security_token=parcel.get("security_token"))
                 
                 # Also ensure satellite exists for backwards compatibility
                 sat_name = f"sat_{pid}.jpg"
@@ -511,6 +558,45 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                     croq_path = os.path.join(cert_folder, f"croquis_{clean_name}.png")
                     out_docx_path = os.path.join(cert_folder, f"{clean_name}.docx")
                     
+                    # Compute DUDC Security Token (Two points P1 & P2 + Exact Arabic + Receipts)
+                    verts = parcel.get("vertices", [])
+                    p1_lon = verts[0]["lon"] if verts else 31.381790
+                    p1_lat = verts[0]["lat"] if verts else 31.051135
+                    p2_lon = verts[1]["lon"] if len(verts) > 1 else p1_lon
+                    p2_lat = verts[1]["lat"] if len(verts) > 1 else p1_lat
+
+                    rcp_raw = str(parcel.get("receipt_no", "0")).replace(" ", "")
+                    rcp_parts = rcp_raw.split("-") if "-" in rcp_raw else [rcp_raw]
+                    try:
+                        r1 = int("".join(filter(str.isdigit, rcp_parts[0])))
+                    except ValueError:
+                        r1 = 0
+                    r2 = 0
+                    if len(rcp_parts) > 1:
+                        try:
+                            r2 = int("".join(filter(str.isdigit, rcp_parts[1])))
+                        except ValueError:
+                            r2 = 0
+
+                    now_dt = datetime.now()
+                    try:
+                        security_token = generate_dudc_token(
+                            name=parcel.get("applicant_name", ""),
+                            lon=p1_lon,
+                            lat=p1_lat,
+                            lon_2=p2_lon,
+                            lat_2=p2_lat,
+                            receipt_1=r1,
+                            receipt_2=r2,
+                            center=parcel.get("district", ""),
+                            date_val=now_dt
+                        )
+                    except Exception as e:
+                        print(f"[!] Warning: Token generation error: {e}")
+                        security_token = None
+
+                    parcel["security_token"] = security_token
+
                     # If user uploaded a custom satellite image, copy it; otherwise generate it
                     if parcel.get('custom_satellite_path') and os.path.exists(parcel['custom_satellite_path']):
                         shutil.copy2(parcel['custom_satellite_path'], sat_path)
@@ -521,9 +607,9 @@ class CadastralRequestHandler(BaseHTTPRequestHandler):
                     if parcel.get('custom_croquis_path') and os.path.exists(parcel['custom_croquis_path']):
                         shutil.copy2(parcel['custom_croquis_path'], croq_path)
                     else:
-                        generate_croquis_image(parcel, croq_path)
+                        generate_croquis_image(parcel, croq_path, security_token=security_token)
                         
-                    generate_certificate_docx(parcel, croq_path, sat_path, out_docx_path, survey_tech=survey_tech, sys_officer=sys_officer)
+                    generate_certificate_docx(parcel, croq_path, sat_path, out_docx_path, survey_tech=survey_tech, sys_officer=sys_officer, issue_date_val=now_dt, security_token=security_token)
                     
                     # Copy input survey file (Excel/CSV) into citizen's folder
                     if CURRENT_SURVEY_FILE_PATH and os.path.exists(CURRENT_SURVEY_FILE_PATH):

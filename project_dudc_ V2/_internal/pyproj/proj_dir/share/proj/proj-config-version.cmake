@@ -1,8 +1,8 @@
 # Version checking for PROJ
 
-set (PACKAGE_VERSION "9.5.1")
+set (PACKAGE_VERSION "9.8.1")
 set (PACKAGE_VERSION_MAJOR "9")
-set (PACKAGE_VERSION_MINOR "5")
+set (PACKAGE_VERSION_MINOR "8")
 set (PACKAGE_VERSION_PATCH "1")
 
 # These variable definitions parallel those in PROJ's

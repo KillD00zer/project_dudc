@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['D:/Work/GIS_tools/project_dudc/src/app_server.py'],
+    ['d:/Work/certi_processing_tools/project_dudc/src/app_server.py'],
     pathex=[],
     binaries=[],
-    datas=[('D:/Work/GIS_tools/project_dudc/src/شهادة.docx', '.'), ('D:/Work/GIS_tools/project_dudc/src/Google Maps Satellite.lyr', '.'), ('D:/Work/GIS_tools/project_dudc/src/ف.xls', '.'), ('D:/Work/GIS_tools/project_dudc/src/index.html', '.')],
-    hiddenimports=['openpyxl', 'xlrd', 'pyproj', 'shapely', 'PIL', 'matplotlib', 'docx'],
+    datas=[('d:/Work/certi_processing_tools/project_dudc/src/شهادة.docx', '.'), ('d:/Work/certi_processing_tools/project_dudc/src/Google Maps Satellite.lyr', '.'), ('d:/Work/certi_processing_tools/project_dudc/src/ف.xls', '.'), ('d:/Work/certi_processing_tools/project_dudc/src/index.html', '.'), ('d:/Work/certi_processing_tools/project_dudc/src/core', 'core')],
+    hiddenimports=['openpyxl', 'xlrd', 'pyproj', 'shapely', 'PIL', 'matplotlib', 'docx', 'cryptography', 'security_overlay', 'encoder_api', 'arabic_reshaper', 'bidi', 'bidi.algorithm'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
