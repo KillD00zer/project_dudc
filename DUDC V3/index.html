@@ -770,6 +770,139 @@
       box-shadow: 0 0 0 1px var(--accent-green);
     }
 
+    /* قائمة المركز وحالة التأمين الأمني */
+    .district-select {
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border-light);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 11.5px;
+      font-family: 'Cairo', sans-serif;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      width: 100%;
+    }
+    .district-select option {
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .district-select.matched {
+      border: 1.5px solid var(--accent-green) !important;
+      background: rgba(16, 185, 129, 0.16) !important;
+      color: #34d399 !important;
+      box-shadow: 0 0 10px var(--accent-green-glow);
+    }
+    .district-select.unmatched {
+      border: 2px solid var(--accent-red) !important;
+      background: rgba(239, 68, 68, 0.25) !important;
+      color: #fca5a5 !important;
+      box-shadow: 0 0 14px var(--accent-red-glow);
+      animation: pulse-red-border 1.5s infinite;
+    }
+    @keyframes pulse-red-border {
+      0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+      50% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.95); }
+    }
+
+    .token-locked {
+      color: #fbbf24 !important;
+      background: rgba(245, 158, 11, 0.15) !important;
+      border: 1px dashed rgba(245, 158, 11, 0.5);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .token-active {
+      color: var(--accent-cyan) !important;
+      background: rgba(6, 182, 212, 0.14) !important;
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      border-radius: 6px;
+      padding: 4px 8px;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+      display: inline-flex;
+      align-items: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* زر نسخ كود التشفير */
+    .btn-copy-token {
+      background: rgba(6, 182, 212, 0.16);
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      color: var(--accent-cyan);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Cairo', sans-serif;
+    }
+    .btn-copy-token:hover {
+      background: rgba(6, 182, 212, 0.28);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-copy-token.copied {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: var(--accent-green) !important;
+      color: #34d399 !important;
+      box-shadow: 0 0 10px var(--accent-green-glow) !important;
+    }
+
+    /* أزرار وحبوب التحكم في حجم خط الكروكي */
+    .croq-font-pill {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border-light);
+      border-radius: 6px;
+      padding: 3px 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-main);
+    }
+    .btn-step {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      border-radius: 3px;
+      width: 19px;
+      height: 19px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      transition: all 0.15s;
+    }
+    .btn-step:hover {
+      background: var(--accent-green);
+      border-color: var(--accent-green-light);
+      color: #000;
+    }
+    .btn-step:active {
+      transform: scale(0.90);
+    }
+    .croq-step-val {
+      font-weight: bold;
+      font-family: monospace;
+      color: var(--accent-green-light);
+      min-width: 16px;
+      text-align: center;
+    }
+
     /* --------------------------------------------------------------------------
        المرحلة 3: الإخراج النهائي وحزمة العميل (Stage 3 Layout)
        -------------------------------------------------------------------------- */
@@ -996,6 +1129,38 @@
         <button class="btn btn-glass" id="btnBrowseOutputDir">📁 استعراض مجلد الحفظ...</button>
       </div>
 
+            <!-- كارت اختيار مسؤولي المعاملة والاعتماد الرسمي (الخطوة 1 الإلزامية) -->
+      <div class="card" style="border: 1px solid var(--accent-cyan-border); background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); margin-bottom: 14px;">
+        <div class="card-title" style="color: var(--accent-cyan); justify-content: space-between;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">👤</span>
+            <span>الخطوة 1: تحديد مسؤولي المعاملة والاعتماد (إلزامي قبل سحب الملف)</span>
+          </span>
+          <span style="font-size: 11px; color: var(--accent-green-light); font-weight: normal; background: rgba(16, 185, 129, 0.15); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">
+            ✔ يتم التوثيق بالسحابة بالثانية
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px;">
+          <div>
+            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">فني الرفع المساحي الميداني:</label>
+            <select class="stage1-select" id="selSurveyTech" style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold;">
+              <option value="محمد ابراهيم بدير" selected>محمد ابراهيم بدير</option>
+              <option value="محمد السيد بدير">محمد السيد بدير</option>
+              <option value="وائل فاروق">وائل فاروق</option>
+              <option value="محمد حبيب">محمد حبيب</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">مسؤول النظم (الاعتماد الرسمي):</label>
+            <select class="stage1-select" id="selSysOfficer" style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold;">
+              <option value="شريف محمد" selected>شريف محمد</option>
+              <option value="مصطفي فراج">مصطفي فراج</option>
+              <option value="علاء البنا">علاء البنا</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- بطاقة رفع الملف / التجربة السريعة -->
       <div class="dropzone-card" id="dropzone">
         <input type="file" id="surveyFileInput" accept=".xls,.xlsx,.csv" style="display: none;">
@@ -1018,18 +1183,37 @@
             <div><span style="color: var(--text-muted);">مقدم الطلب:</span> <strong id="resApplicantName">--</strong></div>
             <div><span style="color: var(--text-muted);">الرقم القومي:</span> <strong id="resNationalId">--</strong></div>
             <div><span style="color: var(--text-muted);">رقم الإيصال:</span> <strong id="resReceiptNo">--</strong></div>
-            <div><span style="color: var(--text-muted);">المركز / الحي:</span> <strong id="resDistrict">--</strong></div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-muted); font-size: 11px;">المركز / الحي:</span>
+                <span id="districtStatusBadge" style="font-size: 10px;"></span>
+              </div>
+              <select id="selDistrict" class="district-select" onchange="handleDistrictChange(this.value)">
+                <option value="" disabled selected>-- فحص المركز بالقاموس --</option>
+              </select>
+            </div>
             <div><span style="color: var(--text-muted);">المساحة المسجلة:</span> <strong id="resStatedArea">--</strong></div>
             <div><span style="color: var(--text-muted);">المساحة المحسوبة:</span> <strong id="resCalcArea" style="color: var(--accent-green-light);">--</strong></div>
             <div><span style="color: var(--text-muted);">فارق المساحة (Δ):</span> <strong id="resDeltaArea">--</strong></div>
-            <div><span style="color: var(--text-muted);">كود التأمين (DUDC Token):</span> <strong id="resSecurityToken" style="font-family: monospace; color: var(--accent-cyan);">--</strong></div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="color: var(--text-muted); font-size: 11px;">كود التأمين (DUDC Token):</span>
+              <div style="min-height: 26px; display: flex; align-items: center; gap: 6px;">
+                <strong id="resSecurityToken" class="token-locked" style="font-family: monospace; font-size: 11px;">--</strong>
+                <button type="button" class="btn-copy-token" id="btnCopyToken" onclick="copySecurityToken()" title="نسخ كود التأمين للحافظة">📋 نسخ</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- معاينة الصورتين (كروكي الموقع + صورة فضائية) -->
         <div class="results-grid">
           <div class="card">
-            <div class="card-title">📐 كروكي الموقع (CAD Croquis)</div>
+            <div class="card-title" style="justify-content: space-between; align-items: center;">
+              <span>📐 كروكي الموقع (CAD Croquis)</span>
+              <button type="button" class="btn btn-glass" id="btnQuickRefreshCroquis" onclick="updateCroquisDiagram()" style="padding: 2px 8px; font-size: 11px; gap: 4px;" title="إعادة رسم الكروكي">
+                🔄 تحديث
+              </button>
+            </div>
             <div style="height: 220px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
               <img id="stage1CroquisImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
@@ -1044,7 +1228,39 @@
 
         <!-- كارت بطاقات مجموع أطوال الحدود الأربعة -->
         <div class="card">
-          <div class="card-title">🗺️ الحدود الأربعة والأطوال المحسوبة لحظياً</div>
+          <div class="card-title" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span>🗺️ الحدود الأربعة وتفصيل أضلاع الكروكي</span>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <!-- 1. أرقام النقط -->
+              <div class="croq-font-pill" title="حجم خط أرقام النقط على الكروكي (1..N)">
+                <span>🔢 النقط:</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('pts', -1)">−</button>
+                <span id="croqFontPtsVal" class="croq-step-val">16</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('pts', 1)">+</button>
+              </div>
+
+              <!-- 2. خط الكتابة / أسماء الجيران -->
+              <div class="croq-font-pill" title="حجم خط أسماء الجيران والشوارع على الكروكي">
+                <span>🏷️ الجيران:</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('text', -1)">−</button>
+                <span id="croqFontTextVal" class="croq-step-val">16</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('text', 1)">+</button>
+              </div>
+
+              <!-- 3. خط الأبعاد -->
+              <div class="croq-font-pill" title="حجم خط الأبعاد وأطوال الأضلاع على الكروكي">
+                <span>📏 الأبعاد:</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('dim', -1)">−</button>
+                <span id="croqFontDimVal" class="croq-step-val">16</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('dim', 1)">+</button>
+              </div>
+
+              <!-- زر تحديث رسم الكروكي -->
+              <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateCroquisDiagram()" style="padding: 5px 12px; font-size: 11.5px; gap: 4px;">
+                <span>🔄 تحديث رسم الكروكي</span>
+              </button>
+            </div>
+          </div>
           <div class="sum-cards-grid">
             <div class="sum-card"><div class="sum-card-title">🌊 الحد البحري</div><div class="sum-card-val" id="sumNorth">0.00 م</div></div>
             <div class="sum-card"><div class="sum-card-title">🌅 الحد الشرقي</div><div class="sum-card-val" id="sumEast">0.00 م</div></div>
@@ -1070,28 +1286,7 @@
           </table>
         </div>
 
-        <!-- كارت اختيار وتوقيعات الموظفين -->
-        <div class="card">
-          <div class="card-title">✍️ اعتماد وتوقيعات مسؤولي المركز</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div>
-              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">فني المساحة:</label>
-              <select class="stage1-select" id="selSurveyTech">
-                <option value="محمد ابراهيم بدير" selected>محمد ابراهيم بدير</option>
-                <option value="محمد السيد بدير">محمد السيد بدير</option>
-                <option value="وائل فاروق">وائل فاروق</option>
-                <option value="محمد حبيب">محمد حبيب</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">مسؤول النظم:</label>
-              <select class="stage1-select" id="selSysOfficer">
-                <option value="شريف محمد" selected>شريف محمد</option>
-                <option value="مصطفي فراج">مصطفي فراج</option>
-                <option value="علاء البنا">علاء البنا</option>
-              </select>
-            </div>
-          </div>
+        
         </div>
 
         <!-- زر الانتقال إلى المرحلة 2 (الاستوديو) -->
@@ -1420,8 +1615,24 @@
           <div><span style="color: var(--text-muted);">المساحة:</span> <strong id="stage3Area">--</strong></div>
         </div>
 
-        <!-- أزرار الإخراج الرئيسية -->
-        <div class="delivery-actions-grid">
+        <!-- بطاقة التأكيد والاعتماد السحابي الرسمي للطباعة والتصدير -->
+        <div id="cardOfficialConfirmation" style="background: rgba(15, 23, 42, 0.75); border: 2px dashed #0284c7; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; transition: all 0.3s ease;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
+            <span style="font-size: 22px;">🔒</span>
+            <strong style="font-size: 15px; color: #38bdf8;">خطوة تأكيد واعتماد البيانات للطباعة والتصدير الرسمي</strong>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+            لتوثيق الشهادة وتثبيت بياناتها رسمياً في سجل الرقابة السحابي لمركز DUDC وتفعيل أزرار الطباعة والتصدير:
+          </p>
+          <button id="btnConfirmIssuance" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; font-weight: bold; font-size: 14px; padding: 10px 24px; border-radius: 8px; cursor: pointer; border: none; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); display: inline-flex; align-items: center; gap: 8px;">
+            <span id="confirmBtnIcon">🔒</span>
+            <span id="confirmBtnText">تأكيد واعتماد البيانات للطباعة والتصدير الرسمي</span>
+          </button>
+          <div id="confirmationStatusMsg" style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #10b981; display: none;"></div>
+        </div>
+
+        <!-- أزرار الإخراج الرئيسية (مقفولة حتى اعتماد الشهادة) -->
+        <div class="delivery-actions-grid" id="deliveryActionsGrid" style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease;">
           <div class="action-box" id="btnActionPrintPdf">
             <div class="action-icon">🖨️</div>
             <strong style="font-size: 14px; color: #ffffff;">طباعة فورية / حفظ PDF</strong>
@@ -1548,10 +1759,35 @@
       }
 
       stepTab1.addEventListener('click', () => switchStage(1));
-      stepTab2.addEventListener('click', () => { if (activeParcel) switchStage(2); });
-      stepTab3.addEventListener('click', () => { if (activeParcel) switchStage(3); });
+      stepTab2.addEventListener('click', () => {
+        if (!activeParcel) return;
+        if (!activeParcel.district_matched || !activeParcel.security_token) {
+          alert('⚠️ تنبيه أمني: يرجى تحديد وتأمين المركز أولاً من القائمة لتوليد كود التأمين الرقابي قبل الانتقال للاستوديو.');
+          const sel = document.getElementById('selDistrict');
+          if (sel) { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); sel.focus(); }
+          return;
+        }
+        switchStage(2);
+      });
+      stepTab3.addEventListener('click', () => {
+        if (!activeParcel) return;
+        if (!activeParcel.district_matched || !activeParcel.security_token) {
+          alert('⚠️ تنبيه أمني: يرجى تأمين المركز وكود الأمان أولاً.');
+          return;
+        }
+        switchStage(3);
+      });
 
-      document.getElementById('btnGoToStage2').addEventListener('click', () => switchStage(2));
+      document.getElementById('btnGoToStage2').addEventListener('click', () => {
+        if (!activeParcel) return;
+        if (!activeParcel.district_matched || !activeParcel.security_token) {
+          alert('⚠️ تنبيه أمني: لا يمكن الانتقال للاستوديو أو اعتماد الشهادة حتى يتم تأمين وتحديد خانة المركز من القائمة لتوليد كود التأمين الرقابي!');
+          const sel = document.getElementById('selDistrict');
+          if (sel) { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); sel.focus(); }
+          return;
+        }
+        switchStage(2);
+      });
       document.getElementById('btnBackToStage1').addEventListener('click', () => switchStage(1));
       document.getElementById('btnGoToStage3').addEventListener('click', () => switchStage(3));
       document.getElementById('btnBackToStage2').addEventListener('click', () => switchStage(2));
@@ -1580,13 +1816,30 @@
           });
       });
 
+      // قائمة المراكز الرسمية الـ 18 لمحافظة الدقهلية
+      const OFFICIAL_CENTERS_FALLBACK = [
+        [0, "المنصورة"], [1, "طلخا"], [2, "ميت غمر"], [3, "دكرنس"],
+        [4, "السنبلاوين"], [5, "بلقاس"], [6, "شربين"], [7, "المنزلة"],
+        [8, "منية النصر"], [9, "أجا"], [10, "نبروه"], [11, "تمي الأمديد"],
+        [12, "الجمالية"], [13, "الكردي"], [14, "المطرية"], [15, "ميت سلسيل"],
+        [16, "بني عبيد"], [17, "جمصة"]
+      ];
+      let officialCentersList = OFFICIAL_CENTERS_FALLBACK;
+
       // تحميل عينة ف.xls
       document.getElementById('btnLoadSample').addEventListener('click', (e) => {
         e.stopPropagation();
-        fetch('/api/load-sample', { method: 'POST' })
+        const techVal = document.getElementById('selSurveyTech').value;
+        const officerVal = document.getElementById('selSysOfficer').value;
+        fetch('/api/load-sample', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ survey_technician: techVal, system_officer: officerVal })
+        })
           .then(res => res.json())
           .then(data => {
             if (data.success && data.parcels && data.parcels.length > 0) {
+              if (data.official_centers) officialCentersList = data.official_centers;
               loadParcelData(data.parcels[0]);
             } else {
               alert('خطأ: ' + (data.error || 'تعذر تحميل العينة'));
@@ -1611,12 +1864,17 @@
       });
 
       function uploadFile(file) {
+        const techVal = document.getElementById('selSurveyTech').value;
+        const officerVal = document.getElementById('selSysOfficer').value;
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('survey_technician', techVal);
+        formData.append('system_officer', officerVal);
         fetch('/api/upload', { method: 'POST', body: formData })
           .then(res => res.json())
           .then(data => {
             if (data.success && data.parcels && data.parcels.length > 0) {
+              if (data.official_centers) officialCentersList = data.official_centers;
               loadParcelData(data.parcels[0]);
             } else {
               alert('خطأ في قراءة ملف الإحداثيات: ' + (data.error || 'تأكد من صيغة الملف'));
@@ -1624,15 +1882,166 @@
           }).catch(err => alert('خطأ في الاتصال: ' + err.message));
       }
 
+            // التحديث اللحظي للشفرة السحابية عند تغيير الفني أو المسؤول
+      ['selSurveyTech', 'selSysOfficer'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          if (activeParcel && activeParcel.district_id !== null && activeParcel.district_id !== undefined) {
+            const newCid = activeParcel.district_id;
+            const techVal = document.getElementById('selSurveyTech').value;
+            const officerVal = document.getElementById('selSysOfficer').value;
+            const badge = document.getElementById('districtStatusBadge');
+            const tokDisplay = document.getElementById('resSecurityToken');
+            if (badge) badge.innerHTML = '<span style="color: var(--accent-cyan); font-size: 10px;">⏳ تحديث بالسحابة...</span>';
+
+            fetch('/api/update-center', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                parcel_index: 0,
+                center_id: parseInt(newCid),
+                survey_technician: techVal,
+                system_officer: officerVal
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                activeParcel.security_token = data.security_token;
+                if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ موثق بالسحابة</span>';
+                if (tokDisplay) {
+                  tokDisplay.className = 'token-active';
+                  tokDisplay.textContent = data.security_token;
+                }
+              }
+            }).catch(() => {});
+          }
+        });
+      });
+
+      function renderDistrictSelector(parcel) {
+        const sel = document.getElementById('selDistrict');
+        const badge = document.getElementById('districtStatusBadge');
+        const tokDisplay = document.getElementById('resSecurityToken');
+        if (!sel) return;
+
+        sel.innerHTML = '';
+        const centers = (officialCentersList && officialCentersList.length > 0) ? officialCentersList : OFFICIAL_CENTERS_FALLBACK;
+
+        if (parcel.district_matched && parcel.district_id !== null && parcel.district_id !== undefined) {
+          // حالة التطابق التلقائي الناجح
+          centers.forEach(([cid, name]) => {
+            const opt = document.createElement('option');
+            opt.value = cid;
+            opt.textContent = name;
+            if (cid === parcel.district_id) opt.selected = true;
+            sel.appendChild(opt);
+          });
+
+          sel.className = 'district-select matched';
+          if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ مطابق</span>';
+
+          if (tokDisplay) {
+            tokDisplay.className = 'token-active';
+            tokDisplay.textContent = parcel.security_token || '--';
+          }
+        } else {
+          // حالة عدم التطابق - تنبيه أحمر وقائمة منسدلة
+          const placeholder = document.createElement('option');
+          placeholder.value = "";
+          placeholder.disabled = true;
+          placeholder.selected = true;
+          const rawVal = parcel.district ? `"${parcel.district}"` : 'غير محدد';
+          placeholder.textContent = `⚠️ غير مطابق (${rawVal}) - اختر المركز...`;
+          sel.appendChild(placeholder);
+
+          centers.forEach(([cid, name]) => {
+            const opt = document.createElement('option');
+            opt.value = cid;
+            opt.textContent = name;
+            sel.appendChild(opt);
+          });
+
+          sel.className = 'district-select unmatched';
+          if (badge) badge.innerHTML = '<span style="color: #ef4444; font-weight: bold; font-size: 10px;">⚠️ يرجى الاختيار</span>';
+
+          // قاعدة صارمة: حجب كود التأمين حتى يتم تأمين المركز
+          if (tokDisplay) {
+            tokDisplay.className = 'token-locked';
+            tokDisplay.innerHTML = '<span>⏳ بانتظار تأمين المركز</span>';
+          }
+        }
+      }
+
+      function handleDistrictChange(newCid) {
+        if (!activeParcel || newCid === "" || newCid === null || newCid === undefined) return;
+
+        const sel = document.getElementById('selDistrict');
+        const badge = document.getElementById('districtStatusBadge');
+        const tokDisplay = document.getElementById('resSecurityToken');
+
+        if (badge) badge.innerHTML = '<span style="color: var(--accent-cyan); font-size: 10px;">⏳ جاري التشفير...</span>';
+
+        const techVal = document.getElementById('selSurveyTech') ? document.getElementById('selSurveyTech').value : '';
+        const officerVal = document.getElementById('selSysOfficer') ? document.getElementById('selSysOfficer').value : '';
+
+        fetch('/api/update-center', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            parcel_index: 0,
+            center_id: parseInt(newCid),
+            survey_technician: techVal,
+            system_officer: officerVal
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            activeParcel.district = data.district;
+            activeParcel.district_id = data.district_id;
+            activeParcel.district_matched = true;
+            activeParcel.security_token = data.security_token;
+
+            if (sel) sel.className = 'district-select matched';
+            if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ تم التأمين</span>';
+
+            if (tokDisplay) {
+              tokDisplay.className = 'token-active';
+              tokDisplay.textContent = data.security_token;
+            }
+
+            // مزامنة الاستوديو في المرحلة 2
+            const valCenterElem = document.getElementById('valCenter');
+            if (valCenterElem) valCenterElem.textContent = data.district;
+
+            // تحديث كروكي المرحلة 1 لإظهار البصمة المشفرة
+            if (data.croquis_url) {
+              const croqImg = document.getElementById('stage1CroquisImg');
+              const imgCroqStage2 = document.getElementById('imgCroquis');
+              if (croqImg) croqImg.src = data.croquis_url;
+              if (imgCroqStage2) imgCroqStage2.src = data.croquis_url;
+            }
+          } else {
+            alert('خطأ في تأمين المركز: ' + (data.error || 'غير معروف'));
+          }
+        })
+        .catch(err => {
+          alert('خطأ في الاتصال بالسيرفر: ' + err.message);
+        });
+      }
+
       function loadParcelData(parcel) {
         activeParcel = parcel;
+        if (typeof resetConfirmationState === 'function') resetConfirmationState();
         document.getElementById('surveyResultsSection').style.display = 'flex';
 
         // بيانات المواطن والتحقق
         document.getElementById('resApplicantName').textContent = parcel.applicant_name || 'غير محدد';
         document.getElementById('resNationalId').textContent = parcel.national_id || 'غير محدد';
         document.getElementById('resReceiptNo').textContent = parcel.receipt_no || '0';
-        document.getElementById('resDistrict').textContent = parcel.district || 'غير محدد';
+
+        // تهيئة قائمة المراكز وتأمين الرمز الأمني
+        renderDistrictSelector(parcel);
 
         const statedArea = parseFloat(parcel.stated_area_m2) || 0;
         const calcArea = parseFloat(parcel.calculated_area_m2) || 0;
@@ -1651,7 +2060,16 @@
           badge.textContent = `⚠️ تنبيه: فرق المساحة ${delta.toFixed(2)} م² يتجاوز التفاوت القانوني (±2.0 م²)`;
         }
 
-        document.getElementById('resSecurityToken').textContent = parcel.security_token || 'DUDC-7K9P2-4W1QM-8V3NB-9X5ZL-2F8TR';
+        // تهيئة مقاسات خطوط الكروكي
+        croqFontSizes.pts = parcel.font_size_pts ? Number(parcel.font_size_pts) : 16;
+        croqFontSizes.dim = parcel.font_size_dims ? Number(parcel.font_size_dims) : 16;
+        croqFontSizes.text = parcel.font_size_text ? Number(parcel.font_size_text) : 16;
+        const elPts = document.getElementById('croqFontPtsVal');
+        const elText = document.getElementById('croqFontTextVal');
+        const elDim = document.getElementById('croqFontDimVal');
+        if (elPts) elPts.textContent = croqFontSizes.pts;
+        if (elText) elText.textContent = croqFontSizes.text;
+        if (elDim) elDim.textContent = croqFontSizes.dim;
 
         // تحميل الصورتين
         loadCroquisPreview();
@@ -1665,11 +2083,17 @@
         fetch('/api/preview-croquis', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ parcel_index: 0 })
+          body: JSON.stringify({
+            parcel_index: 0,
+            font_size_pts: croqFontSizes.pts,
+            font_size_dims: croqFontSizes.dim,
+            font_size_text: croqFontSizes.text
+          })
         }).then(res => res.json()).then(data => {
           if (data.croquis_url) {
-            document.getElementById('stage1CroquisImg').src = data.croquis_url;
-            document.getElementById('imgCroquis').src = data.croquis_url;
+            const bustUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
+            document.getElementById('stage1CroquisImg').src = bustUrl;
+            document.getElementById('imgCroquis').src = bustUrl;
           }
         });
       }
@@ -1715,13 +2139,205 @@
           tbody.appendChild(tr);
         });
 
-        // ربط أحداث التغيير لإعادة حساب المجموع لحظياً
+        // ربط أحداث التغيير لإعادة حساب المجموع وتنبيه الحاجة للتحديث
         tbody.querySelectorAll('.seg-dir-select, .seg-length-input, .seg-neighbor-input').forEach(el => {
-          el.addEventListener('input', updateRunningSums);
+          el.addEventListener('input', () => {
+            updateRunningSums();
+            markCroquisNeedsUpdate();
+          });
         });
 
         updateRunningSums();
       }
+
+      // ضبط أحجام خطوط الكروكي (يدوي بالكامل - لا يتم التحديث إلا بضغط زر التحديث)
+      let croqFontSizes = { pts: 16, text: 16, dim: 16 };
+
+      function adjustCroqFont(type, delta) {
+        if (!croqFontSizes.hasOwnProperty(type)) return;
+        const limits = {
+          pts: { min: 7, max: 26, id: 'croqFontPtsVal' },
+          text: { min: 8, max: 28, id: 'croqFontTextVal' },
+          dim: { min: 8, max: 26, id: 'croqFontDimVal' }
+        };
+        const cfg = limits[type];
+        if (!cfg) return;
+        croqFontSizes[type] = Math.max(cfg.min, Math.min(cfg.max, croqFontSizes[type] + delta));
+        const valElem = document.getElementById(cfg.id);
+        if (valElem) valElem.textContent = croqFontSizes[type];
+        
+        // تنبيه بصري بأن هناك تعديلات تنتظر ضغط زر التحديث
+        markCroquisNeedsUpdate();
+      }
+
+      function markCroquisNeedsUpdate() {
+        const btn = document.getElementById('btnUpdateCroquis');
+        if (btn && !btn.disabled) {
+          btn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.75)';
+          btn.style.borderColor = 'var(--accent-green-light)';
+        }
+      }
+
+      // نسخ كود التأمين للحافظة
+      function copySecurityToken() {
+        if (!activeParcel || !activeParcel.security_token) {
+          alert('⚠️ يرجى تأمين واختيار المركز لتوليد الكود قبل نسخه.');
+          return;
+        }
+        const token = activeParcel.security_token;
+        const btn = document.getElementById('btnCopyToken');
+
+        function showSuccess() {
+          if (btn) {
+            const orig = btn.innerHTML;
+            btn.className = 'btn-copy-token copied';
+            btn.innerHTML = '✔ تم النسخ!';
+            setTimeout(() => {
+              btn.className = 'btn-copy-token';
+              btn.innerHTML = orig;
+            }, 1800);
+          }
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(token).then(showSuccess).catch(() => {
+            fallbackCopy(token);
+            showSuccess();
+          });
+        } else {
+          fallbackCopy(token);
+          showSuccess();
+        }
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta);
+      }
+
+      // تحديث رسم الكروكي الهندسي بالكامل (يتم فقط عند الضغط على زر التحديث)
+      function updateCroquisDiagram() {
+        if (!activeParcel) {
+          alert('يرجى تحميل ملف الرفع المساحي أولاً لمعاينة وتحديث الكروكي.');
+          return;
+        }
+
+        const btn = document.getElementById('btnUpdateCroquis');
+        const quickBtn = document.getElementById('btnQuickRefreshCroquis');
+        const defaultBtnHtml = '<span>🔄 تحديث رسم الكروكي</span>';
+        
+        if (btn) {
+          btn.style.boxShadow = '';
+          btn.style.borderColor = '';
+          btn.innerHTML = '<span>⏳ جاري الرسم...</span>';
+          btn.disabled = true;
+        }
+        if (quickBtn) {
+          quickBtn.textContent = '⏳ جاري...';
+          quickBtn.disabled = true;
+        }
+
+        // قراءة وتجميع بيانات الأضلاع المعدلة
+        const editedSegs = [];
+        const boundaries = { north: '', east: '', south: '', west: '' };
+
+        document.querySelectorAll('#stage1SegmentsTbody tr').forEach((tr, i) => {
+          const dirSel = tr.querySelector('.seg-dir-select');
+          const lenInp = tr.querySelector('.seg-length-input');
+          const neighInp = tr.querySelector('.seg-neighbor-input');
+
+          const dir = dirSel ? dirSel.value : 'north';
+          const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
+          const neigh = neighInp ? neighInp.value.trim() : '';
+
+          editedSegs.push({
+            direction: dir,
+            length_m: len,
+            neighbor: neigh
+          });
+
+          // ربط اسم الجار بالحد العام
+          if (neigh && (!boundaries[dir] || boundaries[dir] === '')) {
+            boundaries[dir] = neigh;
+          }
+        });
+
+        // تحديث كائن الـ activeParcel
+        if (activeParcel.segments) {
+          editedSegs.forEach((es, i) => {
+            if (activeParcel.segments[i]) {
+              activeParcel.segments[i].direction = es.direction;
+              activeParcel.segments[i].length_m = es.length_m;
+              activeParcel.segments[i].neighbor = es.neighbor;
+            }
+          });
+        }
+        activeParcel.boundaries = boundaries;
+        activeParcel.font_size_pts = croqFontSizes.pts;
+        activeParcel.font_size_dims = croqFontSizes.dim;
+        activeParcel.font_size_text = croqFontSizes.text;
+
+        fetch('/api/preview-croquis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            parcel_index: 0,
+            boundaries: boundaries,
+            edited_segments: editedSegs,
+            font_size_pts: croqFontSizes.pts,
+            font_size_dims: croqFontSizes.dim,
+            font_size_text: croqFontSizes.text
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.croquis_url) {
+            const croq1 = document.getElementById('stage1CroquisImg');
+            const croq2 = document.getElementById('imgCroquis');
+            const bustUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
+            if (croq1) croq1.src = bustUrl;
+            if (croq2) croq2.src = bustUrl;
+          }
+          if (btn) {
+            btn.innerHTML = '<span>✔ تم تحديث الكروكي</span>';
+            setTimeout(() => {
+              btn.innerHTML = defaultBtnHtml;
+              btn.disabled = false;
+            }, 1200);
+          }
+          if (quickBtn) {
+            quickBtn.textContent = '✔ تم';
+            setTimeout(() => {
+              quickBtn.textContent = '🔄 تحديث';
+              quickBtn.disabled = false;
+            }, 1200);
+          }
+          updateRunningSums();
+        })
+        .catch(err => {
+          alert('خطأ في تحديث الكروكي: ' + err.message);
+          if (btn) {
+            btn.innerHTML = defaultBtnHtml;
+            btn.disabled = false;
+          }
+          if (quickBtn) {
+            quickBtn.textContent = '🔄 تحديث';
+            quickBtn.disabled = false;
+          }
+        });
+      }
+
+      // إتاحة الدوال على كائن window للتفاعل الفوري مع أحداث HTML المباشرة (onclick, onchange)
+      window.adjustCroqFont = adjustCroqFont;
+      window.updateCroquisDiagram = updateCroquisDiagram;
+      window.copySecurityToken = copySecurityToken;
+      window.handleDistrictChange = handleDistrictChange;
 
       function updateRunningSums() {
         let sums = { north: 0, east: 0, south: 0, west: 0 };
@@ -2155,6 +2771,107 @@
         document.getElementById('lblFileDocx').textContent = `${name}.docx (الشهادة الرسمية Word)`;
         document.getElementById('lblFileJson').textContent = `${name}_session.json (ملف الجلسة الكامل)`;
       }
+
+      // منطق الاعتماد السحابي الرسمي للطباعة والتصدير (Stage 3)
+      let isCertificateConfirmed = false;
+
+      function resetConfirmationState() {
+        isCertificateConfirmed = false;
+        const card = document.getElementById('cardOfficialConfirmation');
+        const btn = document.getElementById('btnConfirmIssuance');
+        const icon = document.getElementById('confirmBtnIcon');
+        const text = document.getElementById('confirmBtnText');
+        const msg = document.getElementById('confirmationStatusMsg');
+        const grid = document.getElementById('deliveryActionsGrid');
+        const topBadge = document.querySelector('.stage3-layout .badge-pass, .stage3-layout .badge-pending');
+
+        if (card) {
+          card.style.borderColor = '#0284c7';
+          card.style.background = 'rgba(15, 23, 42, 0.75)';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+          btn.style.cursor = 'pointer';
+        }
+        if (icon) icon.textContent = '🔒';
+        if (text) text.textContent = 'تأكيد واعتماد البيانات للطباعة والتصدير الرسمي';
+        if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+        if (grid) {
+          grid.style.opacity = '0.45';
+          grid.style.pointerEvents = 'none';
+          grid.style.filter = 'grayscale(0.7)';
+        }
+        if (topBadge) {
+          topBadge.textContent = '⏳ في انتظار الاعتماد';
+          topBadge.className = 'badge-pending';
+        }
+      }
+
+      document.getElementById('btnConfirmIssuance').addEventListener('click', () => {
+        if (!activeParcel || !activeParcel.security_token) {
+          alert('⚠️ تنبيه: لم يتم توليد كود الأمان للشهادة بعد!');
+          return;
+        }
+
+        const btn = document.getElementById('btnConfirmIssuance');
+        const icon = document.getElementById('confirmBtnIcon');
+        const text = document.getElementById('confirmBtnText');
+        const msg = document.getElementById('confirmationStatusMsg');
+        const card = document.getElementById('cardOfficialConfirmation');
+        const grid = document.getElementById('deliveryActionsGrid');
+        const topBadge = document.querySelector('.stage3-layout .badge-pending, .stage3-layout .badge-pass');
+
+        btn.disabled = true;
+        icon.textContent = '⏳';
+        text.textContent = 'جاري الاعتماد السحابي وتوثيق السجل...';
+
+        fetch('/api/confirm-issuance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: activeParcel.security_token })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            isCertificateConfirmed = true;
+            icon.textContent = '✔️';
+            text.textContent = 'تم اعتماد الشهادة رسمياً في السجل السحابي للطباعة والتسليم';
+            btn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+            btn.style.cursor = 'default';
+            btn.style.boxShadow = 'none';
+
+            if (card) {
+              card.style.borderColor = '#10b981';
+              card.style.background = 'rgba(6, 95, 70, 0.2)';
+            }
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `✔ تم توثيق الإصدار الرسمي في السجل السحابي بتاريخ: <strong>${data.confirmed_at}</strong>`;
+            }
+            if (grid) {
+              grid.style.opacity = '1';
+              grid.style.pointerEvents = 'auto';
+              grid.style.filter = 'none';
+            }
+            if (topBadge) {
+              topBadge.textContent = '✔ معتمد رسمي للطباعة والتصدير';
+              topBadge.className = 'badge-pass';
+            }
+          } else {
+            btn.disabled = false;
+            icon.textContent = '🔒';
+            text.textContent = 'إعادة محاولة الاعتماد السحابي';
+            alert('خطأ أثناء الاعتماد السحابي: ' + (data.error || 'تعذر الاتصال'));
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          icon.textContent = '🔒';
+          text.textContent = 'إعادة محاولة الاعتماد';
+          alert('خطأ في الاتصال بالسيرفر: ' + err.message);
+        });
+      });
 
       // طباعة الـ PDF الفورية
       function triggerPdfPrint() {

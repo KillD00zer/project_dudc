@@ -33,7 +33,8 @@ from geo_engine import read_survey_file
 from satellite_engine import generate_satellite_image
 from croquis_engine import generate_croquis_image
 from docx_builder import generate_certificate_docx, format_issue_date
-from encoder_api import generate_dudc_token
+from encoder_api import generate_dudc_token, confirm_cloud_issuance
+from centers import resolve_center, get_center_name, list_all_centers
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(APP_DIR, "app_config.json")
@@ -103,47 +104,73 @@ CURRENT_PARCELS = []
 CURRENT_SURVEY_FILE_PATH = None
 CURRENT_SURVEY_FILENAME = None
 
-def enrich_parcels_with_security_tokens(parcels):
+def generate_token_for_parcel(p, center_id, system_officer="", survey_technician=""):
+    """Generate authentic 210-bit DUDC security token with confirmed center ID & audit log."""
+    now_dt = datetime.now()
+    verts = p.get("vertices", [])
+    p1_lon = verts[0]["lon"] if verts else 31.381790
+    p1_lat = verts[0]["lat"] if verts else 31.051135
+    p2_lon = verts[1]["lon"] if len(verts) > 1 else p1_lon
+    p2_lat = verts[1]["lat"] if len(verts) > 1 else p1_lat
+
+    rcp_raw = str(p.get("receipt_no", "0")).replace(" ", "")
+    rcp_parts = rcp_raw.split("-") if "-" in rcp_raw else [rcp_raw]
+    try:
+        r1 = int("".join(filter(str.isdigit, rcp_parts[0])))
+    except ValueError:
+        r1 = 0
+    r2 = 0
+    if len(rcp_parts) > 1:
+        try:
+            r2 = int("".join(filter(str.isdigit, rcp_parts[1])))
+        except ValueError:
+            r2 = 0
+
+    officer = system_officer or p.get("system_officer", "")
+    technician = survey_technician or p.get("survey_technician", "")
+
+    return generate_dudc_token(
+        name=p.get("applicant_name", ""),
+        lon=p1_lon,
+        lat=p1_lat,
+        lon_2=p2_lon,
+        lat_2=p2_lat,
+        receipt_1=r1,
+        receipt_2=r2,
+        center=int(center_id),
+        date_val=now_dt,
+        system_officer=officer,
+        survey_technician=technician
+    )
+
+def enrich_parcels_with_security_tokens(parcels, system_officer="", survey_technician=""):
     now_dt = datetime.now()
     date_display, _ = format_issue_date(now_dt)
     for p in parcels:
-        verts = p.get("vertices", [])
-        p1_lon = verts[0]["lon"] if verts else 31.381790
-        p1_lat = verts[0]["lat"] if verts else 31.051135
-        p2_lon = verts[1]["lon"] if len(verts) > 1 else p1_lon
-        p2_lat = verts[1]["lat"] if len(verts) > 1 else p1_lat
+        if system_officer:
+            p["system_officer"] = system_officer
+        if survey_technician:
+            p["survey_technician"] = survey_technician
 
-        rcp_raw = str(p.get("receipt_no", "0")).replace(" ", "")
-        rcp_parts = rcp_raw.split("-") if "-" in rcp_raw else [rcp_raw]
-        try:
-            r1 = int("".join(filter(str.isdigit, rcp_parts[0])))
-        except ValueError:
-            r1 = 0
-        r2 = 0
-        if len(rcp_parts) > 1:
-            try:
-                r2 = int("".join(filter(str.isdigit, rcp_parts[1])))
-            except ValueError:
-                r2 = 0
+        raw_dist = p.get("district", "")
+        is_matched, cid, canon_name = resolve_center(raw_dist)
 
-        try:
-            token = generate_dudc_token(
-                name=p.get("applicant_name", ""),
-                lon=p1_lon,
-                lat=p1_lat,
-                lon_2=p2_lon,
-                lat_2=p2_lat,
-                receipt_1=r1,
-                receipt_2=r2,
-                center=p.get("district", ""),
-                date_val=now_dt
-            )
-        except Exception as e:
-            print(f"[!] Warning: Token error during enrich: {e}")
-            token = "DUDC-7K9P2-4W1QM-8V3NB-9X5ZL-2F8TR"
-
-        p["security_token"] = token
+        p["district_matched"] = is_matched
+        p["district_id"] = cid if is_matched else None
         p["issue_date_display"] = date_display
+
+        if is_matched:
+            p["district"] = canon_name
+            try:
+                p["security_token"] = generate_token_for_parcel(p, cid, system_officer=p.get("system_officer", ""), survey_technician=p.get("survey_technician", ""))
+            except Exception as e:
+                print(f"[!] Warning: Token error during enrich: {e}")
+                p["security_token"] = None
+        else:
+            # Rule: Security token is NOT generated or shown until center is secured!
+            p["district"] = raw_dist
+            p["security_token"] = None
+
     return parcels
 
 class DUDCV3RequestHandler(BaseHTTPRequestHandler):
@@ -165,6 +192,9 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(len(content)))
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         self.wfile.write(content)
@@ -178,6 +208,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             self._send_file(INDEX_HTML, 'text/html; charset=utf-8')
         elif path == '/api/get-output-dir':
             self._send_json({"output_dir": OUTPUT_DIR})
+        elif path == '/api/get-centers':
+            self._send_json({"centers": list_all_centers()})
         elif path.startswith('/assets/'):
             rel_path = path.lstrip('/')
             full_path = os.path.join(APP_DIR, rel_path)
@@ -190,6 +222,27 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             ext = os.path.splitext(fname)[1].lower()
             mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else 'image/png'
             self._send_file(fpath, mime)
+        # 8. Confirm Certificate Issuance in Cloud
+        elif path == '/api/confirm-issuance':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                token = req_data.get('token', '').strip()
+                if not token:
+                    self._send_json({"error": "الكود الأمني مطلوب للاعتماد"}, status=400)
+                    return
+                
+                conf_res = confirm_cloud_issuance(token)
+                self._send_json({
+                    "success": True,
+                    "token": token,
+                    "confirmed_at": conf_res.get("confirmed_at", ""),
+                    "message": "تم اعتماد الشهادة بنجاح وتسجيلها رسمي للطباعة"
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         else:
             self.send_error(404, "Not Found")
 
@@ -204,14 +257,19 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 if not os.path.exists(SAMPLE_FILE):
                     self._send_json({"error": "Sample file ف.xls not found"}, status=404)
                     return
-                CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(SAMPLE_FILE))
+                length = int(self.headers.get('Content-Length', 0))
+                req_data = json.loads(self.rfile.read(length).decode('utf-8')) if length > 0 else {}
+                sys_officer = req_data.get('system_officer', 'شريف محمد')
+                survey_tech = req_data.get('survey_technician', 'محمد ابراهيم بدير')
+                CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(SAMPLE_FILE), system_officer=sys_officer, survey_technician=survey_tech)
                 CURRENT_SURVEY_FILE_PATH = SAMPLE_FILE
                 CURRENT_SURVEY_FILENAME = "ف.xls"
                 self._send_json({
                     "success": True,
                     "filename": "ف.xls",
                     "total": len(CURRENT_PARCELS),
-                    "parcels": CURRENT_PARCELS
+                    "parcels": CURRENT_PARCELS,
+                    "official_centers": list_all_centers()
                 })
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
@@ -229,8 +287,20 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
 
                     saved_path = None
                     orig_filename = "survey_file.csv"
+                    sys_officer = "شريف محمد"
+                    survey_tech = "محمد ابراهيم بدير"
 
                     for part in parts:
+                        if b'name="system_officer"' in part:
+                            try:
+                                _, v_body = part.split(b'\r\n\r\n', 1)
+                                sys_officer = v_body.decode('utf-8', errors='ignore').split('\r\n')[0].strip()
+                            except Exception: pass
+                        if b'name="survey_technician"' in part:
+                            try:
+                                _, v_body = part.split(b'\r\n\r\n', 1)
+                                survey_tech = v_body.decode('utf-8', errors='ignore').split('\r\n')[0].strip()
+                            except Exception: pass
                         if b'filename="' in part:
                             header_part, file_body = part.split(b'\r\n\r\n', 1)
                             file_body = file_body.rstrip(b'\r\n--')
@@ -254,14 +324,15 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                         self._send_json({"error": "Failed to receive uploaded file"}, status=400)
                         return
 
-                    CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(saved_path))
+                    CURRENT_PARCELS = enrich_parcels_with_security_tokens(read_survey_file(saved_path), system_officer=sys_officer, survey_technician=survey_tech)
                     CURRENT_SURVEY_FILE_PATH = saved_path
                     CURRENT_SURVEY_FILENAME = orig_filename
                     self._send_json({
                         "success": True,
                         "filename": orig_filename,
                         "total": len(CURRENT_PARCELS),
-                        "parcels": CURRENT_PARCELS
+                        "parcels": CURRENT_PARCELS,
+                        "official_centers": list_all_centers()
                     })
 
                 elif 'application/json' in content_type:
@@ -278,7 +349,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                         "success": True,
                         "filename": os.path.basename(fpath),
                         "total": len(CURRENT_PARCELS),
-                        "parcels": CURRENT_PARCELS
+                        "parcels": CURRENT_PARCELS,
+                        "official_centers": list_all_centers()
                     })
                 else:
                     self._send_json({"error": "Unsupported upload format"}, status=400)
@@ -339,10 +411,28 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                                     pass
                             if "direction" in s_data:
                                 parcel["segments"][i]["direction"] = s_data["direction"]
+                            if "neighbor" in s_data:
+                                parcel["segments"][i]["neighbor"] = s_data["neighbor"]
+
+                # Extract and persist font sizes
+                font_size_pts = int(req_data.get('font_size_pts', parcel.get("font_size_pts", 16)))
+                font_size_dims = int(req_data.get('font_size_dims', parcel.get("font_size_dims", 16)))
+                font_size_text = int(req_data.get('font_size_text', parcel.get("font_size_text", 16)))
+
+                parcel["font_size_pts"] = font_size_pts
+                parcel["font_size_dims"] = font_size_dims
+                parcel["font_size_text"] = font_size_text
 
                 croq_name = f"croq_{pid}.png"
                 croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
-                generate_croquis_image(parcel, croq_path, security_token=parcel.get("security_token"))
+                generate_croquis_image(
+                    parcel,
+                    croq_path,
+                    security_token=parcel.get("security_token"),
+                    font_size_pts=font_size_pts,
+                    font_size_dims=font_size_dims,
+                    font_size_text=font_size_text
+                )
 
                 sat_name = f"sat_{pid}.jpg"
                 sat_path = os.path.join(TEMP_ASSETS_DIR, sat_name)
@@ -389,6 +479,67 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
+        # 5.5 Update & Secure Center
+        elif path == '/api/update-center':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8')
+                req_data = json.loads(body) if length > 0 else {}
+                p_idx = req_data.get('parcel_index', 0)
+
+                if not CURRENT_PARCELS or p_idx >= len(CURRENT_PARCELS):
+                    self._send_json({"error": "No parcel available to update center"}, status=400)
+                    return
+
+                parcel = CURRENT_PARCELS[p_idx]
+                raw_choice = req_data.get('center_id')
+                if raw_choice is None:
+                    raw_choice = req_data.get('center_name', '')
+
+                # Resolve
+                try:
+                    c_int = int(raw_choice)
+                    if 0 <= c_int < 18:
+                        cid = c_int
+                        canon_name = get_center_name(cid)
+                        is_matched = True
+                    else:
+                        is_matched, cid, canon_name = resolve_center(str(raw_choice))
+                except (ValueError, TypeError):
+                    is_matched, cid, canon_name = resolve_center(str(raw_choice))
+
+                if not is_matched or cid < 0 or cid > 17:
+                    self._send_json({"error": "المركز المختار غير مسجل في القاموس الرسمي"}, status=400)
+                    return
+
+                survey_tech = req_data.get('survey_technician', '')
+                sys_officer = req_data.get('system_officer', '')
+                if survey_tech: parcel["survey_technician"] = survey_tech
+                if sys_officer: parcel["system_officer"] = sys_officer
+
+                parcel["district"] = canon_name
+                parcel["district_id"] = cid
+                parcel["district_matched"] = True
+                new_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
+                parcel["security_token"] = new_token
+
+                # Regenerate croquis image if cached to reflect verified token in watermark
+                pid = parcel.get("parcel_id", "0")
+                croq_name = f"croq_{pid}.png"
+                croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
+                generate_croquis_image(parcel, croq_path, security_token=new_token)
+
+                self._send_json({
+                    "success": True,
+                    "district": canon_name,
+                    "district_id": cid,
+                    "district_matched": True,
+                    "security_token": new_token,
+                    "croquis_url": f"/temp_assets/{croq_name}?t={int(time.time())}"
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         # 6. Export Complete Citizen Package (The 6 Deliverables: PDF HTML/Data + DOCX + JSON + 2 Images + Input File)
         elif path == '/api/export-package':
             try:
@@ -427,7 +578,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     if os.path.exists(src_croq):
                         shutil.copy2(src_croq, croq_target_path)
                     else:
-                        generate_croquis_image(parcel, croq_target_path, security_token=parcel.get("security_token"))
+                        generate_croquis_image(
+                            parcel,
+                            croq_target_path,
+                            security_token=parcel.get("security_token"),
+                            font_size_pts=parcel.get("font_size_pts", 16),
+                            font_size_dims=parcel.get("font_size_dims", 16),
+                            font_size_text=parcel.get("font_size_text", 16)
+                        )
 
                 if req_data.get('satellite_base64'):
                     s_b64 = req_data['satellite_base64']
@@ -447,6 +605,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 
                 survey_tech = req_data.get('survey_technician', 'محمد ابراهيم بدير')
                 sys_officer = req_data.get('system_officer', 'شريف محمد')
+                parcel["survey_technician"] = survey_tech
+                parcel["system_officer"] = sys_officer
+
+                # Ensure official token is logged with officer & technician
+                if parcel.get("district_id") is not None:
+                    cid = parcel.get("district_id")
+                    new_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
+                    parcel["security_token"] = new_token
 
                 generate_certificate_docx(
                     template_path=template_docx,
@@ -503,6 +669,27 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     self._send_json({"success": True})
                 else:
                     self._send_json({"error": "Directory does not exist"}, status=404)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
+        # 8. Confirm Certificate Issuance in Cloud
+        elif path == '/api/confirm-issuance':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                token = req_data.get('token', '').strip()
+                if not token:
+                    self._send_json({"error": "الكود الأمني مطلوب للاعتماد"}, status=400)
+                    return
+                
+                conf_res = confirm_cloud_issuance(token)
+                self._send_json({
+                    "success": True,
+                    "token": token,
+                    "confirmed_at": conf_res.get("confirmed_at", ""),
+                    "message": "تم اعتماد الشهادة بنجاح وتسجيلها رسمي للطباعة"
+                })
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 

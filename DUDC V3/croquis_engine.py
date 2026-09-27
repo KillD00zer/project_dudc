@@ -19,6 +19,25 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as MplPolygon, FancyArrowPatch, Circle
 
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    def shape_ar(text):
+        if not text:
+            return ""
+        reshaped = arabic_reshaper.reshape(str(text))
+        return get_display(reshaped)
+except Exception:
+    def shape_ar(text):
+        return str(text) if text else ""
+
+AR_DIGITS_MAP = str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩')
+
+def to_ar_num(val):
+    if val is None:
+        return ""
+    return str(val).translate(AR_DIGITS_MAP)
+
 def get_edge_cardinal_direction(p1_lon, p1_lat, p2_lon, p2_lat, c_lon, c_lat):
     """
     Determines whether a segment belongs to North, South, East, or West
@@ -34,7 +53,7 @@ def get_edge_cardinal_direction(p1_lon, p1_lat, p2_lon, p2_lat, c_lon, c_lat):
     else:
         return "east" if mid_x > 0 else "west"
 
-def generate_croquis_image(parcel, output_path, security_token=None):
+def generate_croquis_image(parcel, output_path, security_token=None, font_size_pts=16, font_size_dims=16, font_size_text=16):
     verts = parcel["vertices"]
     segments = parcel.get("segments", [])
     bounds = parcel.get("boundaries", {})
@@ -94,9 +113,9 @@ def generate_croquis_image(parcel, output_path, security_token=None):
         label_x = x + norm_dx * v_offset
         label_y = y + norm_dy * v_offset
         
-        # Dark brown vertex font (fontsize 11 bold)
-        ax.text(label_x, label_y, str(verts[i]["point_index"]), 
-                color='#3E2723', fontsize=11, fontweight='bold',
+        # Dark brown vertex font (configurable fontsize, default 11 bold)
+        ax.text(label_x, label_y, to_ar_num(verts[i]["point_index"]), 
+                color='#3E2723', fontsize=int(font_size_pts), fontweight='bold',
                 fontfamily='Arial', ha='center', va='center', zorder=5)
         
     # Map edges to cardinal neighbor descriptions
@@ -152,11 +171,11 @@ def generate_croquis_image(parcel, output_path, security_token=None):
         len_y = mid_y + in_ny * len_offset
         
         length_m = segments[i]["length_m"] if i < len(segments) else edge_len
-        len_str = f"{length_m:.2f}م"
+        len_str = f"م {to_ar_num(f'{length_m:.2f}')}"
         
         # Draw red length label aligned with segment INSIDE the polygon
         ax.text(len_x, len_y, len_str,
-                color='#D32F2F', fontsize=12, fontweight='bold',
+                color='#D32F2F', fontsize=int(font_size_dims), fontweight='bold',
                 fontfamily='Arial', rotation=angle_deg, rotation_mode='anchor',
                 ha='center', va='center', zorder=5)
         
@@ -164,8 +183,13 @@ def generate_croquis_image(parcel, output_path, security_token=None):
         side = segments[i].get("direction") if i < len(segments) else None
         if not side:
             side = get_edge_cardinal_direction(verts[i]["lon"], verts[i]["lat"], verts[next_i]["lon"], verts[next_i]["lat"], c_lon, c_lat)
+            
         neighbor_text = ""
-        if side in side_longest_edge and side_longest_edge[side][0] == i:
+        # 1. Per-segment specific neighbor if given
+        if i < len(segments) and segments[i].get("neighbor") and str(segments[i].get("neighbor")).strip():
+            neighbor_text = str(segments[i].get("neighbor")).strip()
+        # 2. Or cardinal boundary neighbor if edge is the longest edge for that direction
+        elif side in side_longest_edge and side_longest_edge[side][0] == i:
             neighbor_text = bounds.get(side, "")
             
         if neighbor_text and str(neighbor_text).strip():
@@ -174,8 +198,8 @@ def generate_croquis_image(parcel, output_path, security_token=None):
             neigh_y = mid_y + out_ny * neigh_offset
             
             # Draw blue neighbor text aligned with segment OUTSIDE the polygon
-            ax.text(neigh_x, neigh_y, str(neighbor_text).strip(),
-                    color='#0284C7', fontsize=13, fontweight='bold',
+            ax.text(neigh_x, neigh_y, shape_ar(to_ar_num(str(neighbor_text).strip())),
+                    color='#0284C7', fontsize=int(font_size_text), fontweight='bold',
                     fontfamily='Arial', rotation=angle_deg, rotation_mode='anchor',
                     ha='center', va='center', zorder=5)
         
@@ -188,16 +212,16 @@ def generate_croquis_image(parcel, output_path, security_token=None):
     ax.text(0.06, 0.96, 'N', transform=ax.transAxes,
             color='black', fontsize=13, fontweight='bold', fontfamily='Arial', ha='center', va='bottom', alpha=0.45, zorder=6)
     
-    # 5. Security Token Footer (Raw Code Only, Bold & Enhanced Visibility)
+    # 5. Cryptographic Security Token Watermark (Background Layer)
     if security_token:
         ax.text(
-            0.5, 0.02,
+            0.5, 0.5,
             str(security_token).strip(),
             transform=ax.transAxes,
-            color='#0F172A', fontsize=11.5, fontweight='bold', fontfamily='Arial',
-            ha='center', va='bottom',
-            bbox=dict(boxstyle='round,pad=0.35', facecolor='#F8FAFC', edgecolor='#64748B', linewidth=1.0, alpha=0.96),
-            zorder=7
+            color='#64748B', fontsize=13, fontweight='bold', fontfamily='Consolas',
+            rotation=25, alpha=0.18,
+            ha='center', va='center',
+            zorder=1
         )
     
     # Set view limits with uniform aspect ratio
