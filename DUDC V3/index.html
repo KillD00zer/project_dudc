@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منظومة DUDC V3 | مسار إصدار شهادات الرفع المساحي</title>
+  
+  <!-- خطوط Google الرسمية والمعتمدة -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       1. متغيرات التصميم والهوية البصرية (Glassmorphism & Color Tokens)
+       ========================================================================== */
+    :root {
+      --bg-dark: #070a11;
+      --glass-panel: rgba(15, 23, 42, 0.88);
+      --glass-card: rgba(26, 36, 56, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-light: rgba(255, 255, 255, 0.16);
+      
+      --accent-green: #10b981;
+      --accent-green-light: #34d399;
+      --accent-green-glow: rgba(16, 185, 129, 0.35);
+      
+      --accent-red: #ef4444;
+      --accent-red-light: #f87171;
+      --accent-red-glow: rgba(239, 68, 68, 0.35);
+      
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* أبعاد صفحة A4 القياسية */
+      --a4-width: 794px;
+      --a4-height: 1123px;
+      
+      /* متغيرات التباعد الافتراضية للشهادة */
+      --cert-margin: 8mm;
+      --sec-gap-header: 3px;
+      --sec-gap-applicant: 4px;
+      --sec-gap-coords: 5px;
+      --sec-gap-images: 4px;
+      --sec-gap-notes: 2px;
+      --sec-gap-sign: 6px;
+      
+      --table-padding-y: 2.2px;
+      --table-padding-x: 4px;
+      
+      --image-height: 168px;
+      --image-gap: 8px;
+      
+      /* متغيرات الخطوط */
+      --cert-font: 'Arial', sans-serif;
+      --font-size-title: 13pt;
+      --font-size-table: 9.5pt;
+      --font-size-notes: 8.5pt;
+      --font-size-sign: 10pt;
+      
+      /* متغيرات العلامة المائية */
+      --wm-opacity: 0.10;
+      --wm-angle: -30deg;
+      --wm-size: 13pt;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #070a11 100%);
+      color: var(--text-main);
+      font-family: 'Cairo', system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. الترويسة وشريط تقدم مسار العمل (Workflow Stepper Header)
+       ========================================================================== */
+    .workflow-header {
+      background: var(--glass-panel);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-badge {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--accent-green-light);
+      box-shadow: 0 0 12px var(--accent-green-glow);
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* شريط خطوات العمل (Stepper) */
+    .stepper-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 10px;
+      border-radius: 30px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .step-item.active {
+      background: var(--accent-green);
+      color: #000000;
+      box-shadow: 0 0 12px var(--accent-green-glow);
+    }
+
+    .step-item.completed {
+      color: var(--accent-green-light);
+    }
+
+    .step-divider {
+      color: var(--glass-border-light);
+      font-size: 12px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      box-shadow: 0 2px 10px var(--accent-green-glow);
+    }
+
+    .btn-green:hover {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border: 1px solid var(--glass-border-light);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+
+    .btn-star {
+      border-color: #f59e0b;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    /* ==========================================================================
+       3. حاويات المراحل الثلاث (Workflow Stages Containers)
+       ========================================================================== */
+    .stage-container {
+      display: none;
+      flex: 1;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    .stage-container.active {
+      display: flex;
+    }
+
+    /* --------------------------------------------------------------------------
+       المرحلة 1: الرفع المساحي والمطابقة (Stage 1 Layout)
+       -------------------------------------------------------------------------- */
+    .stage1-layout {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px 36px 60px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .stage1-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 18px;
+    }
+
+    .dropzone-card {
+      border: 2px dashed rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.03);
+      border-radius: 14px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .dropzone-card:hover, .dropzone-card.dragover {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 25px var(--accent-green-glow);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 8px;
+    }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sum-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .sum-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+
+    .sum-card-title {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .sum-card-val {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent-green-light);
+    }
+
+    /* جدول أضلاع الرفع المساحي في المرحلة 1 */
+    .stage1-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .stage1-table th, .stage1-table td {
+      border: 1px solid var(--glass-border);
+      padding: 6px 8px;
+    }
+
+    .stage1-table th {
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text-muted);
+    }
+
+    .stage1-input, .stage1-select {
+      background: #090d16;
+      border: 1px solid var(--glass-border-light);
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+    }
+
+    .stage1-input:focus, .stage1-select:focus {
+      border-color: var(--accent-green);
+    }
+
+    /* --------------------------------------------------------------------------
+       المرحلة 2: استوديو التحرير التفاعلي (Stage 2 Layout)
+       -------------------------------------------------------------------------- */
+    .stage2-workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .studio-sidebar {
+      background: var(--glass-panel);
+      backdrop-filter: blur(22px);
+      border-left: 1px solid var(--glass-border);
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: 100%;
+    }
+
+    .studio-viewport {
+      background: #060910;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
+        radial-gradient(rgba(16, 185, 129, 0.04) 2px, transparent 0);
+      background-size: 24px 24px, 48px 48px;
+      overflow-y: scroll;
+      overflow-x: auto;
+      padding: 20px 30px 60px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      position: relative;
+    }
+
+    .viewport-toolbar {
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-light);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    /* شريط أدوات النصوص المنبثق العائم */
+    .floating-text-toolbar {
+      position: absolute;
+      display: none;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 4px 8px;
+      gap: 6px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px var(--accent-green-glow);
+      z-index: 999;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .floating-text-toolbar::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.95) transparent;
+      display: block;
+      width: 0;
+    }
+
+    .float-select, .float-btn {
+      background: #090d16;
+      color: #ffffff;
+      border: 1px solid var(--glass-border-light);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .float-btn:hover { background: var(--accent-green); color: #000; }
+    .float-btn.active { background: var(--accent-green); color: #000; }
+
+    /* ==========================================================================
+       4. ورقة الشهادة الرسمية A4 (مطابقة 100% للألوان والـ XML الأصلي)
+       ========================================================================== */
+    .certificate-page-container {
+      transition: transform 0.15s ease-out;
+      transform-origin: top center;
+    }
+
+    .certificate-page {
+      width: var(--a4-width);
+      min-height: var(--a4-height);
+      max-height: var(--a4-height);
+      background: #ffffff;
+      color: #000000;
+      font-family: var(--cert-font);
+      padding: var(--cert-margin);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+
+    .watermark-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      opacity: var(--wm-opacity);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      transition: opacity 0.2s;
+    }
+
+    .watermark-row {
+      display: flex;
+      justify-content: space-around;
+      transform: rotate(var(--wm-angle));
+      white-space: nowrap;
+      font-family: 'Arial', sans-serif;
+      font-size: var(--wm-size);
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+
+    /* ترويسة الشهادة بالألوان الرسمية المستخرجة من Word XML */
+    .cert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--sec-gap-header);
+      position: relative;
+    }
+
+    .gov-titles { text-align: right; }
+    .gov-titles .line-gov { font-size: 14pt; font-weight: bold; line-height: 1.2; color: #000000; }
+    
+    /* شريط مركز معلومات شبكات المرافق باللون السماوي والبنفسجي الداكن */
+    .gov-titles .line-center {
+      font-size: 16pt;
+      font-weight: bold;
+      line-height: 1.2;
+      color: #8064A2; /* اللون البنفسجي الرسمي من document.xml */
+      background: #D3DFEE; /* التظليل السماوي الرسمي من document.xml */
+      padding: 1px 12px;
+      display: inline-block;
+      border-radius: 2px;
+      margin-top: 1px;
+    }
+
+    .header-logos {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logos img {
+      height: 54px;
+      object-fit: contain;
+    }
+
+    /* عنوان "شهادة إحداثيات" بالأزرق الكحلي المسطر */
+    .cert-main-title {
+      text-align: center;
+      font-size: var(--font-size-title);
+      font-weight: bold;
+      margin: 1px 0 3px 0;
+      color: #365F91; /* اللون الأزرق الرسمي من document.xml */
+      text-decoration: underline;
+      letter-spacing: 0.5px;
+    }
+
+    /* الجداول بالحدود الزرقاء الرسمية (#4F81BD) والتظليل الرمادي (#D9D9D9) */
+    .cert-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #4F81BD; /* إطار أزرق رسمي مطابق للـ Word */
+      font-size: var(--font-size-table);
+      table-layout: fixed;
+    }
+
+    .cert-table th, .cert-table td {
+      border: 1px solid #4F81BD; /* خطوط داخلية زرقاء */
+      padding: var(--table-padding-y) var(--table-padding-x);
+      text-align: center;
+      vertical-align: middle;
+      line-height: 1.15;
+    }
+
+    .table-section-header {
+      background-color: #D9D9D9; /* التظليل الرمادي الرسمي */
+      font-weight: bold;
+      font-size: 11pt;
+      color: #000000;
+    }
+
+    .field-label {
+      font-weight: bold;
+      background-color: #ffffff;
+      text-align: right !important;
+    }
+
+    .field-val {
+      text-align: right !important;
+      font-weight: bold;
+    }
+
+    .coords-table th {
+      background-color: #D9D9D9;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .coord-num {
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    /* قسم الصورتين بإطار أزرق */
+    .images-grid {
+      display: grid;
+      grid-template-columns: 48.4% 51.6%;
+      gap: var(--image-gap);
+      margin-top: var(--sec-gap-images);
+      margin-bottom: var(--sec-gap-notes);
+    }
+
+    .image-card {
+      border: 1.5px solid #4F81BD;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .image-header {
+      background: #D9D9D9;
+      border-bottom: 1px solid #4F81BD;
+      text-align: center;
+      font-weight: bold;
+      font-size: 10.5pt;
+      padding: 1.5px;
+      color: #000000;
+    }
+
+    .image-preview-wrapper {
+      height: var(--image-height);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+    }
+
+    .img-action-overlay {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+      z-index: 25;
+    }
+
+    .image-preview-wrapper:hover .img-action-overlay {
+      display: flex;
+    }
+
+    .img-tool-btn {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid var(--accent-green);
+      color: #ffffff;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .img-tool-btn:hover { background: var(--accent-green); color: #000; }
+
+    /* الملاحظات المرقمة من 1 إلى 5 مطابقة تماماً للصورة والـ Word */
+    .cert-notes {
+      font-size: var(--font-size-notes);
+      line-height: 1.3;
+      margin-bottom: var(--sec-gap-notes);
+      color: #000000;
+    }
+
+    .cert-notes p {
+      margin-bottom: 0.5px;
+    }
+
+    .cert-date-center {
+      text-align: center;
+      font-size: 9.5pt;
+      font-weight: bold;
+      margin: 2px 0 4px 0;
+      color: #000000;
+    }
+
+    /* التوقيعات: يعتمد فوق مدير المركز في أقصى اليسار */
+    .signatures-block {
+      margin-top: auto;
+      padding-top: 2px;
+      position: relative;
+    }
+
+    .sign-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      text-align: center;
+      font-size: var(--font-size-sign);
+      gap: 6px;
+    }
+
+    .sign-role { font-weight: bold; margin-bottom: 1px; color: #000000; }
+    .sign-name { font-weight: bold; color: #000000; }
+
+    .director-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ye3tamad-badge {
+      font-size: 11pt;
+      font-weight: bold;
+      margin-bottom: 2px;
+      color: #000000;
+    }
+
+    /* تمييز كافة العناصر القابلة للتحرير بالماوس */
+    [contenteditable="true"] {
+      outline: none;
+      transition: background-color 0.15s;
+      border-radius: 2px;
+      cursor: text;
+    }
+
+    [contenteditable="true"]:hover { background-color: rgba(16, 185, 129, 0.12); }
+    [contenteditable="true"]:focus {
+      background-color: rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 0 1px var(--accent-green);
+    }
+
+    /* --------------------------------------------------------------------------
+       المرحلة 3: الإخراج النهائي وحزمة العميل (Stage 3 Layout)
+       -------------------------------------------------------------------------- */
+    .stage3-layout {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .delivery-card {
+      background: var(--glass-panel);
+      border: 1px solid var(--accent-green);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-green-glow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .delivery-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .action-box {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-box:hover {
+      border-color: var(--accent-green);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--accent-green-glow);
+    }
+
+    .action-icon {
+      font-size: 32px;
+    }
+
+    .package-files-list {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+    }
+
+    /* نافذة استوديو قص وتكبير الصور */
+    .image-modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-modal {
+      background: var(--glass-panel);
+      border: 1px solid var(--accent-green);
+      border-radius: 12px;
+      width: 760px; max-width: 95vw;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-crop-canvas-wrapper {
+      width: 100%; height: 380px;
+      background: #020408;
+      border: 1px dashed var(--glass-border-light);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+    }
+    .modal-crop-canvas-wrapper:active { cursor: grabbing; }
+
+    .crop-target-img {
+      position: absolute;
+      user-select: none;
+      pointer-events: none;
+      transform-origin: center center;
+    }
+
+    .crop-frame-guide {
+      position: absolute;
+      border: 2px solid var(--accent-green);
+      box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .save-toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px; font-weight: bold;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
+      z-index: 9999; opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .save-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* وسائط الطباعة الصارمة */
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+      .workflow-header, .studio-sidebar, .viewport-toolbar, .floating-text-toolbar,
+      .image-modal-backdrop, .img-action-overlay, .save-toast, #stage1View, #stage3View {
+        display: none !important;
+      }
+      #stage2View { display: block !important; height: auto !important; }
+      .stage2-workspace { display: block !important; height: auto !important; overflow: visible !important; }
+      .studio-viewport { background: none !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+      .certificate-page-container { transform: none !important; }
+      .certificate-page {
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        padding: var(--cert-margin) !important;
+        page-break-after: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       1. الترويسة وشريط تقدم مسار العمل (Workflow Header & Stepper)
+       ========================================================================== -->
+  <header class="workflow-header">
+    <div class="brand-section">
+      <div class="brand-logo-badge">DUDC V3</div>
+      <div class="brand-title">
+        <h1>منظومة إصدار شهادات الرفع المساحي</h1>
+        <p>مركز معلومات شبكات المرافق بمحافظة الدقهلية • مسار العمل المتكامل</p>
+      </div>
+    </div>
+
+    <!-- مؤشر خطوات سير العمل -->
+    <nav class="stepper-nav">
+      <div class="step-item active" id="stepTab1">
+        <span>① الرفع والمطابقة</span>
+      </div>
+      <span class="step-divider">➔</span>
+      <div class="step-item" id="stepTab2">
+        <span>② استوديو التحرير</span>
+      </div>
+      <span class="step-divider">➔</span>
+      <div class="step-item" id="stepTab3">
+        <span>③ الإخراج والتسليم</span>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn btn-star" id="btnSaveAsDefault" title="حفظ الإعدادات الحالية كافتراضي دائم">
+        <span>⭐</span> حفظ كإعدادات افتراضية
+      </button>
+
+      <button class="btn btn-glass" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
+        <span>📂</span> استيراد جلسة
+      </button>
+      <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
+
+      <button class="btn btn-green" id="btnPrintCertQuick">
+        <span>🖨️</span> طباعة فورية (Print A4)
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       2. المرحلة الأولى: إدخال الرفع المساحي والمطابقة (Stage 1 View)
+       ========================================================================== -->
+  <section class="stage-container active" id="stage1View">
+    <div class="stage1-layout">
+
+      <!-- شريط المجلد العلوي -->
+      <div class="stage1-top-bar">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 12px; color: var(--text-muted);">مجلد حفظ المخرجات:</span>
+          <span id="txtOutputDirDisplay" style="font-size: 12px; font-weight: bold; color: var(--accent-green-light); font-family: monospace;">جاري التحميل...</span>
+        </div>
+        <button class="btn btn-glass" id="btnBrowseOutputDir">📁 استعراض مجلد الحفظ...</button>
+      </div>
+
+      <!-- بطاقة رفع الملف / التجربة السريعة -->
+      <div class="dropzone-card" id="dropzone">
+        <input type="file" id="surveyFileInput" accept=".xls,.xlsx,.csv" style="display: none;">
+        <div style="font-size: 40px; margin-bottom: 8px;">📥</div>
+        <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">اسحب وأفلت شيت الإحداثيات هنا (.xls, .xlsx, .csv)</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">أو انقر لاختيار ملف من جهازك</p>
+        <button class="btn btn-green" id="btnLoadSample">⚡ تجربة العينة المرفقة (ف.xls)</button>
+      </div>
+
+      <!-- نتائج المعالجة الهندسية والتحقق (تظهر بعد تحميل الملف) -->
+      <div id="surveyResultsSection" style="display: none; display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- كارت بيانات المواطن والتحقق من المساحة والتفاوت -->
+        <div class="card">
+          <div class="card-title" style="justify-content: space-between;">
+            <span>📋 بيانات المعاملة والمطابقة المساحية</span>
+            <span id="badgeTolerance" class="badge-pass">✔ متطابق قانونياً (فرق المساحة ضمن ±2.0 م²)</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px;">
+            <div><span style="color: var(--text-muted);">مقدم الطلب:</span> <strong id="resApplicantName">--</strong></div>
+            <div><span style="color: var(--text-muted);">الرقم القومي:</span> <strong id="resNationalId">--</strong></div>
+            <div><span style="color: var(--text-muted);">رقم الإيصال:</span> <strong id="resReceiptNo">--</strong></div>
+            <div><span style="color: var(--text-muted);">المركز / الحي:</span> <strong id="resDistrict">--</strong></div>
+            <div><span style="color: var(--text-muted);">المساحة المسجلة:</span> <strong id="resStatedArea">--</strong></div>
+            <div><span style="color: var(--text-muted);">المساحة المحسوبة:</span> <strong id="resCalcArea" style="color: var(--accent-green-light);">--</strong></div>
+            <div><span style="color: var(--text-muted);">فارق المساحة (Δ):</span> <strong id="resDeltaArea">--</strong></div>
+            <div><span style="color: var(--text-muted);">كود التأمين (DUDC Token):</span> <strong id="resSecurityToken" style="font-family: monospace; color: var(--accent-cyan);">--</strong></div>
+          </div>
+        </div>
+
+        <!-- معاينة الصورتين (كروكي الموقع + صورة فضائية) -->
+        <div class="results-grid">
+          <div class="card">
+            <div class="card-title">📐 كروكي الموقع (CAD Croquis)</div>
+            <div style="height: 220px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              <img id="stage1CroquisImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🛰️ صورة فضائية (Google Satellite)</div>
+            <div style="height: 220px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              <img id="stage1SatImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+          </div>
+        </div>
+
+        <!-- كارت بطاقات مجموع أطوال الحدود الأربعة -->
+        <div class="card">
+          <div class="card-title">🗺️ الحدود الأربعة والأطوال المحسوبة لحظياً</div>
+          <div class="sum-cards-grid">
+            <div class="sum-card"><div class="sum-card-title">🌊 الحد البحري</div><div class="sum-card-val" id="sumNorth">0.00 م</div></div>
+            <div class="sum-card"><div class="sum-card-title">🌅 الحد الشرقي</div><div class="sum-card-val" id="sumEast">0.00 م</div></div>
+            <div class="sum-card"><div class="sum-card-title">☀️ الحد القبلي</div><div class="sum-card-val" id="sumSouth">0.00 م</div></div>
+            <div class="sum-card"><div class="sum-card-title">🌇 الحد الغربي</div><div class="sum-card-val" id="sumWest">0.00 م</div></div>
+            <div class="sum-card" style="border-color: var(--accent-green);"><div class="sum-card-title">📏 إجمالي المحيط</div><div class="sum-card-val" id="sumPerimeter" style="color: #ffffff;">0.00 م</div></div>
+          </div>
+
+          <!-- جدول الأضلاع التفصيلي مع القوائم المنسدلة للاتجاهات -->
+          <table class="stage1-table">
+            <thead>
+              <tr>
+                <th style="width: 8%;">من - إلى</th>
+                <th style="width: 20%;">الاتجاه (الحد)</th>
+                <th style="width: 35%;">اسم الجار / الشارع</th>
+                <th style="width: 15%;">الطول المحسوب (م)</th>
+                <th style="width: 22%;">طول مخصص للعرض</th>
+              </tr>
+            </thead>
+            <tbody id="stage1SegmentsTbody">
+              <!-- يتم ملؤها ديناميكياً -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- كارت اختيار وتوقيعات الموظفين -->
+        <div class="card">
+          <div class="card-title">✍️ اعتماد وتوقيعات مسؤولي المركز</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">فني المساحة:</label>
+              <select class="stage1-select" id="selSurveyTech">
+                <option value="محمد ابراهيم بدير" selected>محمد ابراهيم بدير</option>
+                <option value="محمد السيد بدير">محمد السيد بدير</option>
+                <option value="وائل فاروق">وائل فاروق</option>
+                <option value="محمد حبيب">محمد حبيب</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">مسؤول النظم:</label>
+              <select class="stage1-select" id="selSysOfficer">
+                <option value="شريف محمد" selected>شريف محمد</option>
+                <option value="مصطفي فراج">مصطفي فراج</option>
+                <option value="علاء البنا">علاء البنا</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- زر الانتقال إلى المرحلة 2 (الاستوديو) -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="btn btn-green" id="btnGoToStage2" style="padding: 12px 28px; font-size: 14px;">
+            <span>الانتقال إلى استوديو التحرير والمعاينة (Next: Studio Edit)</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       3. المرحلة الثانية: استوديو التحرير التفاعلي (Stage 2 View)
+       ========================================================================== -->
+  <section class="stage-container" id="stage2View">
+    <div class="stage2-workspace">
+
+      <!-- القائمة الجانبية لسلايدرات الاستوديو -->
+      <aside class="studio-sidebar" id="sidebar">
+
+        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+          <button class="btn btn-glass" id="btnBackToStage1" style="flex: 1; font-size: 11px;">⬅ العودة للمطابقة</button>
+          <button class="btn btn-green" id="btnGoToStage3" style="flex: 1; font-size: 11px;">الإخراج النهائي ➔</button>
+        </div>
+
+        <!-- كارت 1: سلايدرات التباعد -->
+        <div class="card" style="padding: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: bold; color: var(--accent-green-light);">📐 المسافات والتباعد</span>
+            <button class="btn-glass" id="btnAutoFit" style="padding: 2px 6px; font-size: 10px; color: var(--accent-cyan);">⚡ قفل A4</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>هوامش الورقة</span><span id="valMargin" style="color: var(--accent-green-light); font-weight: bold;">8 mm</span>
+              </div>
+              <input type="range" class="slider-input" id="rngMargin" min="4" max="14" step="0.5" value="8" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>فراغ الترويسة</span><span id="valGapHeader" style="color: var(--accent-green-light); font-weight: bold;">3 px</span>
+              </div>
+              <input type="range" class="slider-input" id="rngGapHeader" min="0" max="15" step="1" value="3" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>فراغ جدول المواطن</span><span id="valGapApplicant" style="color: var(--accent-green-light); font-weight: bold;">4 px</span>
+              </div>
+              <input type="range" class="slider-input" id="rngGapApplicant" min="0" max="15" step="1" value="4" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>فراغ الإحداثيات</span><span id="valGapCoords" style="color: var(--accent-green-light); font-weight: bold;">5 px</span>
+              </div>
+              <input type="range" class="slider-input" id="rngGapCoords" min="0" max="15" step="1" value="5" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>فراغ الصورتين</span><span id="valGapImages" style="color: var(--accent-green-light); font-weight: bold;">4 px</span>
+              </div>
+              <input type="range" class="slider-input" id="rngGapImages" min="0" max="15" step="1" value="4" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>حشوة الخلايا</span><span id="valTablePad" style="color: var(--accent-green-light); font-weight: bold;">2.2 px</span>
+              </div>
+              <input type="range" class="slider-input" id="rngTablePad" min="1" max="6" step="0.2" value="2.2" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
+        <!-- كارت 2: تحرير الصورتين -->
+        <div class="card" style="padding: 12px;">
+          <span style="font-size: 12px; font-weight: bold; margin-bottom: 6px;">🖼️ ضبط وارتفاع الصورتين</span>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+              <span>ارتفاع الصورتين</span><span id="valImageHeight" style="color: var(--accent-green-light); font-weight: bold;">168 px</span>
+            </div>
+            <input type="range" class="slider-input" id="rngImageHeight" min="120" max="230" step="2" value="168" style="width: 100%;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+            <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">✂️ قص كروكي</button>
+            <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص قمر</button>
+          </div>
+        </div>
+
+        <!-- كارت 3: محرك العلامة المائية المبسط (فقط: شفافية + زاوية + حجم) -->
+        <div class="card" style="padding: 12px; border-color: rgba(239, 68, 68, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: bold; color: var(--accent-red-light);">🛡️ العلامة المائية</span>
+            <label style="font-size: 11px; cursor: pointer;"><input type="checkbox" id="chkWatermarkActive" checked> مفعلة</label>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>الشفافية</span><span id="valWmOpacity" style="color: var(--accent-red-light); font-weight: bold;">10 %</span>
+              </div>
+              <input type="range" class="slider-input" id="rngWmOpacity" min="0" max="40" step="1" value="10" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>زاوية الميل</span><span id="valWmAngle" style="color: var(--accent-red-light); font-weight: bold;">-30°</span>
+              </div>
+              <input type="range" class="slider-input" id="rngWmAngle" min="-60" max="60" step="5" value="-30" style="width: 100%;">
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>حجم الخط</span><span id="valWmSize" style="color: var(--accent-red-light); font-weight: bold;">13 pt</span>
+              </div>
+              <input type="range" class="slider-input" id="rngWmSize" min="9" max="22" step="1" value="13" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- طاولة العرض المضيئة (The Digital Lightbox Viewport) -->
+      <main class="studio-viewport" id="viewport">
+
+        <!-- شريط أدوات الرؤية والتنقل السريع -->
+        <div class="viewport-toolbar">
+          <button class="zoom-btn" id="btnZoomOut">🔍 -</button>
+          <span id="zoomLevel" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light); min-width: 38px; text-align: center;">100%</span>
+          <button class="zoom-btn" id="btnZoomIn">🔍 +</button>
+          <span style="color: var(--glass-border-light);">|</span>
+          <button class="zoom-btn" id="btnZoomReset">100%</button>
+          <button class="zoom-btn" id="btnZoomFit">ملاءمة العرض</button>
+        </div>
+
+        <!-- ورقة الشهادة الرسمية A4 المتطابقة مع Word بالألوان الأصلية -->
+        <div class="certificate-page-container" id="pageContainer">
+          <article class="certificate-page" id="certPage">
+
+            <div class="watermark-overlay" id="watermarkLayer"></div>
+
+            <!-- 1. الترويسة والشعارات -->
+            <header class="cert-header" id="secHeader">
+              <div class="gov-titles">
+                <div class="line-gov" contenteditable="true" spellcheck="false">محافظة الدقهلية</div>
+                <div class="line-center" contenteditable="true" spellcheck="false">مركز معلومات شبكات المرافق</div>
+              </div>
+
+              <div class="header-logos">
+                <img src="assets/logo_iso.jpg" alt="ISO Logo" id="logoIso">
+                <img src="assets/logo_dudc.jpg" alt="DUDC Logo" id="logoDudc">
+              </div>
+            </header>
+
+            <!-- 2. عنوان الشهادة: "شهادة إحداثيات" مطابق لـ Word تماماً -->
+            <div class="cert-main-title" contenteditable="true" spellcheck="false">
+              شهادة إحداثيات
+            </div>
+
+            <!-- 3. جدول بيانات مقدم الطلب -->
+            <table class="cert-table applicant-table" style="margin-bottom: var(--sec-gap-applicant);">
+              <colgroup>
+                <col style="width: 14.2%;">
+                <col style="width: 35.6%;">
+                <col style="width: 15.1%;">
+                <col style="width: 35.1%;">
+              </colgroup>
+              <tr>
+                <th colspan="4" class="table-section-header" contenteditable="true" spellcheck="false">بيانات مقدم الطلب</th>
+              </tr>
+              <tr>
+                <td class="field-label" contenteditable="true" spellcheck="false">اسم مقدم الطلب</td>
+                <td class="field-val" id="valApplicantName" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" contenteditable="true" spellcheck="false">رقم إيصال السداد</td>
+                <td class="field-val" id="valReceiptNo" contenteditable="true" spellcheck="false">--</td>
+              </tr>
+              <tr>
+                <td class="field-label" contenteditable="true" spellcheck="false">الرقم القومي</td>
+                <td class="field-val" id="valNationalId" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" contenteditable="true" spellcheck="false">رقم الطلب</td>
+                <td class="field-val" id="valOrderNo" style="text-align: center !important; font-size: 13pt;" contenteditable="true" spellcheck="false">2605s</td>
+              </tr>
+              <tr>
+                <td class="field-label" contenteditable="true" spellcheck="false">المركز</td>
+                <td class="field-val" id="valCenter" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" contenteditable="true" spellcheck="false">القرية</td>
+                <td class="field-val" id="valVillage" contenteditable="true" spellcheck="false">--</td>
+              </tr>
+              <tr>
+                <td class="field-label" contenteditable="true" spellcheck="false">العنوان</td>
+                <td class="field-val" id="valAddress" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" contenteditable="true" spellcheck="false">المساحة</td>
+                <td class="field-val" id="valArea" contenteditable="true" spellcheck="false">-- _ م2</td>
+              </tr>
+              <tr>
+                <td class="field-label" contenteditable="true" spellcheck="false">وصف التعامل</td>
+                <td class="field-val" id="valDealType" contenteditable="true" spellcheck="false">انشاء</td>
+                <td class="field-label" contenteditable="true" spellcheck="false">وصف الموقع</td>
+                <td class="field-val" id="valSiteDesc" contenteditable="true" spellcheck="false">موقع عينة تجريبية</td>
+              </tr>
+            </table>
+
+            <!-- 4. جدول الحدود والأبعاد وإحداثيات الموقع (إطار أزرق وتظليل رمادي) -->
+            <table class="cert-table coords-table" id="secCoords" style="margin-bottom: var(--sec-gap-coords);">
+              <colgroup>
+                <col style="width: 14.16%;">
+                <col style="width: 27.12%;">
+                <col style="width: 7.14%;">
+                <col style="width: 10.65%;">
+                <col style="width: 19.66%;">
+                <col style="width: 21.27%;">
+              </colgroup>
+              <tr>
+                <th colspan="4" contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
+                <th colspan="2" contenteditable="true" spellcheck="false">إحداثيات الموقع</th>
+              </tr>
+              <tr>
+                <th contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
+                <th contenteditable="true" spellcheck="false"></th>
+                <th contenteditable="true" spellcheck="false"></th>
+                <th contenteditable="true" spellcheck="false"></th>
+                <th contenteditable="true" spellcheck="false">(LONG(E)</th>
+                <th contenteditable="true" spellcheck="false">(LAT(N)</th>
+              </tr>
+
+              <!-- صفوف الحدود الأربعة مع دمج الخلايا -->
+              <tbody id="certCoordsTbody">
+                <!-- يتم بناؤها ديناميكياً من بيانات المرحلة الأولى -->
+              </tbody>
+            </table>
+
+            <!-- 5. قسم الصورتين -->
+            <div class="images-grid" id="secImages">
+              <div class="image-card">
+                <div class="image-header" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+                <div class="image-preview-wrapper" id="croquisWrapper">
+                  <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
+                  <div class="img-action-overlay">
+                    <button class="img-tool-btn" id="btnCropCroqQuick">✂️ قص وضبط</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="image-card">
+                <div class="image-header" contenteditable="true" spellcheck="false">صورة فضائية</div>
+                <div class="image-preview-wrapper" id="satWrapper">
+                  <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
+                  <div class="img-action-overlay">
+                    <button class="img-tool-btn" id="btnCropSatQuick">✂️ قص وضبط</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. الملاحظات والاشتراطات الرسمية (مرقمة من 1 إلى 5 تماماً) -->
+            <div class="cert-notes">
+              <p contenteditable="true" spellcheck="false">1. بيانات الموقع على مسئولية مقدم الطلب .</p>
+              <p contenteditable="true" spellcheck="false">2. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
+              <p contenteditable="true" spellcheck="false">3. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
+              <p contenteditable="true" spellcheck="false">4. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
+              <p contenteditable="true" spellcheck="false">5. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
+            </div>
+
+            <!-- تاريخ التحرير بالمنتصف -->
+            <div class="cert-date-center" id="certDateDisplay" contenteditable="true" spellcheck="false">
+              تم تحرير الشهادة في يوم          الموافق
+            </div>
+
+            <!-- 7. التوقيعات: كلمة يعتمد في أقصى اليسار فوق مدير المركز -->
+            <footer class="signatures-block" id="secSign">
+              <div class="sign-grid">
+                <div>
+                  <div class="sign-role" contenteditable="true" spellcheck="false">فنى مساحة</div>
+                  <div class="sign-name" id="sigTech" contenteditable="true" spellcheck="false">أ / محمد حبيب</div>
+                </div>
+                <div>
+                  <div class="sign-role" contenteditable="true" spellcheck="false">مسئول النظم</div>
+                  <div class="sign-name" id="sigGis" contenteditable="true" spellcheck="false">أ / علاء البنا</div>
+                </div>
+                <div>
+                  <div class="sign-role" contenteditable="true" spellcheck="false">رئيس قسم النظم</div>
+                  <div class="sign-name" id="sigHead" contenteditable="true" spellcheck="false">أ / محمد مصطفى</div>
+                </div>
+                <div class="director-column">
+                  <div class="ye3tamad-badge" contenteditable="true" spellcheck="false">يعتمد</div>
+                  <div class="sign-role" contenteditable="true" spellcheck="false">مدير المركز</div>
+                  <div class="sign-name" id="sigDirector" contenteditable="true" spellcheck="false">م/ السيد زين العابدين</div>
+                </div>
+              </div>
+            </footer>
+
+          </article>
+        </div>
+
+      </main>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       4. المرحلة الثالثة: الإخراج النهائي وحزمة العميل (Stage 3 View)
+       ========================================================================== -->
+  <section class="stage-container" id="stage3View">
+    <div class="stage3-layout">
+
+      <div class="delivery-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: #ffffff;">🎉 اعتماد وتصدير الشهادة المساحية</h2>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">المعاملة جاهزة للطباعة والتصدير في حزمة متكاملة</p>
+          </div>
+          <span class="badge-pass">✔ جاهز للتصدير</span>
+        </div>
+
+        <!-- ملخص بيانات المواطن -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
+          <div><span style="color: var(--text-muted);">اسم المواطن:</span> <strong id="stage3CitizenName">--</strong></div>
+          <div><span style="color: var(--text-muted);">المركز:</span> <strong id="stage3Center">--</strong></div>
+          <div><span style="color: var(--text-muted);">المساحة:</span> <strong id="stage3Area">--</strong></div>
+        </div>
+
+        <!-- أزرار الإخراج الرئيسية -->
+        <div class="delivery-actions-grid">
+          <div class="action-box" id="btnActionPrintPdf">
+            <div class="action-icon">🖨️</div>
+            <strong style="font-size: 14px; color: #ffffff;">طباعة فورية / حفظ PDF</strong>
+            <p style="font-size: 11px; color: var(--text-muted);">تصدير مباشر بصيغة PDF فيكتور عالي الدقة مقفول A4</p>
+          </div>
+
+          <div class="action-box" id="btnActionExportPackage" style="border-color: var(--accent-green);">
+            <div class="action-icon">📦</div>
+            <strong style="font-size: 14px; color: var(--accent-green-light);">تصدير حزمة المشروع الكاملة</strong>
+            <p style="font-size: 11px; color: var(--text-muted);">حفظ مجلد العميل (PDF + Word DOCX + JSON + Images + CSV)</p>
+          </div>
+        </div>
+
+        <!-- تفاصيل الحزمة -->
+        <div class="package-files-list">
+          <span style="font-weight: bold; color: var(--accent-cyan);">📁 محتويات مجلد العميل عند التصدير:</span>
+          <div class="file-item"><span>📄</span> <span id="lblFilePdf">الشهادة الرسمية بصيغة PDF (مقفولة A4)</span></div>
+          <div class="file-item"><span>📝</span> <span id="lblFileDocx">الشهادة الرسمية بصيغة Word (.docx)</span></div>
+          <div class="file-item"><span>⚙️</span> <span id="lblFileJson">ملف الجلسة الكاملة (.json) لإعادة الفتح والتعديل</span></div>
+          <div class="file-item"><span>🖼️</span> <span>صورة الكروكي الهندسي عالي الدقة (300 DPI)</span></div>
+          <div class="file-item"><span>🛰️</span> <span>صورة القمر الصناعي مدمج بها مضلع الأرض</span></div>
+          <div class="file-item"><span>📊</span> <span>شيت الإحداثيات الأصلي المرفوع للأرشيف</span></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <button class="btn btn-glass" id="btnBackToStage2">⬅ العودة إلى الاستوديو</button>
+          <button class="btn btn-glass" id="btnOpenOutputDir" style="color: var(--accent-green-light);">📁 فتح مجلد الشهادات في Windows Explorer</button>
+          <button class="btn btn-green" id="btnStartNewWorkflow">↺ بدء معاملة جديدة</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       5. النوافذ المنبثقة: استوديو قص الصور والشريط العائم
+       ========================================================================== -->
+  <div class="floating-text-toolbar" id="floatingToolbar">
+    <select class="float-select" id="fltFontFamily">
+      <option value="'Arial', sans-serif">Arial</option>
+      <option value="'Cairo', sans-serif">Cairo</option>
+      <option value="'Amiri', serif">Amiri</option>
+    </select>
+    <button class="float-btn" id="fltFontDec">-</button>
+    <span id="fltFontSizeVal" style="font-size: 11px; min-width: 28px; text-align: center; color: var(--accent-green-light); font-weight: bold;">10pt</span>
+    <button class="float-btn" id="fltFontInc">+</button>
+    <button class="float-btn" id="fltBold">B</button>
+    <button class="float-btn" id="fltColorBlue" style="color: #60a5fa;">A</button>
+    <button class="float-btn" id="fltColorBlack" style="color: #ffffff;">A</button>
+  </div>
+
+  <div class="image-modal-backdrop" id="imageModalBackdrop">
+    <div class="image-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
+        <span style="font-weight: 800; font-size: 14px; color: var(--accent-green-light);" id="modalImageTitle">✂️ استوديو قص وتكبير الصورة</span>
+        <button class="btn-glass" id="btnCloseModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
+      </div>
+
+      <div class="modal-crop-canvas-wrapper" id="cropCanvasWrapper">
+        <img src="" id="modalTargetImg" class="crop-target-img">
+        <div class="crop-frame-guide" id="cropFrameGuide"></div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; color: var(--text-muted);">تكبير:</span>
+          <input type="range" class="slider-input" id="rngModalZoom" min="1.0" max="3.5" step="0.05" value="1.0" style="width: 140px;">
+          <span id="txtModalZoom" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light);">100%</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn btn-glass" id="btnModalRotate" style="font-size: 11px; padding: 4px 8px;">🔄 تدوير</button>
+          <button class="btn btn-glass" id="btnModalReset" style="font-size: 11px; padding: 4px 8px;">↺ استعادة</button>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn btn-glass" id="btnCancelCrop">إلغاء</button>
+        <button class="btn btn-green" id="btnApplyCrop">✔ حفظ وتطبيق على الشهادة</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-toast" id="saveToast">
+    <span>⭐</span>
+    <span>تم حفظ الإعدادات الحالية بنجاح كإعدادات افتراضية للبرنامج!</span>
+  </div>
+
+  <!-- ==========================================================================
+       6. المحرك البرمجي المتكامل لمسار العمل (Workflow JavaScript Controller)
+       ========================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // متغيرات الحالة العالمية (Global Workflow State)
+      let currentStage = 1;
+      let activeParcel = null;
+      let currentSegments = [];
+      let outputDir = '';
+
+      // عناصر مسار العمل
+      const stepTab1 = document.getElementById('stepTab1');
+      const stepTab2 = document.getElementById('stepTab2');
+      const stepTab3 = document.getElementById('stepTab3');
+      const stage1View = document.getElementById('stage1View');
+      const stage2View = document.getElementById('stage2View');
+      const stage3View = document.getElementById('stage3View');
+
+      function switchStage(stageNum) {
+        currentStage = stageNum;
+        [stage1View, stage2View, stage3View].forEach((el, i) => {
+          el.classList.toggle('active', i + 1 === stageNum);
+        });
+        [stepTab1, stepTab2, stepTab3].forEach((el, i) => {
+          el.classList.toggle('active', i + 1 === stageNum);
+          el.classList.toggle('completed', i + 1 < stageNum);
+        });
+
+        if (stageNum === 2) {
+          syncStage1ToStage2();
+          updateSpacing();
+          renderWatermark();
+        } else if (stageNum === 3) {
+          syncStage2ToStage3();
+        }
+      }
+
+      stepTab1.addEventListener('click', () => switchStage(1));
+      stepTab2.addEventListener('click', () => { if (activeParcel) switchStage(2); });
+      stepTab3.addEventListener('click', () => { if (activeParcel) switchStage(3); });
+
+      document.getElementById('btnGoToStage2').addEventListener('click', () => switchStage(2));
+      document.getElementById('btnBackToStage1').addEventListener('click', () => switchStage(1));
+      document.getElementById('btnGoToStage3').addEventListener('click', () => switchStage(3));
+      document.getElementById('btnBackToStage2').addEventListener('click', () => switchStage(2));
+
+      /* ==========================================================================
+         المرحلة 1: استدعاء الـ APIs ورفع الملفات
+         ========================================================================== */
+      function fetchOutputDir() {
+        fetch('/api/get-output-dir')
+          .then(res => res.json())
+          .then(data => {
+            outputDir = data.output_dir || '';
+            document.getElementById('txtOutputDirDisplay').textContent = outputDir;
+          }).catch(() => {});
+      }
+      fetchOutputDir();
+
+      document.getElementById('btnBrowseOutputDir').addEventListener('click', () => {
+        fetch('/api/browse-output-dir', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.output_dir) {
+              outputDir = data.output_dir;
+              document.getElementById('txtOutputDirDisplay').textContent = outputDir;
+            }
+          });
+      });
+
+      // تحميل عينة ف.xls
+      document.getElementById('btnLoadSample').addEventListener('click', (e) => {
+        e.stopPropagation();
+        fetch('/api/load-sample', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.parcels && data.parcels.length > 0) {
+              loadParcelData(data.parcels[0]);
+            } else {
+              alert('خطأ: ' + (data.error || 'تعذر تحميل العينة'));
+            }
+          });
+      });
+
+      // السحب والإفلات لملفات المساحة
+      const dropzone = document.getElementById('dropzone');
+      const surveyFileInput = document.getElementById('surveyFileInput');
+
+      dropzone.addEventListener('click', () => surveyFileInput.click());
+      dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
+      });
+      surveyFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) uploadFile(e.target.files[0]);
+      });
+
+      function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch('/api/upload', { method: 'POST', body: formData })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.parcels && data.parcels.length > 0) {
+              loadParcelData(data.parcels[0]);
+            } else {
+              alert('خطأ في قراءة ملف الإحداثيات: ' + (data.error || 'تأكد من صيغة الملف'));
+            }
+          }).catch(err => alert('خطأ في الاتصال: ' + err.message));
+      }
+
+      function loadParcelData(parcel) {
+        activeParcel = parcel;
+        document.getElementById('surveyResultsSection').style.display = 'flex';
+
+        // بيانات المواطن والتحقق
+        document.getElementById('resApplicantName').textContent = parcel.applicant_name || 'غير محدد';
+        document.getElementById('resNationalId').textContent = parcel.national_id || 'غير محدد';
+        document.getElementById('resReceiptNo').textContent = parcel.receipt_no || '0';
+        document.getElementById('resDistrict').textContent = parcel.district || 'غير محدد';
+
+        const statedArea = parseFloat(parcel.stated_area_m2) || 0;
+        const calcArea = parseFloat(parcel.calculated_area_m2) || 0;
+        const delta = Math.abs(calcArea - statedArea);
+
+        document.getElementById('resStatedArea').textContent = `${statedArea.toFixed(2)} م²`;
+        document.getElementById('resCalcArea').textContent = `${calcArea.toFixed(2)} م²`;
+        document.getElementById('resDeltaArea').textContent = `${delta.toFixed(2)} م²`;
+
+        const badge = document.getElementById('badgeTolerance');
+        if (delta <= 2.0) {
+          badge.className = 'badge-pass';
+          badge.textContent = `✔ متطابق قانونياً (فرق المساحة ${delta.toFixed(2)} م² ضمن المسموح ±2.0 م²)`;
+        } else {
+          badge.className = 'badge-fail';
+          badge.textContent = `⚠️ تنبيه: فرق المساحة ${delta.toFixed(2)} م² يتجاوز التفاوت القانوني (±2.0 م²)`;
+        }
+
+        document.getElementById('resSecurityToken').textContent = parcel.security_token || 'DUDC-7K9P2-4W1QM-8V3NB-9X5ZL-2F8TR';
+
+        // تحميل الصورتين
+        loadCroquisPreview();
+        loadSatellitePreview();
+
+        // بناء جدول الأضلاع
+        buildSegmentsTable(parcel.segments || []);
+      }
+
+      function loadCroquisPreview() {
+        fetch('/api/preview-croquis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ parcel_index: 0 })
+        }).then(res => res.json()).then(data => {
+          if (data.croquis_url) {
+            document.getElementById('stage1CroquisImg').src = data.croquis_url;
+            document.getElementById('imgCroquis').src = data.croquis_url;
+          }
+        });
+      }
+
+      function loadSatellitePreview() {
+        fetch('/api/preview-satellite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ parcel_index: 0 })
+        }).then(res => res.json()).then(data => {
+          if (data.image_url) {
+            document.getElementById('stage1SatImg').src = data.image_url;
+            document.getElementById('imgSatellite').src = data.image_url;
+          }
+        });
+      }
+
+      function buildSegmentsTable(segments) {
+        currentSegments = JSON.parse(JSON.stringify(segments));
+        const tbody = document.getElementById('stage1SegmentsTbody');
+        tbody.innerHTML = '';
+
+        segments.forEach((seg, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>P${seg.from_pt} - P${seg.to_pt}</strong></td>
+            <td>
+              <select class="stage1-select seg-dir-select" data-index="${i}">
+                <option value="north" ${seg.direction === 'north' ? 'selected' : ''}>🌊 الحد البحري</option>
+                <option value="east" ${seg.direction === 'east' ? 'selected' : ''}>🌅 الحد الشرقي</option>
+                <option value="south" ${seg.direction === 'south' ? 'selected' : ''}>☀️ الحد القبلي</option>
+                <option value="west" ${seg.direction === 'west' ? 'selected' : ''}>🌇 الحد الغربي</option>
+              </select>
+            </td>
+            <td>
+              <input type="text" class="stage1-input seg-neighbor-input" data-index="${i}" placeholder="اسم الجار أو الشارع..." value="${seg.neighbor || ''}">
+            </td>
+            <td><strong>${(parseFloat(seg.length_m) || 0).toFixed(2)} م</strong></td>
+            <td>
+              <input type="number" step="0.01" class="stage1-input seg-length-input" data-index="${i}" value="${(parseFloat(seg.length_m) || 0).toFixed(2)}">
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // ربط أحداث التغيير لإعادة حساب المجموع لحظياً
+        tbody.querySelectorAll('.seg-dir-select, .seg-length-input, .seg-neighbor-input').forEach(el => {
+          el.addEventListener('input', updateRunningSums);
+        });
+
+        updateRunningSums();
+      }
+
+      function updateRunningSums() {
+        let sums = { north: 0, east: 0, south: 0, west: 0 };
+        let perimeter = 0;
+
+        document.querySelectorAll('#stage1SegmentsTbody tr').forEach(tr => {
+          const dir = tr.querySelector('.seg-dir-select').value;
+          const len = parseFloat(tr.querySelector('.seg-length-input').value) || 0;
+          if (sums[dir] !== undefined) sums[dir] += len;
+          perimeter += len;
+        });
+
+        document.getElementById('sumNorth').textContent = `${sums.north.toFixed(2)} م`;
+        document.getElementById('sumEast').textContent = `${sums.east.toFixed(2)} م`;
+        document.getElementById('sumSouth').textContent = `${sums.south.toFixed(2)} م`;
+        document.getElementById('sumWest').textContent = `${sums.west.toFixed(2)} م`;
+        document.getElementById('sumPerimeter').textContent = `${perimeter.toFixed(2)} م`;
+      }
+
+      /* ==========================================================================
+         المرحلة 2: المزامنة من المرحلة 1 إلى استوديو التحرير
+         ========================================================================== */
+      function syncStage1ToStage2() {
+        if (!activeParcel) return;
+
+        // ملء بيانات المواطن بالشهادة
+        document.getElementById('valApplicantName').textContent = activeParcel.applicant_name || 'محمد إبراهيم محمد حسن';
+        document.getElementById('valReceiptNo').textContent = activeParcel.receipt_no || '104523';
+        document.getElementById('valNationalId').textContent = activeParcel.national_id || '29001011234567';
+        document.getElementById('valCenter').textContent = activeParcel.district || 'نبروه';
+        document.getElementById('valVillage').textContent = activeParcel.village || 'كفر الجنينة';
+        document.getElementById('valAddress').textContent = activeParcel.address || 'شارع داير الناحية';
+        document.getElementById('valArea').textContent = `${(parseFloat(activeParcel.calculated_area_m2) || 0).toFixed(2)} _ م2`;
+
+        // التوقيعات المحددة
+        document.getElementById('sigTech').textContent = `أ / ${document.getElementById('selSurveyTech').value}`;
+        document.getElementById('sigGis').textContent = `أ / ${document.getElementById('selSysOfficer').value}`;
+
+        // تاريخ اليوم
+        const now = new Date();
+        const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const dayName = days[now.getDay()];
+        const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+        document.getElementById('certDateDisplay').textContent = `تم تحرير الشهادة في يوم ${dayName} الموافق ${dateStr}`;
+
+        // بناء جدول الحدود والإحداثيات بالدمج الرأسي الدقيق
+        buildCertCoordsTable();
+      }
+
+      function buildCertCoordsTable() {
+        const tbody = document.getElementById('certCoordsTbody');
+        tbody.innerHTML = '';
+
+        const directions = [
+          { key: 'north', title: 'الحد البحري' },
+          { key: 'east', title: 'الحد الشرقي' },
+          { key: 'south', title: 'الحد القبلي' },
+          { key: 'west', title: 'الحد الغربي' }
+        ];
+
+        // تجميع الأضلاع حسب الاتجاه
+        const segRows = document.querySelectorAll('#stage1SegmentsTbody tr');
+        let dirGroups = { north: [], east: [], south: [], west: [] };
+
+        segRows.forEach(tr => {
+          const dir = tr.querySelector('.seg-dir-select').value;
+          const neighbor = tr.querySelector('.seg-neighbor-input').value.trim();
+          const len = parseFloat(tr.querySelector('.seg-length-input').value) || 0;
+          dirGroups[dir].push({ neighbor, len });
+        });
+
+        // قراءة الإحداثيات من النقاط
+        const verts = activeParcel.vertices || [];
+
+        directions.forEach((d, dIdx) => {
+          const group = dirGroups[d.key];
+          const totalLen = group.reduce((acc, curr) => acc + curr.len, 0);
+          const neighborName = group.map(g => g.neighbor).filter(Boolean).join(' • ') || 'شارع عمومي';
+          const rowCount = Math.max(1, group.length);
+
+          for (let r = 0; r < rowCount; r++) {
+            const tr = document.createElement('tr');
+            let v = verts[(dIdx * 2 + r) % Math.max(1, verts.length)] || { lon: 31.27252042, lat: 31.05590931 };
+            const lonStr = parseFloat(v.lon).toFixed(8);
+            const latStr = parseFloat(v.lat).toFixed(8);
+
+            if (r === 0) {
+              tr.innerHTML = `
+                <td rowspan="${rowCount}" style="font-weight: bold;" contenteditable="true" spellcheck="false">${d.title}</td>
+                <td rowspan="${rowCount}" contenteditable="true" spellcheck="false">${neighborName}</td>
+                <td rowspan="${rowCount}" contenteditable="true" spellcheck="false">بطول</td>
+                <td rowspan="${rowCount}" style="font-weight: bold;" contenteditable="true" spellcheck="false">${totalLen > 0 ? totalLen.toFixed(2) : '--'}</td>
+                <td><span class="coord-num" contenteditable="true" spellcheck="false">${lonStr}</span></td>
+                <td><span class="coord-num" contenteditable="true" spellcheck="false">${latStr}</span></td>
+              `;
+            } else {
+              tr.innerHTML = `
+                <td><span class="coord-num" contenteditable="true" spellcheck="false">${lonStr}</span></td>
+                <td><span class="coord-num" contenteditable="true" spellcheck="false">${latStr}</span></td>
+              `;
+            }
+            tbody.appendChild(tr);
+          }
+        });
+      }
+
+      /* ==========================================================================
+         أدوات استوديو التحرير (Spacing, Typography, Watermark, Zoom & Crop)
+         ========================================================================== */
+      const certPage = document.getElementById('certPage');
+      const pageContainer = document.getElementById('pageContainer');
+      const watermarkLayer = document.getElementById('watermarkLayer');
+      const viewport = document.getElementById('viewport');
+
+      const rngMargin = document.getElementById('rngMargin');
+      const valMargin = document.getElementById('valMargin');
+      const rngGapHeader = document.getElementById('rngGapHeader');
+      const valGapHeader = document.getElementById('valGapHeader');
+      const rngGapApplicant = document.getElementById('rngGapApplicant');
+      const valGapApplicant = document.getElementById('valGapApplicant');
+      const rngGapCoords = document.getElementById('rngGapCoords');
+      const valGapCoords = document.getElementById('valGapCoords');
+      const rngGapImages = document.getElementById('rngGapImages');
+      const valGapImages = document.getElementById('valGapImages');
+      const rngTablePad = document.getElementById('rngTablePad');
+      const valTablePad = document.getElementById('valTablePad');
+      const rngImageHeight = document.getElementById('rngImageHeight');
+      const valImageHeight = document.getElementById('valImageHeight');
+
+      const chkWatermarkActive = document.getElementById('chkWatermarkActive');
+      const rngWmOpacity = document.getElementById('rngWmOpacity');
+      const valWmOpacity = document.getElementById('valWmOpacity');
+      const rngWmAngle = document.getElementById('rngWmAngle');
+      const valWmAngle = document.getElementById('valWmAngle');
+      const rngWmSize = document.getElementById('rngWmSize');
+      const valWmSize = document.getElementById('valWmSize');
+
+      function updateSpacing() {
+        document.documentElement.style.setProperty('--cert-margin', `${rngMargin.value}mm`);
+        valMargin.textContent = `${rngMargin.value} mm`;
+        document.documentElement.style.setProperty('--sec-gap-header', `${rngGapHeader.value}px`);
+        valGapHeader.textContent = `${rngGapHeader.value} px`;
+        document.documentElement.style.setProperty('--sec-gap-applicant', `${rngGapApplicant.value}px`);
+        valGapApplicant.textContent = `${rngGapApplicant.value} px`;
+        document.documentElement.style.setProperty('--sec-gap-coords', `${rngGapCoords.value}px`);
+        valGapCoords.textContent = `${rngGapCoords.value} px`;
+        document.documentElement.style.setProperty('--sec-gap-images', `${rngGapImages.value}px`);
+        valGapImages.textContent = `${rngGapImages.value} px`;
+        document.documentElement.style.setProperty('--table-padding-y', `${rngTablePad.value}px`);
+        valTablePad.textContent = `${rngTablePad.value} px`;
+        document.documentElement.style.setProperty('--image-height', `${rngImageHeight.value}px`);
+        valImageHeight.textContent = `${rngImageHeight.value} px`;
+      }
+
+      [rngMargin, rngGapHeader, rngGapApplicant, rngGapCoords, rngGapImages, rngTablePad, rngImageHeight].forEach(el => {
+        el.addEventListener('input', updateSpacing);
+      });
+
+      document.getElementById('btnAutoFit').addEventListener('click', () => {
+        const targetHeight = 1123;
+        const currentHeight = certPage.scrollHeight;
+        if (currentHeight > targetHeight) {
+          rngMargin.value = Math.max(5, rngMargin.value - 1);
+          rngGapHeader.value = 1;
+          rngGapApplicant.value = 2;
+          rngGapCoords.value = 3;
+          rngGapImages.value = 2;
+          rngTablePad.value = 1.8;
+          rngImageHeight.value = Math.max(140, rngImageHeight.value - 15);
+          updateSpacing();
+        }
+        alert('⚡ تم ضبط وتنسيق المسافات بنجاح لقفل الشهادة في صفحة A4 واحدة تماماً.');
+      });
+
+      function renderWatermark() {
+        const isActive = chkWatermarkActive.checked;
+        const opacity = isActive ? (rngWmOpacity.value / 100) : 0;
+        const angle = `${rngWmAngle.value}deg`;
+        const size = `${rngWmSize.value}pt`;
+
+        document.documentElement.style.setProperty('--wm-opacity', opacity);
+        document.documentElement.style.setProperty('--wm-angle', angle);
+        document.documentElement.style.setProperty('--wm-size', size);
+
+        valWmOpacity.textContent = `${rngWmOpacity.value} %`;
+        valWmAngle.textContent = `${rngWmAngle.value}°`;
+        valWmSize.textContent = `${rngWmSize.value} pt`;
+
+        const wmText = 'مركز معلومات شبكات المرافق • رسمي ومعتمد • DUDC SECURE';
+        watermarkLayer.innerHTML = '';
+        if (isActive) {
+          for (let i = 0; i < 7; i++) {
+            const row = document.createElement('div');
+            row.className = 'watermark-row';
+            row.textContent = `${wmText}   •   ${wmText}`;
+            watermarkLayer.appendChild(row);
+          }
+        }
+      }
+
+      [chkWatermarkActive, rngWmOpacity, rngWmAngle, rngWmSize].forEach(el => {
+        el.addEventListener('input', renderWatermark);
+      });
+
+      // الشريط العائم للنصوص
+      const floatingToolbar = document.getElementById('floatingToolbar');
+      const fltFontFamily = document.getElementById('fltFontFamily');
+      const fltFontSizeVal = document.getElementById('fltFontSizeVal');
+      const fltFontInc = document.getElementById('fltFontInc');
+      const fltFontDec = document.getElementById('fltFontDec');
+      const fltBold = document.getElementById('fltBold');
+      const fltColorBlue = document.getElementById('fltColorBlue');
+      const fltColorBlack = document.getElementById('fltColorBlack');
+      let activeEditableElement = null;
+
+      certPage.addEventListener('focusin', (e) => {
+        if (e.target && e.target.isContentEditable) {
+          activeEditableElement = e.target;
+          const rect = e.target.getBoundingClientRect();
+          const vRect = viewport.getBoundingClientRect();
+          floatingToolbar.style.top = `${(rect.top - vRect.top) + viewport.scrollTop - 44}px`;
+          floatingToolbar.style.left = `${(rect.left - vRect.left) + (rect.width / 2)}px`;
+          floatingToolbar.style.display = 'flex';
+
+          const comp = window.getComputedStyle(e.target);
+          fltFontSizeVal.textContent = `${parseInt(comp.fontSize) || 12}px`;
+          fltBold.classList.toggle('active', comp.fontWeight === 'bold' || parseInt(comp.fontWeight) >= 700);
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.isContentEditable && !floatingToolbar.contains(e.target)) {
+          floatingToolbar.style.display = 'none';
+        }
+      });
+
+      fltFontFamily.addEventListener('change', () => { if (activeEditableElement) activeEditableElement.style.fontFamily = fltFontFamily.value; });
+      fltFontInc.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const s = (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) + 1;
+          activeEditableElement.style.fontSize = `${s}px`;
+          fltFontSizeVal.textContent = `${s}px`;
+        }
+      });
+      fltFontDec.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const s = Math.max(8, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) - 1);
+          activeEditableElement.style.fontSize = `${s}px`;
+          fltFontSizeVal.textContent = `${s}px`;
+        }
+      });
+      fltBold.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const b = activeEditableElement.style.fontWeight === 'bold';
+          activeEditableElement.style.fontWeight = b ? 'normal' : 'bold';
+          fltBold.classList.toggle('active', !b);
+        }
+      });
+      fltColorBlue.addEventListener('click', () => { if (activeEditableElement) activeEditableElement.style.color = '#365F91'; });
+      fltColorBlack.addEventListener('click', () => { if (activeEditableElement) activeEditableElement.style.color = '#000000'; });
+
+      // استوديو قص وتكبير الصور بالأبعاد الحقيقية
+      const imageModalBackdrop = document.getElementById('imageModalBackdrop');
+      const modalTargetImg = document.getElementById('modalTargetImg');
+      const cropFrameGuide = document.getElementById('cropFrameGuide');
+      const cropCanvasWrapper = document.getElementById('cropCanvasWrapper');
+      const rngModalZoom = document.getElementById('rngModalZoom');
+      const txtModalZoom = document.getElementById('txtModalZoom');
+      const btnModalRotate = document.getElementById('btnModalRotate');
+      const btnModalReset = document.getElementById('btnModalReset');
+      const btnApplyCrop = document.getElementById('btnApplyCrop');
+      const btnCloseModal = document.getElementById('btnCloseModal');
+      const btnCancelCrop = document.getElementById('btnCancelCrop');
+
+      let currentEditingTarget = null;
+      let imgState = { baseWidth: 0, baseHeight: 0, zoom: 1.0, posX: 0, posY: 0, rotate: 0 };
+      let isDraggingImg = false;
+      let startMouseX = 0, startMouseY = 0;
+      let frameW = 500, frameH = 240;
+
+      function openImageStudio(targetType) {
+        currentEditingTarget = targetType;
+        const sourceImg = (targetType === 'croquis') ? document.getElementById('imgCroquis') : document.getElementById('imgSatellite');
+        const targetWrapper = (targetType === 'croquis') ? document.getElementById('croquisWrapper') : document.getElementById('satWrapper');
+
+        const targetAspect = targetWrapper.clientWidth / targetWrapper.clientHeight;
+        const wrapperW = cropCanvasWrapper.clientWidth || 700;
+        const wrapperH = cropCanvasWrapper.clientHeight || 380;
+        const maxW = wrapperW * 0.85;
+        const maxH = wrapperH * 0.85;
+
+        if (maxW / maxH > targetAspect) {
+          frameH = maxH; frameW = frameH * targetAspect;
+        } else {
+          frameW = maxW; frameH = frameW / targetAspect;
+        }
+
+        cropFrameGuide.style.width = `${frameW}px`;
+        cropFrameGuide.style.height = `${frameH}px`;
+
+        modalTargetImg.onload = () => {
+          const natW = modalTargetImg.naturalWidth;
+          const natH = modalTargetImg.naturalHeight;
+          const scaleToFit = Math.min(frameW / natW, frameH / natH) * 1.05;
+          imgState.baseWidth = natW * scaleToFit;
+          imgState.baseHeight = natH * scaleToFit;
+          imgState.zoom = 1.0; imgState.posX = 0; imgState.posY = 0; imgState.rotate = 0;
+
+          modalTargetImg.style.width = `${imgState.baseWidth}px`;
+          modalTargetImg.style.height = `${imgState.baseHeight}px`;
+          rngModalZoom.value = 1.0;
+          txtModalZoom.textContent = '100%';
+          applyImgTransform();
+        };
+
+        modalTargetImg.src = sourceImg.src;
+        imageModalBackdrop.style.display = 'flex';
+      }
+
+      function applyImgTransform() {
+        modalTargetImg.style.transform = `translate(${imgState.posX}px, ${imgState.posY}px) scale(${imgState.zoom}) rotate(${imgState.rotate}deg)`;
+      }
+
+      document.getElementById('btnOpenCropCroquis').addEventListener('click', () => openImageStudio('croquis'));
+      document.getElementById('btnOpenCropSat').addEventListener('click', () => openImageStudio('sat'));
+      document.getElementById('btnCropCroqQuick').addEventListener('click', () => openImageStudio('croquis'));
+      document.getElementById('btnCropSatQuick').addEventListener('click', () => openImageStudio('sat'));
+
+      function closeModal() { imageModalBackdrop.style.display = 'none'; }
+      btnCloseModal.addEventListener('click', closeModal);
+      btnCancelCrop.addEventListener('click', closeModal);
+
+      rngModalZoom.addEventListener('input', () => {
+        imgState.zoom = parseFloat(rngModalZoom.value);
+        txtModalZoom.textContent = `${Math.round(imgState.zoom * 100)}%`;
+        applyImgTransform();
+      });
+      btnModalRotate.addEventListener('click', () => { imgState.rotate = (imgState.rotate + 90) % 360; applyImgTransform(); });
+      btnModalReset.addEventListener('click', () => {
+        imgState.zoom = 1.0; imgState.posX = 0; imgState.posY = 0; imgState.rotate = 0;
+        rngModalZoom.value = 1.0; txtModalZoom.textContent = '100%'; applyImgTransform();
+      });
+
+      cropCanvasWrapper.addEventListener('mousedown', (e) => {
+        isDraggingImg = true;
+        startMouseX = e.clientX - imgState.posX;
+        startMouseY = e.clientY - imgState.posY;
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingImg) return;
+        imgState.posX = e.clientX - startMouseX;
+        imgState.posY = e.clientY - startMouseY;
+        applyImgTransform();
+      });
+      window.addEventListener('mouseup', () => { isDraggingImg = false; });
+
+      btnApplyCrop.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = frameW * 2; canvas.height = frameH * 2;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = modalTargetImg.src;
+        img.onload = () => {
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((imgState.rotate * Math.PI) / 180);
+          const ratio = canvas.width / frameW;
+          const drawW = imgState.baseWidth * imgState.zoom * ratio;
+          const drawH = imgState.baseHeight * imgState.zoom * ratio;
+          ctx.drawImage(img, (imgState.posX * ratio) - (drawW / 2), (imgState.posY * ratio) - (drawH / 2), drawW, drawH);
+          ctx.restore();
+
+          const croppedUrl = canvas.toDataURL('image/jpeg', 0.95);
+          if (currentEditingTarget === 'croquis') {
+            document.getElementById('imgCroquis').src = croppedUrl;
+          } else {
+            document.getElementById('imgSatellite').src = croppedUrl;
+          }
+          closeModal();
+        };
+      });
+
+      // حفظ كإعدادات افتراضية
+      const saveToast = document.getElementById('saveToast');
+      document.getElementById('btnSaveAsDefault').addEventListener('click', () => {
+        const defs = {
+          margin_mm: rngMargin.value, gap_header: rngGapHeader.value, gap_applicant: rngGapApplicant.value,
+          gap_coords: rngGapCoords.value, gap_images: rngGapImages.value, table_pad: rngTablePad.value,
+          image_height: rngImageHeight.value, wm_active: chkWatermarkActive.checked, wm_opacity: rngWmOpacity.value,
+          wm_angle: rngWmAngle.value, wm_size: rngWmSize.value
+        };
+        localStorage.setItem('dudc_v3_default_settings', JSON.stringify(defs));
+        saveToast.classList.add('show');
+        setTimeout(() => saveToast.classList.remove('show'), 3000);
+      });
+
+      function loadDefaultSettings() {
+        const saved = localStorage.getItem('dudc_v3_default_settings');
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            rngMargin.value = data.margin_mm ?? 8;
+            rngGapHeader.value = data.gap_header ?? 3;
+            rngGapApplicant.value = data.gap_applicant ?? 4;
+            rngGapCoords.value = data.gap_coords ?? 5;
+            rngGapImages.value = data.gap_images ?? 4;
+            rngTablePad.value = data.table_pad ?? 2.2;
+            rngImageHeight.value = data.image_height ?? 168;
+            chkWatermarkActive.checked = data.wm_active ?? true;
+            rngWmOpacity.value = data.wm_opacity ?? 10;
+            rngWmAngle.value = data.wm_angle ?? -30;
+            rngWmSize.value = data.wm_size ?? 13;
+          } catch (e) {}
+        }
+      }
+
+      /* ==========================================================================
+         المرحلة 3: الإخراج النهائي وتصدير الحزمة
+         ========================================================================== */
+      function syncStage2ToStage3() {
+        const name = document.getElementById('valApplicantName').textContent.trim() || 'محمد إبراهيم محمد حسن';
+        const center = document.getElementById('valCenter').textContent.trim() || 'نبروه';
+        const area = document.getElementById('valArea').textContent.trim() || '3865.82 _ م2';
+
+        document.getElementById('stage3CitizenName').textContent = name;
+        document.getElementById('stage3Center').textContent = center;
+        document.getElementById('stage3Area').textContent = area;
+
+        document.getElementById('lblFilePdf').textContent = `${name}.pdf (الشهادة الرسمية مقفولة A4)`;
+        document.getElementById('lblFileDocx').textContent = `${name}.docx (الشهادة الرسمية Word)`;
+        document.getElementById('lblFileJson').textContent = `${name}_session.json (ملف الجلسة الكامل)`;
+      }
+
+      // طباعة الـ PDF الفورية
+      function triggerPdfPrint() {
+        switchStage(2);
+        setTimeout(() => window.print(), 150);
+      }
+
+      document.getElementById('btnActionPrintPdf').addEventListener('click', triggerPdfPrint);
+      document.getElementById('btnPrintCertQuick').addEventListener('click', triggerPdfPrint);
+
+      // تصدير حزمة المشروع الكاملة من الباك إند
+      document.getElementById('btnActionExportPackage').addEventListener('click', () => {
+        if (!activeParcel) {
+          alert('يرجى تحميل ملف الرفع المساحي أولاً');
+          return;
+        }
+
+        const citizenName = document.getElementById('valApplicantName').textContent.trim() || activeParcel.applicant_name;
+        const payload = {
+          parcel_index: 0,
+          applicant_name: citizenName,
+          survey_technician: document.getElementById('selSurveyTech').value,
+          system_officer: document.getElementById('selSysOfficer').value,
+          croquis_base64: document.getElementById('imgCroquis').src,
+          satellite_base64: document.getElementById('imgSatellite').src,
+          session_data: {
+            applicant_name: citizenName,
+            receipt_no: document.getElementById('valReceiptNo').textContent.trim(),
+            national_id: document.getElementById('valNationalId').textContent.trim(),
+            district: document.getElementById('valCenter').textContent.trim(),
+            area: document.getElementById('valArea').textContent.trim(),
+            sliders: {
+              margin: rngMargin.value, gapHeader: rngGapHeader.value, gapApplicant: rngGapApplicant.value,
+              gapCoords: rngGapCoords.value, gapImages: rngGapImages.value, tablePad: rngTablePad.value,
+              imageHeight: rngImageHeight.value
+            },
+            watermark: {
+              active: chkWatermarkActive.checked, opacity: rngWmOpacity.value, angle: rngWmAngle.value, size: rngWmSize.value
+            }
+          }
+        };
+
+        fetch('/api/export-package', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(res => res.json()).then(data => {
+          if (data.success) {
+            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}`);
+            // فتح المجلد تلقائياً
+            fetch('/api/open-folder', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ folder_path: data.folder_path })
+            });
+          } else {
+            alert('خطأ في تصدير الحزمة: ' + (data.error || 'تعذر التصدير'));
+          }
+        }).catch(err => alert('خطأ في الاتصال: ' + err.message));
+      });
+
+      document.getElementById('btnOpenOutputDir').addEventListener('click', () => {
+        fetch('/api/open-folder', { method: 'POST' });
+      });
+
+      document.getElementById('btnStartNewWorkflow').addEventListener('click', () => {
+        if (confirm('هل تود بدء معاملة جديدة لمواطن آخر؟')) {
+          location.reload();
+        }
+      });
+
+      // زووم صفحة العرض
+      let currentZoom = 1.0;
+      const zoomLevelDisplay = document.getElementById('zoomLevel');
+      function setZoom(factor) {
+        currentZoom = Math.min(Math.max(0.4, factor), 1.8);
+        pageContainer.style.transform = `scale(${currentZoom})`;
+        zoomLevelDisplay.textContent = `${Math.round(currentZoom * 100)}%`;
+      }
+      document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(currentZoom + 0.1));
+      document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(currentZoom - 0.1));
+      document.getElementById('btnZoomReset').addEventListener('click', () => setZoom(1.0));
+      document.getElementById('btnZoomFit').addEventListener('click', () => {
+        setZoom((viewport.clientWidth - 70) / 794);
+      });
+
+      // التهيئة الابتدائية
+      loadDefaultSettings();
+      updateSpacing();
+      renderWatermark();
+    });
+  </script>
+</body>
+</html>

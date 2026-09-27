@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استوديو تحرير واعتماد شهادات الرفع المساحي | DUDC V3 Studio</title>
+  
+  <!-- الخطوط الرسمية: Arial المعتمد + Cairo + Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       1. متغيرات التصميم والهوية البصرية (Glassmorphism & Color Tokens)
+       ========================================================================== */
+    :root {
+      --bg-dark: #070a11;
+      --glass-panel: rgba(15, 23, 42, 0.85);
+      --glass-card: rgba(26, 36, 56, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-light: rgba(255, 255, 255, 0.16);
+      
+      /* ألوان المحاور: أخضر زمردي وأحمر ياقوتي */
+      --accent-green: #10b981;
+      --accent-green-light: #34d399;
+      --accent-green-glow: rgba(16, 185, 129, 0.35);
+      
+      --accent-red: #ef4444;
+      --accent-red-light: #f87171;
+      --accent-red-glow: rgba(239, 68, 68, 0.35);
+      
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* أبعاد صفحة A4 القياسية (794px × 1123px) */
+      --a4-width: 794px;
+      --a4-height: 1123px;
+      
+      /* متغيرات التباعد الافتراضية للشهادة */
+      --cert-margin: 8mm;
+      --sec-gap-header: 3px;
+      --sec-gap-applicant: 4px;
+      --sec-gap-coords: 5px;
+      --sec-gap-images: 4px;
+      --sec-gap-notes: 2px;
+      --sec-gap-sign: 6px;
+      
+      --table-padding-y: 2.2px;
+      --table-padding-x: 4px;
+      
+      --image-height: 168px;
+      --image-gap: 8px;
+      
+      /* متغيرات الخطوط الافتراضية */
+      --cert-font: 'Arial', sans-serif;
+      --font-size-title: 13pt;
+      --font-size-table: 9.5pt;
+      --font-size-notes: 8.5pt;
+      --font-size-sign: 10pt;
+      
+      /* متغيرات العلامة المائية المبسطة */
+      --wm-opacity: 0.10;
+      --wm-angle: -30deg;
+      --wm-size: 13pt;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #070a11 100%);
+      color: var(--text-main);
+      font-family: 'Cairo', system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. الترويسة الرئيسية العلوية (Top Studio Header)
+       ========================================================================== */
+    .studio-header {
+      background: var(--glass-panel);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-badge {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: var(--accent-green-light);
+      box-shadow: 0 0 12px var(--accent-green-glow);
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      box-shadow: 0 2px 10px var(--accent-green-glow);
+    }
+
+    .btn-green:hover {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border: 1px solid var(--glass-border-light);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+
+    .btn-star {
+      border-color: #f59e0b;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .btn-star:hover {
+      background: rgba(245, 158, 11, 0.25);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       3. بيئة العمل الرئيسية: سكرولين مستقلين تماماً (Sidebar & Viewport)
+       ========================================================================== */
+    .studio-workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      flex: 1;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    /* القائمة الجانبية - سكرول مستقل */
+    .studio-sidebar {
+      background: var(--glass-panel);
+      backdrop-filter: blur(22px);
+      border-left: 1px solid var(--glass-border);
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: 100%;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .studio-sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .studio-sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .control-card {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title.green { color: var(--accent-green-light); }
+    .card-title.red { color: var(--accent-red-light); }
+
+    .slider-control {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 9px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .slider-value {
+      font-weight: 700;
+      color: var(--accent-green-light);
+    }
+
+    .slider-input {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--accent-green-glow);
+    }
+
+    .slider-input.red-accent::-webkit-slider-thumb {
+      background: var(--accent-red);
+      box-shadow: 0 0 6px var(--accent-red-glow);
+    }
+
+    /* طاولة العرض المضيئة (The Viewport) - سكرول سلس ومستقل تماماً */
+    .studio-viewport {
+      background: #060910;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
+        radial-gradient(rgba(16, 185, 129, 0.04) 2px, transparent 0);
+      background-size: 24px 24px, 48px 48px;
+      overflow-y: scroll;
+      overflow-x: auto;
+      padding: 20px 30px 60px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      position: relative;
+    }
+
+    .studio-viewport::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .studio-viewport::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    .studio-viewport::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 4px;
+    }
+    .studio-viewport::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-green);
+    }
+
+    /* شريط أدوات الرؤية والتنقل */
+    .viewport-toolbar {
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-light);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .zoom-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-pill:hover {
+      color: var(--accent-green-light);
+      border-color: var(--accent-green);
+    }
+
+    /* ==========================================================================
+       4. شريط أدوات النصوص المنبثق العائم (Floating Contextual Toolbar)
+       ========================================================================== */
+    .floating-text-toolbar {
+      position: absolute;
+      display: none;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 4px 8px;
+      gap: 6px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px var(--accent-green-glow);
+      z-index: 999;
+      transform: translateX(-50%);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .floating-text-toolbar::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.95) transparent;
+      display: block;
+      width: 0;
+    }
+
+    .float-select {
+      background: #090d16;
+      color: #ffffff;
+      border: 1px solid var(--glass-border-light);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .float-btn {
+      background: #090d16;
+      color: #ffffff;
+      border: 1px solid var(--glass-border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .float-btn:hover {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .float-btn.active {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    /* ==========================================================================
+       5. ورقة الشهادة الرسمية A4 (كافة النصوص قابلة للتعديل 100%)
+       ========================================================================== */
+    .certificate-page-container {
+      transition: transform 0.15s ease-out;
+      transform-origin: top center;
+    }
+
+    .certificate-page {
+      width: var(--a4-width);
+      min-height: var(--a4-height);
+      max-height: var(--a4-height);
+      background: #ffffff;
+      color: #000000;
+      font-family: var(--cert-font);
+      padding: var(--cert-margin);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+
+    /* طبقة العلامة المائية المبسطة */
+    .watermark-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      opacity: var(--wm-opacity);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      transition: opacity 0.2s;
+    }
+
+    .watermark-row {
+      display: flex;
+      justify-content: space-around;
+      transform: rotate(var(--wm-angle));
+      white-space: nowrap;
+      font-family: 'Arial', sans-serif;
+      font-size: var(--wm-size);
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+
+    /* 1. الترويسة */
+    .cert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--sec-gap-header);
+      position: relative;
+    }
+
+    .gov-titles {
+      text-align: right;
+    }
+
+    .gov-titles .line-gov { font-size: 14pt; font-weight: bold; line-height: 1.2; }
+    .gov-titles .line-center { font-size: 15pt; font-weight: bold; line-height: 1.2; color: #000000; }
+    .gov-titles .line-date { font-size: 10pt; font-weight: bold; margin-top: 1px; }
+
+    .header-logos {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-logos img {
+      height: 48px;
+      object-fit: contain;
+    }
+
+    /* عنوان الشهادة */
+    .cert-main-title {
+      text-align: center;
+      font-size: var(--font-size-title);
+      font-weight: bold;
+      margin: 1px 0 3px 0;
+      letter-spacing: 0.5px;
+    }
+
+    /* الجداول الرسمية */
+    .cert-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000000;
+      font-size: var(--font-size-table);
+      table-layout: fixed;
+    }
+
+    .cert-table th, .cert-table td {
+      border: 1px solid #000000;
+      padding: var(--table-padding-y) var(--table-padding-x);
+      text-align: center;
+      vertical-align: middle;
+      line-height: 1.15;
+    }
+
+    .table-section-header {
+      background-color: #f1f5f9;
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .field-label {
+      font-weight: bold;
+      background-color: #f8fafc;
+      text-align: right !important;
+    }
+
+    .field-val {
+      text-align: right !important;
+      font-weight: bold;
+    }
+
+    .coords-table th {
+      background-color: #f1f5f9;
+      font-weight: bold;
+    }
+
+    .coord-num {
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    /* قسم الصورتين */
+    .images-grid {
+      display: grid;
+      grid-template-columns: 48.4% 51.6%;
+      gap: var(--image-gap);
+      margin-top: var(--sec-gap-images);
+      margin-bottom: var(--sec-gap-notes);
+    }
+
+    .image-card {
+      border: 1.2px solid #000000;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .image-header {
+      background: #f1f5f9;
+      border-bottom: 1px solid #000000;
+      text-align: center;
+      font-weight: bold;
+      font-size: 10.5pt;
+      padding: 1.5px;
+    }
+
+    .image-preview-wrapper {
+      height: var(--image-height);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+    }
+
+    .img-action-overlay {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+      z-index: 25;
+    }
+
+    .image-preview-wrapper:hover .img-action-overlay {
+      display: flex;
+    }
+
+    .img-tool-btn {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid var(--accent-green);
+      color: #ffffff;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .img-tool-btn:hover {
+      background: var(--accent-green);
+      color: #000000;
+    }
+
+    /* الملاحظات والاشتراطات */
+    .cert-notes {
+      font-size: var(--font-size-notes);
+      line-height: 1.25;
+      margin-bottom: var(--sec-gap-notes);
+      color: #000000;
+    }
+
+    .cert-notes p {
+      margin-bottom: 0.5px;
+    }
+
+    .cert-token-line {
+      font-size: 8.5pt;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      color: #000000;
+      margin-top: 1px;
+      margin-bottom: var(--sec-gap-sign);
+    }
+
+    /* التوقيعات والاعتمادات */
+    .signatures-block {
+      margin-top: auto;
+      border-top: 1px dashed #94a3b8;
+      padding-top: 2px;
+      position: relative;
+    }
+
+    .sign-title-center {
+      text-align: center;
+      font-size: 11pt;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .sign-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      text-align: center;
+      font-size: var(--font-size-sign);
+      gap: 6px;
+    }
+
+    .sign-role {
+      font-weight: bold;
+      margin-bottom: 1px;
+    }
+
+    .sign-name {
+      font-weight: bold;
+      color: #000000;
+    }
+
+    /* تمييز كافة العناصر القابلة للتحرير بالماوس */
+    [contenteditable="true"] {
+      outline: none;
+      transition: background-color 0.15s;
+      border-radius: 2px;
+      cursor: text;
+    }
+
+    [contenteditable="true"]:hover {
+      background-color: rgba(16, 185, 129, 0.12);
+    }
+
+    [contenteditable="true"]:focus {
+      background-color: rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 0 1px var(--accent-green);
+    }
+
+    /* ==========================================================================
+       6. نافذة استوديو تحرير وقص وتكبير الصور (Image Zoom & Crop Modal)
+       ========================================================================== */
+    .image-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-modal {
+      background: var(--glass-panel);
+      border: 1px solid var(--accent-green);
+      border-radius: 12px;
+      width: 760px;
+      max-width: 95vw;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent-green-glow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 8px;
+    }
+
+    .modal-crop-canvas-wrapper {
+      width: 100%;
+      height: 380px;
+      background: #020408;
+      border: 1px dashed var(--glass-border-light);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .modal-crop-canvas-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .crop-target-img {
+      position: absolute;
+      user-select: none;
+      pointer-events: none;
+      transform-origin: center center;
+    }
+
+    .crop-frame-guide {
+      position: absolute;
+      border: 2px solid var(--accent-green);
+      box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .modal-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    /* إشعار الحفظ السريع التلقائي (Toast) */
+    .save-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .save-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       7. وسائط الطباعة الصارمة (Strict A4 Printing)
+       ========================================================================== */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .studio-header,
+      .studio-sidebar,
+      .viewport-toolbar,
+      .floating-text-toolbar,
+      .image-modal-backdrop,
+      .img-action-overlay,
+      .save-toast {
+        display: none !important;
+      }
+
+      .studio-workspace {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      .studio-viewport {
+        background: none !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
+      }
+
+      .certificate-page-container {
+        transform: none !important;
+      }
+
+      .certificate-page {
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        padding: var(--cert-margin) !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       1. الترويسة الرئيسية للاستوديو (Studio Top Header)
+       ========================================================================== -->
+  <header class="studio-header">
+    <div class="brand-section">
+      <div class="brand-logo-badge">DUDC V3</div>
+      <div class="brand-title">
+        <h1>استوديو شهادات الرفع المساحي التفاعلي</h1>
+        <p>مركز معلومات شبكات المرافق بمحافظة الدقهلية • الإصدار المعتمد 3.0</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- زر حفظ الإعدادات الافتراضية للبرنامج -->
+      <button class="btn btn-star" id="btnSaveAsDefault" title="حفظ المسافات وإعدادات العلامة المائية كافتراضي دائم للتطبيق">
+        <span>⭐</span> حفظ كإعدادات افتراضية
+      </button>
+
+      <button class="btn btn-glass" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
+        <span>📂</span> استيراد جلسة
+      </button>
+      <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
+
+      <button class="btn btn-glass" id="btnExportJson" title="حفظ كامل البيانات وقيم السلايدرات لإعادة التعديل">
+        <span>💾</span> حفظ الجلسة
+      </button>
+
+      <button class="btn btn-glass" id="btnAutoFit" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">
+        <span>⚡</span> ضبط صفحة واحدة
+      </button>
+
+      <button class="btn btn-green" id="btnPrintCert">
+        <span>🖨️</span> طباعة فورية (Print A4)
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       2. شريط أدوات النصوص المنبثق العائم (Floating Contextual Toolbar)
+       ========================================================================== -->
+  <div class="floating-text-toolbar" id="floatingToolbar">
+    <select class="float-select" id="fltFontFamily">
+      <option value="'Arial', sans-serif">Arial (المعتمد)</option>
+      <option value="'Cairo', sans-serif">Cairo (هندسي)</option>
+      <option value="'Amiri', serif">Amiri (نسخ رسمي)</option>
+    </select>
+
+    <div style="display: flex; align-items: center; gap: 2px;">
+      <button class="float-btn" id="fltFontDec">-</button>
+      <span id="fltFontSizeVal" style="font-size: 11px; min-width: 28px; text-align: center; color: var(--accent-green-light); font-weight: bold;">10pt</span>
+      <button class="float-btn" id="fltFontInc">+</button>
+    </div>
+
+    <button class="float-btn" id="fltBold" title="عريض">B</button>
+    <button class="float-btn" id="fltColorBlue" style="color: #60a5fa;" title="أزرق">A</button>
+    <button class="float-btn" id="fltColorBlack" style="color: #ffffff;" title="أسود">A</button>
+  </div>
+
+  <!-- ==========================================================================
+       3. مساحة العمل: سكرولين مستقلين تماماً (Sidebar & Viewport)
+       ========================================================================== -->
+  <div class="studio-workspace">
+
+    <!-- لوحة التحكم الجانبية - سكرول مستقل -->
+    <aside class="studio-sidebar" id="sidebar">
+
+      <!-- كارت 1: سلايدرات التباعد الرأسي والأفقي -->
+      <div class="control-card">
+        <div class="card-header">
+          <span class="card-title green">📐 المسافات والتباعد (Spacing)</span>
+          <button class="btn-glass" id="btnResetSpacing" style="padding: 2px 6px; font-size: 10px;">استعادة</button>
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>هوامش الورقة الخارجية (Margins)</span>
+            <span class="slider-value" id="valMargin">8 mm</span>
+          </div>
+          <input type="range" class="slider-input" id="rngMargin" min="4" max="14" step="0.5" value="8">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>الفراغ أسفل الترويسة والعنوان</span>
+            <span class="slider-value" id="valGapHeader">3 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngGapHeader" min="0" max="15" step="1" value="3">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>المسافة بين جدول المواطن والإحداثيات</span>
+            <span class="slider-value" id="valGapApplicant">4 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngGapApplicant" min="0" max="15" step="1" value="4">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>المسافة بين الإحداثيات والصورتين</span>
+            <span class="slider-value" id="valGapCoords">5 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngGapCoords" min="0" max="15" step="1" value="5">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>المسافة بين الصورتين والملاحظات</span>
+            <span class="slider-value" id="valGapImages">4 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngGapImages" min="0" max="15" step="1" value="4">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>فراغ التوقيعات والاعتماد السفلي</span>
+            <span class="slider-value" id="valGapSign">6 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngGapSign" min="0" max="20" step="1" value="6">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>حشوة خلايا الجداول (Cell Padding)</span>
+            <span class="slider-value" id="valTablePad">2.2 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngTablePad" min="1" max="6" step="0.2" value="2.2">
+        </div>
+      </div>
+
+      <!-- كارت 2: أدوات الصورتين والتحكم بالحجم -->
+      <div class="control-card">
+        <div class="card-header">
+          <span class="card-title">🖼️ تحرير وتنسيق الصورتين</span>
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>ارتفاع الصورتين الموحد</span>
+            <span class="slider-value" id="valImageHeight">168 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngImageHeight" min="120" max="230" step="2" value="168">
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>المسافة الأفقية بين الصورتين</span>
+            <span class="slider-value" id="valImageGap">8 px</span>
+          </div>
+          <input type="range" class="slider-input" id="rngImageGap" min="2" max="20" step="1" value="8">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+          <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">
+            <span>✂️</span> قص/تكبير كروكي
+          </button>
+          <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">
+            <span>✂️</span> قص/تكبير قمر
+          </button>
+        </div>
+      </div>
+
+      <!-- كارت 3: محرك وأدوات العلامة المائية المبسطة (فقط: شفافية + زاوية + حجم) -->
+      <div class="control-card" style="border-color: rgba(239, 68, 68, 0.3);">
+        <div class="card-header">
+          <span class="card-title red">🛡️ العلامة المائية</span>
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;">
+            <input type="checkbox" id="chkWatermarkActive" checked>
+            <span>مفعلة</span>
+          </label>
+        </div>
+
+        <!-- 1. الشفافية -->
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>درجة الشفافية (Opacity)</span>
+            <span class="slider-value" id="valWmOpacity" style="color: var(--accent-red-light);">10 %</span>
+          </div>
+          <input type="range" class="slider-input red-accent" id="rngWmOpacity" min="0" max="40" step="1" value="10">
+        </div>
+
+        <!-- 2. زاوية الميل -->
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>زاوية الميل (Angle)</span>
+            <span class="slider-value" id="valWmAngle" style="color: var(--accent-red-light);">-30°</span>
+          </div>
+          <input type="range" class="slider-input red-accent" id="rngWmAngle" min="-60" max="60" step="5" value="-30">
+        </div>
+
+        <!-- 3. حجم الخط -->
+        <div class="slider-control">
+          <div class="slider-header">
+            <span>حجم خط العلامة (Size)</span>
+            <span class="slider-value" id="valWmSize" style="color: var(--accent-red-light);">13 pt</span>
+          </div>
+          <input type="range" class="slider-input red-accent" id="rngWmSize" min="9" max="22" step="1" value="13">
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- طاولة العرض المضيئة (The Digital Lightbox Viewport) - سكرول مستقل -->
+    <main class="studio-viewport" id="viewport">
+
+      <!-- شريط أدوات الرؤية والتنقل السريع -->
+      <div class="viewport-toolbar">
+        <button class="zoom-btn" id="btnZoomOut">🔍 -</button>
+        <span id="zoomLevel" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light); min-width: 38px; text-align: center;">100%</span>
+        <button class="zoom-btn" id="btnZoomIn">🔍 +</button>
+        <span style="color: var(--glass-border-light);">|</span>
+        <button class="zoom-btn" id="btnZoomReset">100%</button>
+        <button class="zoom-btn" id="btnZoomFit">ملاءمة العرض</button>
+        <span style="color: var(--glass-border-light);">|</span>
+        <span class="nav-pill" id="navTop">▲ الترويسة</span>
+        <span class="nav-pill" id="navCoords">الحدود</span>
+        <span class="nav-pill" id="navImages">الصور</span>
+        <span class="nav-pill" id="navSign">التوقيعات ▼</span>
+      </div>
+
+      <!-- حاوية ورقة الشهادة الرسمية A4 -->
+      <div class="certificate-page-container" id="pageContainer">
+        <article class="certificate-page" id="certPage">
+
+          <!-- الطبقة المائية العائمة للشهادة بالكامل -->
+          <div class="watermark-overlay" id="watermarkLayer"></div>
+
+          <!-- 1. الترويسة والشعارات وتاريخ التحرير (مطابقة تماماً لـ شهادة.docx وكل النصوص قابلة للتعديل) -->
+          <header class="cert-header" id="secHeader">
+            <div class="gov-titles">
+              <div class="line-gov" contenteditable="true" spellcheck="false">محافظة الدقهلية</div>
+              <div class="line-center" contenteditable="true" spellcheck="false">مركز معلومات شبكات المرافق</div>
+              <div class="line-date" id="certDateDisplay" contenteditable="true" spellcheck="false">تحريراً في : الأحد الموافق 2026/09/27</div>
+            </div>
+
+            <div class="header-logos">
+              <img src="assets/logo_iso.jpg" alt="ISO Logo" id="logoIso">
+              <img src="assets/logo_dudc.jpg" alt="DUDC Logo" id="logoDudc">
+            </div>
+          </header>
+
+          <!-- 2. عنوان الشهادة الرئيسي: "شهادة إحداثيات" مطابق لـ شهادة.docx -->
+          <div class="cert-main-title" contenteditable="true" spellcheck="false">
+            شهادة إحداثيات
+          </div>
+
+          <!-- 3. جدول بيانات مقدم الطلب (كافة الحقول والتسميات قابلة للتعديل) -->
+          <table class="cert-table applicant-table" style="margin-bottom: var(--sec-gap-applicant);">
+            <colgroup>
+              <col style="width: 14.2%;">
+              <col style="width: 35.6%;">
+              <col style="width: 15.1%;">
+              <col style="width: 35.1%;">
+            </colgroup>
+            <tr>
+              <th colspan="4" class="table-section-header" contenteditable="true" spellcheck="false">بيانات مقدم الطلب</th>
+            </tr>
+            <tr>
+              <td class="field-label" contenteditable="true" spellcheck="false">اسم مقدم الطلب</td>
+              <td class="field-val" id="valApplicantName" contenteditable="true" spellcheck="false">محمد إبراهيم محمد حسن</td>
+              <td class="field-label" contenteditable="true" spellcheck="false">رقم إيصال السداد</td>
+              <td class="field-val" id="valReceiptNo" contenteditable="true" spellcheck="false">104523</td>
+            </tr>
+            <tr>
+              <td class="field-label" contenteditable="true" spellcheck="false">الرقم القومي</td>
+              <td class="field-val" id="valNationalId" contenteditable="true" spellcheck="false">29001011234567</td>
+              <td class="field-label" contenteditable="true" spellcheck="false">رقم الطلب</td>
+              <td class="field-val" id="valOrderNo" contenteditable="true" spellcheck="false">2605s</td>
+            </tr>
+            <tr>
+              <td class="field-label" contenteditable="true" spellcheck="false">المركز</td>
+              <td class="field-val" id="valCenter" contenteditable="true" spellcheck="false">نبروه</td>
+              <td class="field-label" contenteditable="true" spellcheck="false">القرية</td>
+              <td class="field-val" id="valVillage" contenteditable="true" spellcheck="false">كفر الجنينة</td>
+            </tr>
+            <tr>
+              <td class="field-label" contenteditable="true" spellcheck="false">العنوان</td>
+              <td class="field-val" id="valAddress" contenteditable="true" spellcheck="false">شارع داير الناحية بجوار المسجد الكبير</td>
+              <td class="field-label" contenteditable="true" spellcheck="false">المساحة</td>
+              <td class="field-val" id="valArea" contenteditable="true" spellcheck="false">3865.82 _ م2</td>
+            </tr>
+            <tr>
+              <td class="field-label" contenteditable="true" spellcheck="false">وصف التعامل</td>
+              <td class="field-val" id="valDealType" contenteditable="true" spellcheck="false">شهادة مطابقة مساحية وترخيص بناء</td>
+              <td class="field-label" contenteditable="true" spellcheck="false">وصف الموقع</td>
+              <td class="field-val" id="valSiteDesc" contenteditable="true" spellcheck="false">قطعة أرض فضاء محاطة بأسوار</td>
+            </tr>
+          </table>
+
+          <!-- 4. جدول الحدود والأبعاد وإحداثيات الموقع (كافة العناوين والأرقام قابلة للتعديل) -->
+          <table class="cert-table coords-table" id="secCoords" style="margin-bottom: var(--sec-gap-coords);">
+            <colgroup>
+              <col style="width: 14.16%;">
+              <col style="width: 27.12%;">
+              <col style="width: 7.14%;">
+              <col style="width: 10.65%;">
+              <col style="width: 19.66%;">
+              <col style="width: 21.27%;">
+            </colgroup>
+            <tr>
+              <th colspan="4" contenteditable="true" spellcheck="false">الحدود والابعاد على الطبيعه</th>
+              <th colspan="2" contenteditable="true" spellcheck="false">إحداثيات الموقع</th>
+            </tr>
+            <tr>
+              <th contenteditable="true" spellcheck="false">اسم الحد</th>
+              <th contenteditable="true" spellcheck="false">الجار</th>
+              <th contenteditable="true" spellcheck="false">بطول</th>
+              <th contenteditable="true" spellcheck="false">الطول (م)</th>
+              <th contenteditable="true" spellcheck="false">LONG(E)</th>
+              <th contenteditable="true" spellcheck="false">LAT(N)</th>
+            </tr>
+
+            <!-- الحد البحري -->
+            <tr>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">الحد البحري</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">شارع عمومي بعرض 10م</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">بطول</td>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">89.04</td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27252042</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05590931</span></td>
+            </tr>
+            <tr>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27311050</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05601240</span></td>
+            </tr>
+
+            <!-- الحد الشرقي -->
+            <tr>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">الحد الشرقي</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">جار ملك / حسن أحمد علي</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">بطول</td>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">43.20</td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27325010</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05562080</span></td>
+            </tr>
+            <tr>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27331000</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05521090</span></td>
+            </tr>
+
+            <!-- الحد القبلي -->
+            <tr>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">الحد القبلي</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">أرض زراعية ملك ورثة فلان</td>
+              <td rowspan="2" contenteditable="true" spellcheck="false">بطول</td>
+              <td rowspan="2" style="font-weight: bold;" contenteditable="true" spellcheck="false">88.50</td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27241020</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05510040</span></td>
+            </tr>
+            <tr>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27189030</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05518060</span></td>
+            </tr>
+
+            <!-- الحد الغربي -->
+            <tr>
+              <td rowspan="1" style="font-weight: bold;" contenteditable="true" spellcheck="false">الحد الغربي</td>
+              <td rowspan="1" contenteditable="true" spellcheck="false">مسجد الرحمة وشارع 6م</td>
+              <td rowspan="1" contenteditable="true" spellcheck="false">بطول</td>
+              <td rowspan="1" style="font-weight: bold;" contenteditable="true" spellcheck="false">42.80</td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.27192050</span></td>
+              <td><span class="coord-num" contenteditable="true" spellcheck="false">31.05579020</span></td>
+            </tr>
+          </table>
+
+          <!-- 5. قسم الصورتين -->
+          <div class="images-grid" id="secImages">
+            <!-- كروكى الموقع -->
+            <div class="image-card">
+              <div class="image-header" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+              <div class="image-preview-wrapper" id="croquisWrapper">
+                <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
+                <div class="img-action-overlay">
+                  <button class="img-tool-btn" id="btnCropCroqQuick" title="تكبير وقص">✂️ قص وضبط</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- صورة فضائية -->
+            <div class="image-card">
+              <div class="image-header" contenteditable="true" spellcheck="false">صورة فضائية</div>
+              <div class="image-preview-wrapper" id="satWrapper">
+                <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
+                <div class="img-action-overlay">
+                  <button class="img-tool-btn" id="btnCropSatQuick" title="تكبير وقص">✂️ قص وضبط</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. الملاحظات والاشتراطات الرسمية (قابلة للتعديل) -->
+          <div class="cert-notes">
+            <p contenteditable="true" spellcheck="false">بيانات الموقع على مسئولية مقدم الطلب .</p>
+            <p contenteditable="true" spellcheck="false">كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
+            <p contenteditable="true" spellcheck="false">هذا النموذج لا يعتد به إلا للغرض الذى حرر من أجله .</p>
+            <p contenteditable="true" spellcheck="false">الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
+            <p contenteditable="true" spellcheck="false">هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
+          </div>
+
+          <!-- كود التأمين والتحقق الرقمي -->
+          <div class="cert-token-line" contenteditable="true" spellcheck="false">
+            كود التأمين والتحقق الرقمي (DUDC Token): <span id="txtSecurityTokenDisplay">DUDC-7K9P2-4W1QM-8V3NB-9X5ZL-2F8TR</span>
+          </div>
+
+          <!-- 7. قسم الاعتمادات وتوقيعات مسؤولي المركز الأربعة (كافة المسميات والأسماء قابلة للتعديل) -->
+          <footer class="signatures-block" id="secSign">
+            <div class="sign-title-center" contenteditable="true" spellcheck="false">يعتمد</div>
+            <div class="sign-grid">
+              <div>
+                <div class="sign-role" contenteditable="true" spellcheck="false">فنى مساحة</div>
+                <div class="sign-name" id="sigTech" contenteditable="true" spellcheck="false">أ / محمد ابراهيم بدير</div>
+              </div>
+              <div>
+                <div class="sign-role" contenteditable="true" spellcheck="false">مسئول النظم</div>
+                <div class="sign-name" id="sigGis" contenteditable="true" spellcheck="false">أ / شريف محمد</div>
+              </div>
+              <div>
+                <div class="sign-role" contenteditable="true" spellcheck="false">رئيس قسم النظم</div>
+                <div class="sign-name" id="sigHead" contenteditable="true" spellcheck="false">م / محمد مصطفى</div>
+              </div>
+              <div>
+                <div class="sign-role" contenteditable="true" spellcheck="false">مدير المركز</div>
+                <div class="sign-name" id="sigDirector" contenteditable="true" spellcheck="false">م / السيد زين العابدين</div>
+              </div>
+            </div>
+          </footer>
+
+        </article>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ==========================================================================
+       8. نافذة استوديو تحرير وقص وتكبير الصور (Image Zoom & Crop Modal مع الأبعاد الصحيحة)
+       ========================================================================== -->
+  <div class="image-modal-backdrop" id="imageModalBackdrop">
+    <div class="image-modal">
+      <div class="modal-header">
+        <span style="font-weight: 800; font-size: 14px; color: var(--accent-green-light);" id="modalImageTitle">✂️ استوديو قص وتكبير الصورة</span>
+        <button class="btn-glass" id="btnCloseModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
+      </div>
+
+      <div class="modal-crop-canvas-wrapper" id="cropCanvasWrapper">
+        <img src="" id="modalTargetImg" class="crop-target-img">
+        <div class="crop-frame-guide" id="cropFrameGuide"></div>
+      </div>
+
+      <!-- أدوات الزووم والتحريك داخل النافذة -->
+      <div class="modal-tools">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+          <span style="font-size: 11px; color: var(--text-muted);">تكبير/تصغير:</span>
+          <input type="range" class="slider-input" id="rngModalZoom" min="1.0" max="3.5" step="0.05" value="1.0" style="max-width: 180px;">
+          <span id="txtModalZoom" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light);">100%</span>
+        </div>
+
+        <div style="display: flex; gap: 6px;">
+          <button class="btn btn-glass" id="btnModalRotate" style="padding: 4px 8px; font-size: 11px;">🔄 تدوير 90°</button>
+          <button class="btn btn-glass" id="btnModalReset" style="padding: 4px 8px; font-size: 11px;">↺ استعادة</button>
+          <label class="btn btn-glass" style="padding: 4px 8px; font-size: 11px; cursor: pointer;">
+            📁 استبدال صورة
+            <input type="file" id="modalFileInput" accept="image/*" style="display: none;">
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn btn-glass" id="btnCancelCrop">إلغاء</button>
+        <button class="btn btn-green" id="btnApplyCrop">✔ حفظ وتطبيق على الشهادة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- إشعار الحفظ كإعدادات افتراضية (Toast Notification) -->
+  <div class="save-toast" id="saveToast">
+    <span>⭐</span>
+    <span>تم حفظ الإعدادات الحالية بنجاح كإعدادات افتراضية للبرنامج!</span>
+  </div>
+
+  <!-- ==========================================================================
+       9. المحرك البرمجي التفاعلي للاستوديو (JavaScript Core Engine)
+       ========================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // عناصر DOM الأساسية
+      const certPage = document.getElementById('certPage');
+      const pageContainer = document.getElementById('pageContainer');
+      const watermarkLayer = document.getElementById('watermarkLayer');
+      const viewport = document.getElementById('viewport');
+
+      // عناصر التباعد
+      const rngMargin = document.getElementById('rngMargin');
+      const valMargin = document.getElementById('valMargin');
+      const rngGapHeader = document.getElementById('rngGapHeader');
+      const valGapHeader = document.getElementById('valGapHeader');
+      const rngGapApplicant = document.getElementById('rngGapApplicant');
+      const valGapApplicant = document.getElementById('valGapApplicant');
+      const rngGapCoords = document.getElementById('rngGapCoords');
+      const valGapCoords = document.getElementById('valGapCoords');
+      const rngGapImages = document.getElementById('rngGapImages');
+      const valGapImages = document.getElementById('valGapImages');
+      const rngGapSign = document.getElementById('rngGapSign');
+      const valGapSign = document.getElementById('valGapSign');
+      const rngTablePad = document.getElementById('rngTablePad');
+      const valTablePad = document.getElementById('valTablePad');
+
+      // عناصر الصورتين
+      const rngImageHeight = document.getElementById('rngImageHeight');
+      const valImageHeight = document.getElementById('valImageHeight');
+      const rngImageGap = document.getElementById('rngImageGap');
+      const valImageGap = document.getElementById('valImageGap');
+      const imgCroquis = document.getElementById('imgCroquis');
+      const imgSatellite = document.getElementById('imgSatellite');
+
+      // عناصر العلامة المائية المبسطة
+      const chkWatermarkActive = document.getElementById('chkWatermarkActive');
+      const rngWmOpacity = document.getElementById('rngWmOpacity');
+      const valWmOpacity = document.getElementById('valWmOpacity');
+      const rngWmAngle = document.getElementById('rngWmAngle');
+      const valWmAngle = document.getElementById('valWmAngle');
+      const rngWmSize = document.getElementById('rngWmSize');
+      const valWmSize = document.getElementById('valWmSize');
+
+      // شريط أدوات النصوص المنبثق العائم
+      const floatingToolbar = document.getElementById('floatingToolbar');
+      const fltFontFamily = document.getElementById('fltFontFamily');
+      const fltFontSizeVal = document.getElementById('fltFontSizeVal');
+      const fltFontInc = document.getElementById('fltFontInc');
+      const fltFontDec = document.getElementById('fltFontDec');
+      const fltBold = document.getElementById('fltBold');
+      const fltColorBlue = document.getElementById('fltColorBlue');
+      const fltColorBlack = document.getElementById('fltColorBlack');
+      let activeEditableElement = null;
+
+      // عناصر الزووم على الشاشة
+      let currentZoom = 1.0;
+      const zoomLevelDisplay = document.getElementById('zoomLevel');
+      const btnZoomIn = document.getElementById('btnZoomIn');
+      const btnZoomOut = document.getElementById('btnZoomOut');
+      const btnZoomReset = document.getElementById('btnZoomReset');
+      const btnZoomFit = document.getElementById('btnZoomFit');
+
+      /* ==========================================================================
+         1. تحديث قيم المسافات والتباعد (Spacing Engine)
+         ========================================================================== */
+      function updateSpacing() {
+        document.documentElement.style.setProperty('--cert-margin', `${rngMargin.value}mm`);
+        valMargin.textContent = `${rngMargin.value} mm`;
+
+        document.documentElement.style.setProperty('--sec-gap-header', `${rngGapHeader.value}px`);
+        valGapHeader.textContent = `${rngGapHeader.value} px`;
+
+        document.documentElement.style.setProperty('--sec-gap-applicant', `${rngGapApplicant.value}px`);
+        valGapApplicant.textContent = `${rngGapApplicant.value} px`;
+
+        document.documentElement.style.setProperty('--sec-gap-coords', `${rngGapCoords.value}px`);
+        valGapCoords.textContent = `${rngGapCoords.value} px`;
+
+        document.documentElement.style.setProperty('--sec-gap-images', `${rngGapImages.value}px`);
+        valGapImages.textContent = `${rngGapImages.value} px`;
+
+        document.documentElement.style.setProperty('--sec-gap-sign', `${rngGapSign.value}px`);
+        valGapSign.textContent = `${rngGapSign.value} px`;
+
+        document.documentElement.style.setProperty('--table-padding-y', `${rngTablePad.value}px`);
+        valTablePad.textContent = `${rngTablePad.value} px`;
+
+        document.documentElement.style.setProperty('--image-height', `${rngImageHeight.value}px`);
+        valImageHeight.textContent = `${rngImageHeight.value} px`;
+
+        document.documentElement.style.setProperty('--image-gap', `${rngImageGap.value}px`);
+        valImageGap.textContent = `${rngImageGap.value} px`;
+      }
+
+      [rngMargin, rngGapHeader, rngGapApplicant, rngGapCoords, rngGapImages, rngGapSign, rngTablePad, rngImageHeight, rngImageGap].forEach(el => {
+        el.addEventListener('input', updateSpacing);
+      });
+
+      document.getElementById('btnResetSpacing').addEventListener('click', () => {
+        rngMargin.value = 8;
+        rngGapHeader.value = 3;
+        rngGapApplicant.value = 4;
+        rngGapCoords.value = 5;
+        rngGapImages.value = 4;
+        rngGapSign.value = 6;
+        rngTablePad.value = 2.2;
+        rngImageHeight.value = 168;
+        rngImageGap.value = 8;
+        updateSpacing();
+      });
+
+      document.getElementById('btnAutoFit').addEventListener('click', () => {
+        const targetHeight = 1123;
+        const currentHeight = certPage.scrollHeight;
+        if (currentHeight > targetHeight) {
+          rngMargin.value = Math.max(5, rngMargin.value - 1);
+          rngGapHeader.value = 1;
+          rngGapApplicant.value = 2;
+          rngGapCoords.value = 3;
+          rngGapImages.value = 2;
+          rngGapSign.value = 4;
+          rngTablePad.value = 1.8;
+          rngImageHeight.value = Math.max(140, rngImageHeight.value - 15);
+          updateSpacing();
+        }
+        alert('⚡ تم ضبط المسافات بنجاح لتطابق صفحة A4 واحدة تماماً.');
+      });
+
+      /* ==========================================================================
+         2. محرك العلامة المائية المبسط (فقط: شفافية + زاوية + حجم)
+         ========================================================================== */
+      function renderWatermark() {
+        const isActive = chkWatermarkActive.checked;
+        const opacity = isActive ? (rngWmOpacity.value / 100) : 0;
+        const angle = `${rngWmAngle.value}deg`;
+        const size = `${rngWmSize.value}pt`;
+
+        document.documentElement.style.setProperty('--wm-opacity', opacity);
+        document.documentElement.style.setProperty('--wm-angle', angle);
+        document.documentElement.style.setProperty('--wm-size', size);
+
+        valWmOpacity.textContent = `${rngWmOpacity.value} %`;
+        valWmAngle.textContent = `${rngWmAngle.value}°`;
+        valWmSize.textContent = `${rngWmSize.value} pt`;
+
+        const wmText = 'مركز معلومات شبكات المرافق • رسمي ومعتمد • DUDC SECURE';
+
+        watermarkLayer.innerHTML = '';
+        if (isActive) {
+          const rowCount = 7;
+          for (let i = 0; i < rowCount; i++) {
+            const row = document.createElement('div');
+            row.className = 'watermark-row';
+            row.textContent = `${wmText}   •   ${wmText}`;
+            watermarkLayer.appendChild(row);
+          }
+        }
+      }
+
+      [chkWatermarkActive, rngWmOpacity, rngWmAngle, rngWmSize].forEach(el => {
+        el.addEventListener('input', renderWatermark);
+      });
+
+      /* ==========================================================================
+         3. شريط أدوات النصوص المنبثق العائم (يعمل على أي نص يتم النقر عليه)
+         ========================================================================== */
+      function showFloatingToolbar(el) {
+        activeEditableElement = el;
+        const rect = el.getBoundingClientRect();
+        const viewportRect = viewport.getBoundingClientRect();
+
+        const top = (rect.top - viewportRect.top) + viewport.scrollTop - 44;
+        const left = (rect.left - viewportRect.left) + (rect.width / 2);
+
+        floatingToolbar.style.top = `${top}px`;
+        floatingToolbar.style.left = `${left}px`;
+        floatingToolbar.style.display = 'flex';
+
+        const computedStyle = window.getComputedStyle(el);
+        const currentSize = parseInt(computedStyle.fontSize) || 12;
+        fltFontSizeVal.textContent = `${currentSize}px`;
+
+        const isBold = computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700;
+        fltBold.classList.toggle('active', isBold);
+      }
+
+      function hideFloatingToolbar() {
+        floatingToolbar.style.display = 'none';
+        activeEditableElement = null;
+      }
+
+      // تفعيل النقر على كافة العناصر القابلة للتعديل
+      certPage.addEventListener('focusin', (e) => {
+        if (e.target && e.target.isContentEditable) {
+          showFloatingToolbar(e.target);
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.isContentEditable && !floatingToolbar.contains(e.target)) {
+          hideFloatingToolbar();
+        }
+      });
+
+      fltFontFamily.addEventListener('change', () => {
+        if (activeEditableElement) {
+          activeEditableElement.style.fontFamily = fltFontFamily.value;
+        }
+      });
+
+      fltFontInc.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const current = parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12;
+          const newSize = current + 1;
+          activeEditableElement.style.fontSize = `${newSize}px`;
+          fltFontSizeVal.textContent = `${newSize}px`;
+        }
+      });
+
+      fltFontDec.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const current = parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12;
+          const newSize = Math.max(8, current - 1);
+          activeEditableElement.style.fontSize = `${newSize}px`;
+          fltFontSizeVal.textContent = `${newSize}px`;
+        }
+      });
+
+      fltBold.addEventListener('click', () => {
+        if (activeEditableElement) {
+          const isBold = activeEditableElement.style.fontWeight === 'bold' || parseInt(window.getComputedStyle(activeEditableElement).fontWeight) >= 700;
+          activeEditableElement.style.fontWeight = isBold ? 'normal' : 'bold';
+          fltBold.classList.toggle('active', !isBold);
+        }
+      });
+
+      fltColorBlue.addEventListener('click', () => {
+        if (activeEditableElement) activeEditableElement.style.color = '#1e3a8a';
+      });
+      fltColorBlack.addEventListener('click', () => {
+        if (activeEditableElement) activeEditableElement.style.color = '#000000';
+      });
+
+      /* ==========================================================================
+         4. استوديو قص وتكبير وتحريك الصور بالأبعاد الحقيقية الصحيحة 100%
+         ========================================================================== */
+      const imageModalBackdrop = document.getElementById('imageModalBackdrop');
+      const btnCloseModal = document.getElementById('btnCloseModal');
+      const btnCancelCrop = document.getElementById('btnCancelCrop');
+      const btnApplyCrop = document.getElementById('btnApplyCrop');
+      const modalTargetImg = document.getElementById('modalTargetImg');
+      const rngModalZoom = document.getElementById('rngModalZoom');
+      const txtModalZoom = document.getElementById('txtModalZoom');
+      const btnModalRotate = document.getElementById('btnModalRotate');
+      const btnModalReset = document.getElementById('btnModalReset');
+      const modalFileInput = document.getElementById('modalFileInput');
+      const cropCanvasWrapper = document.getElementById('cropCanvasWrapper');
+      const cropFrameGuide = document.getElementById('cropFrameGuide');
+
+      let currentEditingTarget = null; // 'croquis' or 'sat'
+      let imgState = { baseWidth: 0, baseHeight: 0, zoom: 1.0, posX: 0, posY: 0, rotate: 0 };
+      let isDraggingImg = false;
+      let startMouseX = 0, startMouseY = 0;
+      let frameW = 500, frameH = 240;
+
+      function openImageStudio(targetType) {
+        currentEditingTarget = targetType;
+        const sourceImg = (targetType === 'croquis') ? imgCroquis : imgSatellite;
+        const targetWrapper = (targetType === 'croquis') ? document.getElementById('croquisWrapper') : document.getElementById('satWrapper');
+        
+        document.getElementById('modalImageTitle').textContent = (targetType === 'croquis') 
+          ? '✂️ استوديو قص وتكبير كروكي الموقع' 
+          : '✂️ استوديو قص وتكبير صورة القمر الصناعي';
+
+        // حساب نسبة الأبعاد الحقيقية لصندوق الصورة في الشهادة
+        const targetAspect = targetWrapper.clientWidth / targetWrapper.clientHeight;
+        const wrapperW = cropCanvasWrapper.clientWidth || 700;
+        const wrapperH = cropCanvasWrapper.clientHeight || 380;
+
+        // ضبط أبعاد إطار القص في النافذة بنفس النسبة
+        const maxFrameW = wrapperW * 0.85;
+        const maxFrameH = wrapperH * 0.85;
+
+        if (maxFrameW / maxFrameH > targetAspect) {
+          frameH = maxFrameH;
+          frameW = frameH * targetAspect;
+        } else {
+          frameW = maxFrameW;
+          frameH = frameW / targetAspect;
+        }
+
+        cropFrameGuide.style.width = `${frameW}px`;
+        cropFrameGuide.style.height = `${frameH}px`;
+
+        // تحميل الصورة وحساب المقاس الابتدائي بحيث تظهر كاملة داخل الإطار
+        modalTargetImg.onload = () => {
+          const natW = modalTargetImg.naturalWidth;
+          const natH = modalTargetImg.naturalHeight;
+
+          // احتواء كامل داخل إطار القص أول ما يفتح
+          const scaleToFit = Math.min(frameW / natW, frameH / natH) * 1.05;
+          imgState.baseWidth = natW * scaleToFit;
+          imgState.baseHeight = natH * scaleToFit;
+          imgState.zoom = 1.0;
+          imgState.posX = 0;
+          imgState.posY = 0;
+          imgState.rotate = 0;
+
+          modalTargetImg.style.width = `${imgState.baseWidth}px`;
+          modalTargetImg.style.height = `${imgState.baseHeight}px`;
+
+          rngModalZoom.value = 1.0;
+          txtModalZoom.textContent = '100%';
+          applyImgTransform();
+        };
+
+        modalTargetImg.src = sourceImg.src;
+        imageModalBackdrop.style.display = 'flex';
+      }
+
+      function applyImgTransform() {
+        modalTargetImg.style.transform = `translate(${imgState.posX}px, ${imgState.posY}px) scale(${imgState.zoom}) rotate(${imgState.rotate}deg)`;
+      }
+
+      document.getElementById('btnOpenCropCroquis').addEventListener('click', () => openImageStudio('croquis'));
+      document.getElementById('btnOpenCropSat').addEventListener('click', () => openImageStudio('sat'));
+      document.getElementById('btnCropCroqQuick').addEventListener('click', () => openImageStudio('croquis'));
+      document.getElementById('btnCropSatQuick').addEventListener('click', () => openImageStudio('sat'));
+
+      function closeModal() {
+        imageModalBackdrop.style.display = 'none';
+      }
+
+      btnCloseModal.addEventListener('click', closeModal);
+      btnCancelCrop.addEventListener('click', closeModal);
+
+      rngModalZoom.addEventListener('input', () => {
+        imgState.zoom = parseFloat(rngModalZoom.value);
+        txtModalZoom.textContent = `${Math.round(imgState.zoom * 100)}%`;
+        applyImgTransform();
+      });
+
+      btnModalRotate.addEventListener('click', () => {
+        imgState.rotate = (imgState.rotate + 90) % 360;
+        applyImgTransform();
+      });
+
+      btnModalReset.addEventListener('click', () => {
+        imgState.zoom = 1.0;
+        imgState.posX = 0;
+        imgState.posY = 0;
+        imgState.rotate = 0;
+        rngModalZoom.value = 1.0;
+        txtModalZoom.textContent = '100%';
+        applyImgTransform();
+      });
+
+      // السحب والتحريك الحر (Pan)
+      cropCanvasWrapper.addEventListener('mousedown', (e) => {
+        isDraggingImg = true;
+        startMouseX = e.clientX - imgState.posX;
+        startMouseY = e.clientY - imgState.posY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingImg) return;
+        imgState.posX = e.clientX - startMouseX;
+        imgState.posY = e.clientY - startMouseY;
+        applyImgTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDraggingImg = false;
+      });
+
+      modalFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            modalTargetImg.src = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // حفظ وتطبيق القص على الشهادة بجودة عالية
+      btnApplyCrop.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = frameW * 2;
+        canvas.height = frameH * 2;
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = modalTargetImg.src;
+        img.onload = () => {
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((imgState.rotate * Math.PI) / 180);
+
+          const scaleRatio = canvas.width / frameW;
+          const drawW = imgState.baseWidth * imgState.zoom * scaleRatio;
+          const drawH = imgState.baseHeight * imgState.zoom * scaleRatio;
+          const drawX = imgState.posX * scaleRatio;
+          const drawY = imgState.posY * scaleRatio;
+
+          ctx.drawImage(img, drawX - (drawW / 2), drawY - (drawH / 2), drawW, drawH);
+          ctx.restore();
+
+          const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+          if (currentEditingTarget === 'croquis') {
+            imgCroquis.src = croppedDataUrl;
+          } else {
+            imgSatellite.src = croppedDataUrl;
+          }
+          closeModal();
+        };
+      });
+
+      /* ==========================================================================
+         5. حفظ واستعادة الإعدادات الافتراضية للبرنامج (Save as Default Settings)
+         ========================================================================== */
+      const btnSaveAsDefault = document.getElementById('btnSaveAsDefault');
+      const saveToast = document.getElementById('saveToast');
+
+      function showToast() {
+        saveToast.classList.add('show');
+        setTimeout(() => saveToast.classList.remove('show'), 3000);
+      }
+
+      btnSaveAsDefault.addEventListener('click', () => {
+        const defaultSettings = {
+          margin_mm: rngMargin.value,
+          gap_header: rngGapHeader.value,
+          gap_applicant: rngGapApplicant.value,
+          gap_coords: rngGapCoords.value,
+          gap_images: rngGapImages.value,
+          gap_sign: rngGapSign.value,
+          table_pad: rngTablePad.value,
+          image_height: rngImageHeight.value,
+          image_gap: rngImageGap.value,
+          wm_active: chkWatermarkActive.checked,
+          wm_opacity: rngWmOpacity.value,
+          wm_angle: rngWmAngle.value,
+          wm_size: rngWmSize.value
+        };
+
+        localStorage.setItem('dudc_v3_default_settings', JSON.stringify(defaultSettings));
+        showToast();
+      });
+
+      function loadDefaultSettings() {
+        const saved = localStorage.getItem('dudc_v3_default_settings');
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            rngMargin.value = data.margin_mm ?? 8;
+            rngGapHeader.value = data.gap_header ?? 3;
+            rngGapApplicant.value = data.gap_applicant ?? 4;
+            rngGapCoords.value = data.gap_coords ?? 5;
+            rngGapImages.value = data.gap_images ?? 4;
+            rngGapSign.value = data.gap_sign ?? 6;
+            rngTablePad.value = data.table_pad ?? 2.2;
+            rngImageHeight.value = data.image_height ?? 168;
+            rngImageGap.value = data.image_gap ?? 8;
+
+            chkWatermarkActive.checked = data.wm_active ?? true;
+            rngWmOpacity.value = data.wm_opacity ?? 10;
+            rngWmAngle.value = data.wm_angle ?? -30;
+            rngWmSize.value = data.wm_size ?? 13;
+          } catch (e) {
+            console.warn('Could not parse default settings', e);
+          }
+        }
+      }
+
+      /* ==========================================================================
+         6. نسبة العرض والتنقل السريع داخل طاولة العرض
+         ========================================================================== */
+      function setZoom(factor) {
+        currentZoom = Math.min(Math.max(0.4, factor), 1.8);
+        pageContainer.style.transform = `scale(${currentZoom})`;
+        zoomLevelDisplay.textContent = `${Math.round(currentZoom * 100)}%`;
+      }
+
+      btnZoomIn.addEventListener('click', () => setZoom(currentZoom + 0.1));
+      btnZoomOut.addEventListener('click', () => setZoom(currentZoom - 0.1));
+      btnZoomReset.addEventListener('click', () => setZoom(1.0));
+      btnZoomFit.addEventListener('click', () => {
+        const viewportWidth = viewport.clientWidth - 70;
+        const fitScale = viewportWidth / 794;
+        setZoom(fitScale);
+      });
+
+      document.getElementById('navTop').addEventListener('click', () => {
+        viewport.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      document.getElementById('navCoords').addEventListener('click', () => {
+        document.getElementById('secCoords').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      document.getElementById('navImages').addEventListener('click', () => {
+        document.getElementById('secImages').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      document.getElementById('navSign').addEventListener('click', () => {
+        document.getElementById('secSign').scrollIntoView({ behavior: 'smooth', block: 'end' });
+      });
+
+      /* ==========================================================================
+         7. حفظ واستيراد الجلسة كملف JSON
+         ========================================================================== */
+      document.getElementById('btnExportJson').addEventListener('click', () => {
+        const citizenName = document.getElementById('valApplicantName').textContent.trim() || 'شهادة_مساحية';
+        const sessionData = {
+          version: '3.0',
+          exported_at: new Date().toISOString(),
+          applicant_data: {
+            name: document.getElementById('valApplicantName').textContent.trim(),
+            receipt_no: document.getElementById('valReceiptNo').textContent.trim(),
+            national_id: document.getElementById('valNationalId').textContent.trim(),
+            order_no: document.getElementById('valOrderNo').textContent.trim(),
+            center: document.getElementById('valCenter').textContent.trim(),
+            village: document.getElementById('valVillage').textContent.trim(),
+            address: document.getElementById('valAddress').textContent.trim(),
+            area: document.getElementById('valArea').textContent.trim(),
+            deal_type: document.getElementById('valDealType').textContent.trim(),
+            site_desc: document.getElementById('valSiteDesc').textContent.trim(),
+            date_text: document.getElementById('certDateDisplay').textContent.trim()
+          },
+          signatories: {
+            survey_tech: document.getElementById('sigTech').textContent.trim(),
+            gis_officer: document.getElementById('sigGis').textContent.trim(),
+            dept_head: document.getElementById('sigHead').textContent.trim(),
+            director: document.getElementById('sigDirector').textContent.trim()
+          },
+          security: {
+            token: document.getElementById('txtSecurityTokenDisplay').textContent.trim()
+          },
+          sliders: {
+            margin_mm: rngMargin.value,
+            gap_header: rngGapHeader.value,
+            gap_applicant: rngGapApplicant.value,
+            gap_coords: rngGapCoords.value,
+            gap_images: rngGapImages.value,
+            gap_sign: rngGapSign.value,
+            table_pad: rngTablePad.value,
+            image_height: rngImageHeight.value,
+            image_gap: rngImageGap.value
+          },
+          watermark: {
+            active: chkWatermarkActive.checked,
+            opacity: rngWmOpacity.value,
+            angle: rngWmAngle.value,
+            size: rngWmSize.value
+          }
+        };
+
+        const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${citizenName}_session.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      const btnImportJson = document.getElementById('btnImportJson');
+      const fileJsonInput = document.getElementById('fileJsonInput');
+
+      btnImportJson.addEventListener('click', () => fileJsonInput.click());
+
+      fileJsonInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const data = JSON.parse(evt.target.result);
+            if (data.applicant_data) {
+              document.getElementById('valApplicantName').textContent = data.applicant_data.name || '';
+              document.getElementById('valReceiptNo').textContent = data.applicant_data.receipt_no || '';
+              document.getElementById('valNationalId').textContent = data.applicant_data.national_id || '';
+              document.getElementById('valOrderNo').textContent = data.applicant_data.order_no || '';
+              document.getElementById('valCenter').textContent = data.applicant_data.center || '';
+              document.getElementById('valVillage').textContent = data.applicant_data.village || '';
+              document.getElementById('valAddress').textContent = data.applicant_data.address || '';
+              document.getElementById('valArea').textContent = data.applicant_data.area || '';
+              document.getElementById('valDealType').textContent = data.applicant_data.deal_type || '';
+              document.getElementById('valSiteDesc').textContent = data.applicant_data.site_desc || '';
+              if (data.applicant_data.date_text) {
+                document.getElementById('certDateDisplay').textContent = data.applicant_data.date_text;
+              }
+            }
+            if (data.signatories) {
+              document.getElementById('sigTech').textContent = data.signatories.survey_tech || '';
+              document.getElementById('sigGis').textContent = data.signatories.gis_officer || '';
+              document.getElementById('sigHead').textContent = data.signatories.dept_head || '';
+              document.getElementById('sigDirector').textContent = data.signatories.director || '';
+            }
+            if (data.security && data.security.token) {
+              document.getElementById('txtSecurityTokenDisplay').textContent = data.security.token;
+            }
+            if (data.sliders) {
+              rngMargin.value = data.sliders.margin_mm ?? 8;
+              rngGapHeader.value = data.sliders.gap_header ?? 3;
+              rngGapApplicant.value = data.sliders.gap_applicant ?? 4;
+              rngGapCoords.value = data.sliders.gap_coords ?? 5;
+              rngGapImages.value = data.sliders.gap_images ?? 4;
+              rngGapSign.value = data.sliders.gap_sign ?? 6;
+              rngTablePad.value = data.sliders.table_pad ?? 2.2;
+              rngImageHeight.value = data.sliders.image_height ?? 168;
+              rngImageGap.value = data.sliders.image_gap ?? 8;
+              updateSpacing();
+            }
+            if (data.watermark) {
+              chkWatermarkActive.checked = data.watermark.active ?? true;
+              rngWmOpacity.value = data.watermark.opacity ?? 10;
+              rngWmAngle.value = data.watermark.angle ?? -30;
+              rngWmSize.value = data.watermark.size ?? 13;
+              renderWatermark();
+            }
+            alert('✔ تم استيراد الجلسة واستعادة كافة الإعدادات بنجاح!');
+          } catch (err) {
+            alert('❌ خطأ في قراءة ملف الجلسة: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById('btnPrintCert').addEventListener('click', () => {
+        window.print();
+      });
+
+      // التحميل والتهيئة
+      loadDefaultSettings();
+      updateSpacing();
+      renderWatermark();
+    });
+  </script>
+</body>
+</html>
