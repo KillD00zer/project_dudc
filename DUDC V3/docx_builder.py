@@ -27,6 +27,12 @@ import security_overlay
 
 ARABIC_DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 
+def to_arabic_numerals(text):
+    if text is None:
+        return ""
+    trans = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+    return str(text).translate(trans)
+
 def format_issue_date(issue_date_val=None):
     if isinstance(issue_date_val, str) and issue_date_val.strip():
         for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d/%m/%Y"):
@@ -40,7 +46,8 @@ def format_issue_date(issue_date_val=None):
     else:
         dt = datetime.now()
     day_name = ARABIC_DAYS[dt.weekday()]
-    display_text = f"تحريراً في : {day_name} الموافق {dt.year:04d}/{dt.month:02d}/{dt.day:02d}"
+    date_str = to_arabic_numerals(f"{dt.year:04d}/{dt.month:02d}/{dt.day:02d}")
+    display_text = f"تحريراً في : {day_name} الموافق {date_str}"
     iso_date = f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
     return display_text, iso_date
 
@@ -246,11 +253,11 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
     # 1. Applicant & Parcel Metadata (Rows 1 to 5)
     # Row 1: Applicant Name & Receipt No
     set_cell_text(table.rows[1].cells[1], parcel.get("applicant_name", ""), bold=True, font_size=12)
-    set_cell_text(table.rows[1].cells[5], parcel.get("receipt_no", ""), bold=True, font_size=12)
+    set_cell_text(table.rows[1].cells[5], to_arabic_numerals(parcel.get("receipt_no", "")), bold=True, font_size=12)
     
     # Row 2: National ID & Request No
-    set_cell_text(table.rows[2].cells[1], parcel.get("national_id", ""), bold=True, font_size=12)
-    set_cell_text(table.rows[2].cells[5], parcel.get("request_no", ""), bold=True, font_size=12)
+    set_cell_text(table.rows[2].cells[1], to_arabic_numerals(parcel.get("national_id", "")), bold=True, font_size=12)
+    set_cell_text(table.rows[2].cells[5], to_arabic_numerals(parcel.get("request_no", "")), bold=True, font_size=12)
     
     # Row 3: District & Village
     set_cell_text(table.rows[3].cells[1], parcel.get("district", ""), bold=True, font_size=12)
@@ -260,7 +267,7 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
     # Row 4: Address & Area
     set_cell_text(table.rows[4].cells[1], parcel.get("address", ""), bold=True, font_size=12)
     area_val = parcel.get('stated_area_m2', '')
-    area_str = f"{area_val} _ م2" if area_val else ""
+    area_str = f"{to_arabic_numerals(area_val)} م²" if area_val else ""
     set_cell_text(table.rows[4].cells[5], area_str, bold=True, font_size=12)
     
     # Row 5: Transaction & Site Status
@@ -369,7 +376,7 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
         num_pts = len(pts)
         dir_name = item["dir"]["name"]
         neighbor = item["neighbor"]
-        total_len_str = f"{item['total_len']:.2f}"
+        total_len_str = to_arabic_numerals(f"{item['total_len']:.2f}")
         
         # Set text on first row of boundary
         row0 = table.rows[curr_r]

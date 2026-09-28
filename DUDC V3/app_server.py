@@ -1,6 +1,6 @@
 """
-DUDC V3 - Next-Generation Cadastral Certificate Workflow Server
-==============================================================
+DUDC V3.5 - Next-Generation Cadastral Certificate Workflow Server
+================================================================
 Dakahlia Utility Data Center (مركز معلومات شبكات المرافق)
 Provides local REST API endpoints for the complete 3-Stage Workflow:
 1. Stage 1: Survey Ingestion, Geodesic Validation, Satellite & Croquis Generation, Token Creation
@@ -206,6 +206,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
         
         if path in ('/', '/index.html'):
             self._send_file(INDEX_HTML, 'text/html; charset=utf-8')
+        elif path == '/api/health':
+            self._send_json({"status": "online", "version": "3.5", "timestamp": time.time()})
         elif path == '/api/get-output-dir':
             self._send_json({"output_dir": OUTPUT_DIR})
         elif path == '/api/get-centers':
@@ -615,13 +617,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     parcel["security_token"] = new_token
 
                 generate_certificate_docx(
-                    template_path=template_docx,
-                    output_path=docx_out_path,
                     parcel=parcel,
                     croquis_img_path=croq_target_path,
                     satellite_img_path=sat_target_path,
-                    survey_technician=survey_tech,
-                    system_officer=sys_officer
+                    output_docx_path=docx_out_path,
+                    template_path=template_docx,
+                    survey_tech=survey_tech,
+                    sys_officer=sys_officer,
+                    security_token=parcel.get("security_token")
                 )
 
                 # 4: Full Session State File (.json)
@@ -701,7 +704,7 @@ def start_server(port=8765):
         try:
             server = HTTPServer(('127.0.0.1', p), DUDCV3RequestHandler)
             print(f"==================================================")
-            print(f"  🏛️ DUDC V3 Cadastral Studio Server Running")
+            print(f"  🏛️ DUDC V3.5 Cadastral Studio Server Running")
             print(f"  URL: http://127.0.0.1:{p}")
             print(f"==================================================")
             return server, p
@@ -715,5 +718,5 @@ if __name__ == '__main__':
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nStopping DUDC V3 Server...")
+        print("\nStopping DUDC V3.5 Server...")
         server.server_close()
