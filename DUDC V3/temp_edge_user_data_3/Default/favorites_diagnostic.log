@@ -1,0 +1,43 @@
+2026-09-28 09:30:31.973: [INFO] CurrentProfilePath: D:\Work\GIS_tools\project_dudc\DUDC V3\temp_edge_user_data_3\Default
+2026-09-28 09:30:31.973: [INFO] Profiles total count: 1
+2026-09-28 09:30:31.973: [INFO] Profile: name=Profile 1 path=D:\Work\GIS_tools\project_dudc\DUDC V3\temp_edge_user_data_3\Default lastActive=null
+2026-09-28 09:30:31.973: [INFO] LastUsedProfileDir: D:\Work\GIS_tools\project_dudc\DUDC V3\temp_edge_user_data_3\Default
+2026-09-28 09:30:31.973: [INFO] VisibilityChanged: 0
+2026-09-28 09:30:31.991: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:31.993: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:31.996: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:31.999: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.001: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.003: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.005: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.008: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.010: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.012: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:32.025: [INFO] OnDoneLoading sync enabled: 0
+2026-09-28 09:30:32.025: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-09-28 09:30:32.025: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-09-28 09:30:32.025: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-09-28 09:30:32.030: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:33.702: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 0
+2026-09-28 09:30:33.706: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-09-28 09:30:33.710: [INFO] Primary account changed.
+2026-09-28 09:30:33.710: [INFO] OnPrimaryAccountChanged PrimaryAccountChangeEvent::Type::kSet
+2026-09-28 09:30:33.731: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-09-28 09:30:33.752: [INFO] RecordSyncInitDuration has_sync_been_enabled: 0 state: 3
+2026-09-28 09:30:41.732: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.732: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.732: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.733: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.733: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.733: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.734: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.734: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.734: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.735: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.735: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.735: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.735: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.735: [INFO] BookmarkNodeAdded, ABU: 0
+2026-09-28 09:30:41.760: [INFO] BookmarkBarPrefChanged showBar=0 showBarNTP=0
+2026-09-28 09:30:41.808: [INFO] VisibilityChanged: 1
+2026-09-28 09:30:42.245: [INFO] Sync initialization duration: 8404ms

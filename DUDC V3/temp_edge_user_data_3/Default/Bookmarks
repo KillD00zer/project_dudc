@@ -1,0 +1,209 @@
+{
+   "checksum": "3ceef84a7fdfcd3816aa87f30107e13d",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "0",
+            "date_last_used": "13399678844399056",
+            "guid": "2b6aeb2e-6953-4b36-8395-aab629ecd18e",
+            "id": "9",
+            "name": "فيسبوك",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.facebook.com/",
+            "visit_count": 4
+         }, {
+            "date_added": "0",
+            "date_last_used": "13399678881359707",
+            "guid": "85d8b002-ecc2-4bab-80d6-704ebc5dedf6",
+            "id": "10",
+            "name": "WhatsApp Web",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://web.whatsapp.com/",
+            "visit_count": 3
+         }, {
+            "date_added": "13355157022458349",
+            "date_last_used": "13427923751616247",
+            "guid": "b47f9f61-aca2-409b-bdd7-7a778efa9d79",
+            "id": "11",
+            "name": "YouTube",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.youtube.com/?app",
+            "visit_count": 58
+         }, {
+            "date_added": "13391616148318443",
+            "date_last_used": "13426420452297807",
+            "guid": "f6b642c4-2df5-40ca-be3c-6025a6554059",
+            "id": "12",
+            "name": "My IBM",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://myibm.ibm.com/dashboard/",
+            "visit_count": 3
+         }, {
+            "date_added": "13383226268424162",
+            "date_last_used": "13407167723296407",
+            "guid": "b7aca469-9904-4857-8d51-9cce71db864f",
+            "id": "13",
+            "name": "https://yat703-my.sharepoint.com/personal/depi2_yat_com_eg/_layouts/15/onedrive.aspx?csf=1&web=1&e=t7uBSu&CID=a952855c%2D35ee%2D4841%2Db6c7%2D4c0efb18d8c4&id=%2Fpersonal%2Fdepi2%5Fyat%5Fcom%5Feg%2FDocuments%2FDEPI%20YAT%20Learning%5FRound%202%2FWeekly%20Assignments%2FData%20Science%2FHRV486A%5FDKH2%5FAIS4%5FG1&FolderCTID=0x012000A9C28D4D3762EE49A42EF8BC4006F185&view=0",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://yat703-my.sharepoint.com/personal/depi2_yat_com_eg/_layouts/15/onedrive.aspx?csf=1&web=1&e=t7uBSu&CID=a952855c-35ee-4841-b6c7-4c0efb18d8c4&id=%2Fpersonal%2Fdepi2_yat_com_eg%2FDocuments%2FDEPI%20YAT%20Learning_Round%202%2FWeekly%20Assignments%2FData%20Science%2FHRV486A_DKH2_AIS4_G1&FolderCTID=0x012000A9C28D4D3762EE49A42EF8BC4006F185&view=0",
+            "visit_count": 3
+         }, {
+            "date_added": "13388921726072391",
+            "date_last_used": "13426420461764725",
+            "guid": "823cc247-5237-4c31-b824-0b9fb2e1fe8d",
+            "id": "14",
+            "name": "action",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.kaggle.com/code/mohamedshata/action/output",
+            "visit_count": 1
+         } ],
+         "date_added": "13435061431781771",
+         "date_last_used": "0",
+         "date_modified": "13391616148318443",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [ {
+            "children": [  ],
+            "date_added": "13348927317544616",
+            "date_last_used": "0",
+            "date_modified": "13348927317544616",
+            "guid": "0999e911-71ff-4ce6-96db-d79ab2a4f9b9",
+            "id": "15",
+            "name": "Other Bookmarks",
+            "source": "unknown",
+            "type": "folder"
+         }, {
+            "children": [ {
+               "date_added": "0",
+               "date_last_used": "0",
+               "guid": "5b0cc1d4-6295-45b9-a7c0-f9e073c11aac",
+               "id": "17",
+               "name": "منديل معطر / وايبس بالشعار / .... - بوكيه للمناديل و معطرات الجو",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "http://bouquetgroup.com/%D9%85%D9%86%D8%AF%D9%8A%D9%84-%D9%85%D8%A8%D9%84%D9%84-%D9%88-%D9%85%D9%86%D8%AF%D9%8A%D9%84-%D9%85%D8%B9%D8%B7%D8%B1-%D8%A8%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1/",
+               "visit_count": 0
+            }, {
+               "date_added": "0",
+               "date_last_used": "0",
+               "guid": "3287f2c4-512c-4c87-a98f-d7cc7f724b53",
+               "id": "18",
+               "name": "مسرح مصر الموسم الخامس | اكوام",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "https://akwam.in/shows/753/%D9%85%D8%B3%D8%B1%D8%AD-%D9%85%D8%B5%D8%B1-%D8%A7%D9%84%D9%85%D9%88%D8%B3%D9%85-%D8%A7%D9%84%D8%AE%D8%A7%D9%85%D8%B3-1#show-episodes",
+               "visit_count": 0
+            }, {
+               "date_added": "0",
+               "date_last_used": "0",
+               "guid": "6878ef68-1e6c-459a-8e63-2ef4bb7cdcbd",
+               "id": "19",
+               "name": "انمي The Legend of Vox Machina الموسم الاول مترجم - شاهد فور يو",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "https://shahed4u.red/series/%d8%a7%d9%86%d9%85%d9%8a-the-legend-of-vox-machina-%d8%a7%d9%84%d9%85%d9%88%d8%b3%d9%85-%d8%a7%d9%84%d8%a7%d9%88%d9%84-%d9%85%d8%aa%d8%b1%d8%ac%d9%85/list/",
+               "visit_count": 0
+            }, {
+               "date_added": "0",
+               "date_last_used": "0",
+               "guid": "3a32454d-a79f-433e-81f9-649dc61e2ae5",
+               "id": "20",
+               "name": "تحميل أنيمي - وقت الانمي",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "https://anime-time.co/download-anime/?rid=97745",
+               "visit_count": 0
+            } ],
+            "date_added": "13348927317544776",
+            "date_last_used": "0",
+            "date_modified": "13348927317544776",
+            "guid": "49f9085d-bf40-404d-9d98-ebbac682be5b",
+            "id": "16",
+            "name": "Synced Bookmarks",
+            "source": "unknown",
+            "type": "folder"
+         } ],
+         "date_added": "13435061431781771",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [ {
+            "date_added": "13350961622892742",
+            "date_last_used": "0",
+            "guid": "a79f9cc5-8dae-49da-a822-95f98f9aa62f",
+            "id": "7",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "https://m.autodoc.co.uk/",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://m.autodoc.co.uk/",
+            "visit_count": 0
+         }, {
+            "date_added": "13350961622894418",
+            "date_last_used": "0",
+            "guid": "9d172986-e96f-47c2-9af1-176f52585e57",
+            "id": "8",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "https://www.yoyopart.com/",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.yoyopart.com/",
+            "visit_count": 0
+         } ],
+         "date_added": "13435061431781771",
+         "date_last_used": "0",
+         "date_modified": "13350961622894418",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "workspaces_v2": {
+         "children": [  ],
+         "date_added": "13435061431781771",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "75aa6670-344f-549d-b742-660f029506ab",
+         "id": "5",
+         "name": "Workspaces",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CkEKHgiIgQISCDylVeegAQAAKg4QABgBIAAoBTAAOABAABIAKhg5VGR2WGE5ZGN4ZTMxVnFHZ2dKSUVnPT1IA6AGDBKMAQgFEocBChx3UkJyWkwrNlBBOWF2S2dqTlA3SlhETGNmdnM9EiRhMjg4MTQ4Mi1jMzcwLTViZWMtODU2YS0yZDcxNjE0YzI3NzAYACAAKAAwiZ3dmJYzOO2d3ZiWM0Dtnd2YljNKHG5teDY1c1FEdnhJOFRnRWV2K0ErbnR0b1NuND1lAAAAAMI+AmAAEq0BCBMSqAEKHDFyUTQ5enpJMHVQcFJTOUx1R1krVThyeVExWT0SJDY4NzhlZjY4LTFlNmMtNDU5YS04ZTYzLTJlZjRiYjdjZGNiZBgAIAAoADC9k+/KzTE46ZXvys0xQOmV78rNMUocYUt3K0k4UmpBc3B5RmVZQ05ZUlFvZkdGK0dZPVofIh29L2hwZ0hrUURCcWlGckI5OGV4T0hJazJtOHRVPWUAAAAAwj4CYAUSrAEIEhKnAQoceFlEb0ZQd3lqeWd0QkYzaHdPbDhEUTJhZ1VrPRIkMzI4N2YyYzQtNTEyYy00Yzg3LWE5OGYtZDdjYzdmNzI0YjUzGAAgACgAMLyT78rNMTi8le/KzTFAvJXvys0xShx2R05kWG9GM2dNWkdLWUxOd3JyZzMzQkx0MjQ9Wh4iHHp0eEpONi91RmdST0trV2lDRTE2OS85Z0hTdz1lAAAAAMI+AmAFEq0BCBQSqAEKHENjelg2R2E0NEpGNDV4ajA5N2Qvdlp6bzRiST0SJDNhMzI0NTRkLWE3OWYtNDMzZS04MWY5LTY0OWRjNjFlMmFlNRgAIAAoADC+k+/KzTE4qJbvys0xQKiW78rNMUocVzBIa054bVROR1pkUHpMcS9GN0JmcUh2Q3NvPVofIh3eQTEzamFrbFRQcUZqOGVLMzJpenBKNnBHWDg4PWUAAAAAwj4CYAUSrAEIERKnAQocUXFxRW5MRFRFTDZpdUdBQXdNT01xZjdXZEFVPRIkNWIwY2MxZDQtNjI5NS00NWI5LWE3YzAtZjllMDczYzExYWFjGAAgACgAMLuT78rNMTiTle/KzTFAk5Xvys0xShwvNnRRRGw4SXlsSTU2dHdNUVNXbktVZXJpSnM9Wh4iHEkzSk9LQmpVc3R1bzdMMlJ0OUoyK0JUbTVRaz1lAAAAAMI+AmAFEq0BCBASqAEKHHZLcXRWV1VWUW1ua0VWeUcyM2lkZTJZdy9nZz0SJDQ5ZjkwODVkLWJmNDAtNDA0ZC05ZDk4LWViYmFjNjgyYmU1YhgAIAAoADC6k+/KzTE42JTvys0xQNiU78rNMUoca0VpUWxhdkpydFhlNDZ0T25rc2NPNUIzeTlJPVofIh2iOVo3bFo2T2dxUlBmL0hzZjI2YXNYU0VUTCtJPWUAAAAAwj4CYAASrAEIDxKnAQocTWdIVU50elFFY0UzQys0bWhWa2phUGdwN3IwPRIkMDk5OWU5MTEtNzFmZi00Y2U2LTk2ZGItZDc5YWIyYTRmOWI5GAAgACgAMKGg78rNMTiRpe/KzTFAkaXvys0xShxndXVHczh1c2lXSDBzUDRISjhWRFIvM3haams9Wh4iHERCMHBzTGJXTnVvdmJ3c2ZCOURXZkwrbHR1bz1lAAAAAMI+AmAAEqwBCAcSpwEKHFgxcVlKQVJaTHJMaG4vTU9WL09TeFFBM3ZsZz0SJGE3OWY5Y2M1LThkYWUtNDlkYS1hODIyLTk1Zjk4ZjlhYTYyZhgAIAAoADDE1vOU1TE4p9fzlNUxQKfX85TVMUocUjFPM3BiUk5ucXRRREVta1V4TDEzV2dTY0YwPVoeIhx2ZTFSY2NUMDc5RlR2THZzUG5paTRzWDk3Nms9ZQAAAADCPgJgBRKtAQgKEqgBChxteWFTSFB1R2JQdW5zWGFXK25JQUUxeVBveU09EiQ4NWQ4YjAwMi1lY2MyLTRiYWItODBkNi03MDRlYmM1ZGVkZjYYACAAKAAw2r+6m4E0OIKJ78rNMUCCie/KzTFKHEsvSnhicWJCQXlWaG5Ca1FhbmtuY0tyQXRGMD1aHyId/m11K3d1QURveS9EZ1NObU9Qd2lNTERaeTFJdz1lQddwG8I+AmAFEq8BCA4SqgEKHHM2c3NoUlY2bTJHSm50SlVOeWhhNFlIK015OD0SJDgyM2NjMjQ3LTUyMzctNGMzMS1iODI0LTBiOWZiMmUxZmU4ZBgAIAAoADCA/72i7jM416nYyeIyQNep2MniMkocTC9IR0M4a25nalJYSVZVQkxmQkc0dkpBZVdrPVohIh///5lEbEFYbG9LQU43MmlhR0VSTWZpbFRtUjZLWVE9ZT/JsZ3CPgJgBRKuAQgNEqkBChxHS1JNYVhiaDU5bDhMSi85ckdkc2hwZDh2Q0k9EiRiN2FjYTQ2OS05OTA0LTQ4NTctOGQ1MS05Y2NlNzFkYjg2NGYYACAAKAAwvseHxqYzOMGE8a3NMkDBhPGtzTJKHDRMeGc2bWJ3N3NsMURFUWpMenJQcXhURHFEMD1aICIe//QvaDdNMWlkRGc5WUN1VFNYUjZaOEtRQkJlem89ZQDqE0zCPgJgBRKtAQgJEqgBChxYZmQwendWMHNDUjZwWVF5ZStqVnErelNKUGs9EiQyYjZhZWIyZS02OTUzLTRiMzYtODM5NS1hYWI2MjllY2QxOGUYACAAKAAww6GL04ozOLej78rNMUC3o+/KzTFKHE1QSHdoMmNpQUJrRFM1WWVqRGNEeUZGNWI5dz1aHyId/TBoNnE1aDFvTXpHVkllVGJNb0pWbUFFUjF3cz1l9+AEKcI+AmAFEq4BCAsSqQEKHC9iYmxPR2JzbUhxT05VSm1ocHZuSUhqTWtldz0SJGI0N2Y5ZjYxLWFjYTItNDA5Yi1iZGQ3LTdhNzc4ZWZhOWQ3ORgAIAAoADC8gLr08zM41JK25eQxQNSStuXkMUocdENkNVRCaXJUYVR3VXlab2I0RjJ4TEM4TnJnPVogIh7/p0lTbEUxZE1YWG1vNE5CbHYrQkdPWTZtWTluaz1lUELD0sI+AmAFEowBCAEShwEKHHl4Si82ZnZrZWNyN2twNUVRekI0dFdMcGRiRT0SJDdhZjVjMjc4LTc4OTEtNWQ5OC1iMWU5LWY3YmYzN2ZlOTRiZRgAIAAoADCivfCo4y44r67zmvgvQK+u85r4L0ocYVJDV0xnaEY5YjVJbnFLSUR2dUovanZRa0ZjPWUAAAAAwj4CYAASjAEIAhKHAQocWWNTVG9udkVTUHdxQ3M0TDJjclZodjY4TDk4PRIkZDMzMTMyODYtODY5OS01YWMzLWI5MzMtZDQzMTcyMGVhNDYzGAAgACgAMKO98KjjLjjOrvOa+C9Azq7zmvgvShxvUFZraHdCUmJWNjVLQ1dSMitJT05IV29PdTg9ZQAAAADCPgJgABKuAQgMEqkBChxYUldQSlg4SWswaHJYTC9lREt4RWpSZ0NlbU09EiRmNmI2NDJjNC0yZGY1LTQwY2EtYmUzYy02MDI1YTY1NTQwNTkYACAAKAAw87W9ou4zOJ3Kvs7sMkCdyr7O7DJKHEpJNmk4em9JQlZidGJ1VUxIUzY0T2hkNFVZaz1aICIe/71wY1ZSR25qNDRYb0Ira1FRZEtZWDh0TTVEajA9ZalC51HCPgJgBRKsAQgIEqcBChxoV2NOK21hQkFhNFNEb2t6VWxhdlRFbGxtanM9EiQ5ZDE3Mjk4Ni1lOTZmLTQ3YzItOWFmMS0xNzZmNTI1ODVlNTcYACAAKAAwxdbzlNUxOObX85TVMUDm1/OU1TFKHGpaeXhseCtBd0ZlUEtNS1ZodHpDOUE2YlJERT1aHiIceEt3VTdlQUIvS3N0NXhGTEZYaUI1K0VwME9NPWUAAAAAwj4CYAUSjAEIAxKHAQocbmpnRHU4OGVDcnZYcDg2cEQ3ZkhHY3FGcDg4PRIkZDMwODMyNjgtN2NkZC01Yzk5LThjOWMtNGI3ZTRiNmIyYzdiGAAgACgAMKe98KjjLjiMr/Oa+C9AjK/zmvgvShx5ek5CMDFjbjU0QTdjUlUwdVQrL1BnbVR0VW89ZQAAAADCPgJgADAAOAA=",
+   "version": 1
+}

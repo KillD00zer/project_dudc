@@ -1463,8 +1463,12 @@
         <span id="serverStatusText">السيرفر متصل</span>
       </div>
 
-      <button class="btn btn-star" id="btnSaveAsDefault" title="حفظ الإعدادات الحالية كافتراضي دائم">
+      <button class="btn btn-star" id="btnSaveAsDefault" title="حفظ الإعدادات الحالية وتعديلات النصوص كافتراضي دائم">
         <span>⭐</span> حفظ كإعدادات افتراضية
+      </button>
+
+      <button class="btn btn-glass" id="btnResetDefaultSettings" title="استعادة الإعدادات الأصلية المصنعية">
+        <span>↺</span> استعادة الافتراضي
       </button>
 
       <button class="btn btn-glass" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
@@ -1480,14 +1484,24 @@
   <section class="stage-container active" id="stage1View">
     <div class="stage1-layout">
 
-      <!-- شريط المجلد العلوي -->
-      <div class="stage1-top-bar">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 12px; color: var(--text-muted);">مجلد حفظ المخرجات:</span>
-          <span id="txtOutputDirDisplay" style="font-size: 12px; font-weight: bold; color: var(--accent-green-light); font-family: monospace;">جاري التحميل...</span>
+      <!-- شريط المجلد العلوي (المطابق للمشروع القديم تماماً) -->
+      <div class="stage1-top-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 320px;">
+          <label for="outputDirInput" style="font-size: 13px; font-weight: bold; color: var(--text-muted); white-space: nowrap;">
+            <span>📂</span> مجلد حفظ الشهادات:
+          </label>
+          <input type="text" id="outputDirInput" class="stage1-input" style="font-family: monospace; font-size: 12px; font-weight: bold; color: #34d399; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 6px 12px; flex: 1; direction: ltr; text-align: left;" placeholder="d:\Work\certi_processing\output" />
+          <button type="button" class="btn btn-glass" onclick="saveOutputDir()" style="padding: 6px 14px; font-size: 0.82rem; white-space: nowrap;">
+            💾 حفظ
+          </button>
         </div>
-        <button class="btn btn-glass" id="btnBrowseOutputDir">📁 استعراض مجلد الحفظ...</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="btn btn-glass" onclick="browseOutputDir()" style="padding: 6px 14px; font-size: 0.82rem; border-color: #38bdf8; color: #38bdf8; white-space: nowrap;">
+            📁 استعراض...
+          </button>
+        </div>
       </div>
+      <div id="outputDirStatus" style="font-size: 12px; color: var(--accent-green-light); margin-top: 4px; font-weight: bold;"></div>
 
             <!-- كارت اختيار مسؤولي المعاملة والاعتماد الرسمي (الخطوة 1 الإلزامية) -->
       <div class="card" id="step1Card" style="border: 1px solid rgba(56, 189, 248, 0.35); background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); margin-bottom: 14px; transition: all 0.3s ease;">
@@ -1811,8 +1825,8 @@
             <!-- 1. الترويسة والشعارات -->
             <header class="cert-header" id="secHeader">
               <div class="gov-titles">
-                <div class="line-gov" contenteditable="true" spellcheck="false">محافظة الدقهلية</div>
-                <div class="line-center" contenteditable="true" spellcheck="false">مركز معلومات شبكات المرافق</div>
+                <div class="line-gov" data-text-id="line_gov" contenteditable="true" spellcheck="false">محافظة الدقهلية</div>
+                <div class="line-center" data-text-id="line_center" contenteditable="true" spellcheck="false">مركز معلومات شبكات المرافق</div>
               </div>
 
               <div class="header-logos">
@@ -1822,7 +1836,7 @@
             </header>
 
             <!-- 2. عنوان الشهادة: "شهادة إحداثيات" مطابق لـ Word تماماً -->
-            <div class="cert-main-title" contenteditable="true" spellcheck="false">
+            <div class="cert-main-title" data-text-id="cert_main_title" contenteditable="true" spellcheck="false">
               شهادة إحداثيات
             </div>
 
@@ -1835,37 +1849,37 @@
                 <col style="width: 35.5%;">
               </colgroup>
               <tr>
-                <th colspan="4" class="table-section-header" contenteditable="true" spellcheck="false">بيانات مقدم الطلب</th>
+                <th colspan="4" class="table-section-header" data-text-id="hdr_applicant_info" contenteditable="true" spellcheck="false">بيانات مقدم الطلب</th>
               </tr>
               <tr>
-                <td class="field-label" contenteditable="true" spellcheck="false">اسم مقدم الطلب</td>
-                <td class="field-val" id="valApplicantName" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" contenteditable="true" spellcheck="false">رقم إيصال السداد</td>
-                <td class="field-val" id="valReceiptNo" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_applicant_name" contenteditable="true" spellcheck="false">اسم مقدم الطلب</td>
+                <td class="field-val" id="valApplicantName" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_receipt_no" contenteditable="true" spellcheck="false">رقم إيصال السداد</td>
+                <td class="field-val" id="valReceiptNo" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
               </tr>
               <tr>
-                <td class="field-label" contenteditable="true" spellcheck="false">الرقم القومي</td>
-                <td class="field-val" id="valNationalId" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" contenteditable="true" spellcheck="false">رقم الطلب</td>
-                <td class="field-val" id="valOrderNo" style="text-align: center !important; font-size: 13pt; font-weight: bold;" contenteditable="true" spellcheck="false">٢٦٠٥s</td>
+                <td class="field-label" data-text-id="lbl_national_id" contenteditable="true" spellcheck="false">الرقم القومي</td>
+                <td class="field-val" id="valNationalId" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_order_no" contenteditable="true" spellcheck="false">رقم الطلب</td>
+                <td class="field-val" id="valOrderNo" data-text-id="valOrderNo" style="text-align: center !important; font-size: 13pt; font-weight: bold;" contenteditable="true" spellcheck="false">--</td>
               </tr>
               <tr>
-                <td class="field-label" contenteditable="true" spellcheck="false">المركز</td>
-                <td class="field-val" id="valCenter" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" contenteditable="true" spellcheck="false">القرية</td>
-                <td class="field-val" id="valVillage" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_center" contenteditable="true" spellcheck="false">المركز</td>
+                <td class="field-val" id="valCenter" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_village" contenteditable="true" spellcheck="false">القرية</td>
+                <td class="field-val" id="valVillage" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
               </tr>
               <tr>
-                <td class="field-label" contenteditable="true" spellcheck="false">العنوان</td>
-                <td class="field-val" id="valAddress" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" contenteditable="true" spellcheck="false">المساحة</td>
-                <td class="field-val" id="valArea" contenteditable="true" spellcheck="false">-- م²</td>
+                <td class="field-label" data-text-id="lbl_address" contenteditable="true" spellcheck="false">العنوان</td>
+                <td class="field-val" id="valAddress" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_area" contenteditable="true" spellcheck="false">المساحة</td>
+                <td class="field-val" id="valArea" data-dynamic="true" contenteditable="true" spellcheck="false">-- م²</td>
               </tr>
               <tr>
-                <td class="field-label" contenteditable="true" spellcheck="false">وصف التعامل</td>
-                <td class="field-val" id="valDealType" contenteditable="true" spellcheck="false">انشاء</td>
-                <td class="field-label" contenteditable="true" spellcheck="false">وصف الموقع</td>
-                <td class="field-val" id="valSiteDesc" contenteditable="true" spellcheck="false">موقع عينة تجريبية</td>
+                <td class="field-label" data-text-id="lbl_deal_type" contenteditable="true" spellcheck="false">وصف التعامل</td>
+                <td class="field-val" id="valDealType" data-text-id="valDealType" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_site_desc" contenteditable="true" spellcheck="false">وصف الموقع</td>
+                <td class="field-val" id="valSiteDesc" data-text-id="valSiteDesc" contenteditable="true" spellcheck="false">--</td>
               </tr>
             </table>
 
@@ -1881,12 +1895,12 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th rowspan="2" colspan="4" class="table-section-header" contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
-                  <th colspan="2" class="table-section-header" contenteditable="true" spellcheck="false">إحداثيات الموقع</th>
+                  <th rowspan="2" colspan="4" class="table-section-header" data-text-id="hdr_bounds_title" contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
+                  <th colspan="2" class="table-section-header" data-text-id="hdr_coords_title" contenteditable="true" spellcheck="false">إحداثيات الموقع</th>
                 </tr>
                 <tr>
-                  <th class="table-section-header" contenteditable="true" spellcheck="false">LONG(E)</th>
-                  <th class="table-section-header" contenteditable="true" spellcheck="false">LAT(N)</th>
+                  <th class="table-section-header" data-text-id="hdr_lon_title" contenteditable="true" spellcheck="false">LONG(E)</th>
+                  <th class="table-section-header" data-text-id="hdr_lat_title" contenteditable="true" spellcheck="false">LAT(N)</th>
                 </tr>
               </thead>
 
@@ -1899,7 +1913,7 @@
             <!-- 5. قسم الصورتين -->
             <div class="images-grid" id="secImages">
               <div class="image-card">
-                <div class="image-header" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+                <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
                 <div class="image-preview-wrapper" id="croquisWrapper">
                   <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
                   <div class="img-action-overlay">
@@ -1909,7 +1923,7 @@
               </div>
 
               <div class="image-card">
-                <div class="image-header" contenteditable="true" spellcheck="false">صورة فضائية</div>
+                <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
                 <div class="image-preview-wrapper" id="satWrapper">
                   <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
                   <div class="img-action-overlay">
@@ -1921,15 +1935,15 @@
 
             <!-- 6. الملاحظات والاشتراطات الرسمية (مرقمة من ١ إلى ٥ تماماً) -->
             <div class="cert-notes">
-              <p contenteditable="true" spellcheck="false">١. بيانات الموقع على مسئولية مقدم الطلب .</p>
-              <p contenteditable="true" spellcheck="false">٢. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
-              <p contenteditable="true" spellcheck="false">٣. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
-              <p contenteditable="true" spellcheck="false">٤. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
-              <p contenteditable="true" spellcheck="false">٥. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
+              <p data-text-id="note_1" contenteditable="true" spellcheck="false">١. بيانات الموقع على مسئولية مقدم الطلب .</p>
+              <p data-text-id="note_2" contenteditable="true" spellcheck="false">٢. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
+              <p data-text-id="note_3" contenteditable="true" spellcheck="false">٣. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
+              <p data-text-id="note_4" contenteditable="true" spellcheck="false">٤. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
+              <p data-text-id="note_5" contenteditable="true" spellcheck="false">٥. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
             </div>
 
             <!-- تاريخ التحرير بالمنتصف -->
-            <div class="cert-date-center" id="certDateDisplay" contenteditable="true" spellcheck="false">
+            <div class="cert-date-center" id="certDateDisplay" data-text-id="certDateDisplay" contenteditable="true" spellcheck="false">
               تم تحرير الشهادة في يوم          الموافق
             </div>
 
@@ -1944,27 +1958,27 @@
               <div class="sign-grid">
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" contenteditable="true" spellcheck="false">فنى مساحة</div>
+                  <div class="sign-role" data-text-id="role_tech" contenteditable="true" spellcheck="false">فنى مساحة</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigTech" contenteditable="true" spellcheck="false">أ / محمد حبيب</div>
+                  <div class="sign-name" id="sigTech" data-dynamic="true" contenteditable="true" spellcheck="false">أ / محمد حبيب</div>
                 </div>
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" contenteditable="true" spellcheck="false">مسئول النظم</div>
+                  <div class="sign-role" data-text-id="role_gis" contenteditable="true" spellcheck="false">مسئول النظم</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigGis" contenteditable="true" spellcheck="false">أ / علاء البنا</div>
+                  <div class="sign-name" id="sigGis" data-dynamic="true" contenteditable="true" spellcheck="false">أ / علاء البنا</div>
                 </div>
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" contenteditable="true" spellcheck="false">رئيس قسم النظم</div>
+                  <div class="sign-role" data-text-id="role_head" contenteditable="true" spellcheck="false">رئيس قسم النظم</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigHead" contenteditable="true" spellcheck="false">أ / محمد مصطفى</div>
+                  <div class="sign-name" id="sigHead" data-text-id="sigHead" contenteditable="true" spellcheck="false">أ / محمد مصطفى</div>
                 </div>
                 <div class="sign-col director-column">
-                  <div class="ye3tamad-badge" contenteditable="true" spellcheck="false">يعتمد</div>
-                  <div class="sign-role director-role" contenteditable="true" spellcheck="false">مدير المركز</div>
+                  <div class="ye3tamad-badge" data-text-id="badge_ye3tamad" contenteditable="true" spellcheck="false">يعتمد</div>
+                  <div class="sign-role director-role" data-text-id="role_director" contenteditable="true" spellcheck="false">مدير المركز</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name director-name" id="sigDirector" contenteditable="true" spellcheck="false">م/ السيد زين العابدين</div>
+                  <div class="sign-name director-name" id="sigDirector" data-text-id="sigDirector" contenteditable="true" spellcheck="false">م/ السيد زين العابدين</div>
                 </div>
               </div>
             </footer>
@@ -2105,7 +2119,7 @@
 
   <div class="save-toast" id="saveToast">
     <span>⭐</span>
-    <span>تم حفظ الإعدادات الحالية بنجاح كإعدادات افتراضية للبرنامج!</span>
+    <span id="saveToastMsg">تم حفظ الإعدادات الافتراضية وتعديلات النصوص بنجاح!</span>
   </div>
 
   <!-- ==========================================================================
@@ -2188,6 +2202,18 @@
       let activeParcel = null;
       let currentSegments = [];
       let outputDir = '';
+      let isBrowsingFolder = false;
+      let savedTextDefaults = null;
+
+      // قائمة المراكز الرسمية الـ 18 لمحافظة الدقهلية
+      const OFFICIAL_CENTERS_FALLBACK = [
+        [0, "المنصورة"], [1, "طلخا"], [2, "ميت غمر"], [3, "دكرنس"],
+        [4, "السنبلاوين"], [5, "بلقاس"], [6, "شربين"], [7, "المنزلة"],
+        [8, "منية النصر"], [9, "أجا"], [10, "نبروه"], [11, "تمي الأمديد"],
+        [12, "الجمالية"], [13, "الكردي"], [14, "المطرية"], [15, "ميت سلسيل"],
+        [16, "بني عبيد"], [17, "جمصة"]
+      ];
+      let officialCentersList = OFFICIAL_CENTERS_FALLBACK;
 
       // عناصر مسار العمل
       const stepTab1 = document.getElementById('stepTab1');
@@ -2251,38 +2277,338 @@
       document.getElementById('btnBackToStage2').addEventListener('click', () => switchStage(2));
 
       /* ==========================================================================
-         المرحلة 1: استدعاء الـ APIs ورفع الملفات
+         المرحلة 1: استدعاء الـ APIs وإدارة مجلد الحفظ (المطابق للمشروع القديم تماماً)
          ========================================================================== */
-      function fetchOutputDir() {
-        fetch('/api/get-output-dir')
-          .then(res => res.json())
-          .then(data => {
-            outputDir = data.output_dir || '';
-            document.getElementById('txtOutputDirDisplay').textContent = outputDir;
-          }).catch(() => {});
-      }
-      fetchOutputDir();
+      window.browseOutputDir = async function() {
+        if (isBrowsingFolder) return;
+        isBrowsingFolder = true;
+        const btn = document.querySelector('button[onclick="browseOutputDir()"]');
+        if (btn) btn.disabled = true;
+        const statusEl = document.getElementById('outputDirStatus');
+        const dirInput = document.getElementById('outputDirInput');
+        const curDir = dirInput ? dirInput.value.trim() : '';
+        if (statusEl) statusEl.textContent = '⏳ جاري فتح نافذة اختيار المجلد...';
 
-      document.getElementById('btnBrowseOutputDir').addEventListener('click', () => {
-        fetch('/api/browse-output-dir', { method: 'POST' })
-          .then(res => res.json())
-          .then(data => {
-            if (data.output_dir) {
-              outputDir = data.output_dir;
-              document.getElementById('txtOutputDirDisplay').textContent = outputDir;
-            }
+        try {
+          const res = await fetch('/api/browse-output-dir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initial_dir: curDir })
           });
-      });
+          const data = await res.json();
+          if (data.folder_path) {
+            if (dirInput) dirInput.value = data.folder_path;
+            outputDir = data.folder_path;
+            if (statusEl) {
+              statusEl.textContent = '✔ تم تحديد وتحديث مجلد الحفظ بنجاح';
+              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+            }
+          } else {
+            if (statusEl) statusEl.textContent = '';
+          }
+        } catch (err) {
+          alert('تعذر فتح نافذة اختيار المجلد: ' + err.message);
+          if (statusEl) statusEl.textContent = '';
+        } finally {
+          isBrowsingFolder = false;
+          if (btn) btn.disabled = false;
+        }
+      };
 
-      // قائمة المراكز الرسمية الـ 18 لمحافظة الدقهلية
-      const OFFICIAL_CENTERS_FALLBACK = [
-        [0, "المنصورة"], [1, "طلخا"], [2, "ميت غمر"], [3, "دكرنس"],
-        [4, "السنبلاوين"], [5, "بلقاس"], [6, "شربين"], [7, "المنزلة"],
-        [8, "منية النصر"], [9, "أجا"], [10, "نبروه"], [11, "تمي الأمديد"],
-        [12, "الجمالية"], [13, "الكردي"], [14, "المطرية"], [15, "ميت سلسيل"],
-        [16, "بني عبيد"], [17, "جمصة"]
-      ];
-      let officialCentersList = OFFICIAL_CENTERS_FALLBACK;
+      window.saveOutputDir = async function() {
+        const dirInput = document.getElementById('outputDirInput');
+        const statusEl = document.getElementById('outputDirStatus');
+        const newDir = dirInput ? dirInput.value.trim() : '';
+        if (!newDir) { alert('الرجاء إدخال مسار المجلد.'); return; }
+        try {
+          const res = await fetch('/api/set-output-dir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ output_dir: newDir })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          outputDir = newDir;
+          if (statusEl) {
+            statusEl.textContent = '✔ تم الحفظ بنجاح';
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
+          }
+        } catch (err) {
+          alert('فشل حفظ المجلد: ' + err.message);
+        }
+      };
+
+      window.openOutputFolder = async function() {
+        try {
+          await fetch('/api/open-folder', { method: 'POST' });
+        } catch (err) {
+          alert('تعذر فتح المجلد تلقائياً: ' + err.message);
+        }
+      };
+
+      async function loadOutputDir() {
+        try {
+          const res = await fetch('/api/get-output-dir');
+          const data = await res.json();
+          outputDir = data.output_dir || '';
+          const inp = document.getElementById('outputDirInput');
+          if (inp) inp.value = outputDir;
+        } catch (err) {
+          console.error('Could not load output dir:', err);
+        }
+      }
+      loadOutputDir();
+
+      // ==========================================================================
+      // استيراد جلسة عمل سابقة بالكامل (.json)
+      // ==========================================================================
+      const btnImportJson = document.getElementById('btnImportJson');
+      const fileJsonInput = document.getElementById('fileJsonInput');
+
+      if (btnImportJson && fileJsonInput) {
+        btnImportJson.addEventListener('click', () => {
+          fileJsonInput.value = '';
+          fileJsonInput.click();
+        });
+
+        fileJsonInput.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+
+          showLoading('استيراد جلسة سابقة', `جاري قراءة واستعادة ملف الجلسة: ${file.name}`);
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const rawData = JSON.parse(event.target.result);
+              // دعم ملفات الجلسة سواء كانت مغلفة بـ session_data أو مسطحة مباشرة
+              const data = (rawData.session_data && typeof rawData.session_data === 'object')
+                ? Object.assign({}, rawData, rawData.session_data)
+                : rawData;
+              const parcelData = data.parcel || {};
+              const applicantName = data.applicant_name || parcelData.applicant_name || data.name || 'مواطن بدون اسم';
+
+              // قراءة واستخراج المركز والتحقق من القاموس الرسمي
+              let distName = data.district || parcelData.district || 'نبروه';
+              let distId = (data.district_id !== undefined && data.district_id !== null)
+                ? data.district_id
+                : parcelData.district_id;
+
+              if (distId === undefined || distId === null) {
+                const cleanDist = String(distName).trim();
+                const matched = OFFICIAL_CENTERS_FALLBACK.find(([cid, cname]) => cname === cleanDist || cleanDist.includes(cname));
+                if (matched) {
+                  distId = matched[0];
+                  distName = matched[1];
+                } else {
+                  distId = 10;
+                  distName = 'نبروه';
+                }
+              }
+
+              // تنظيف وتحويل المساحات بأمان
+              const statedArea = parseFloat(toEnglishNumerals(String(data.stated_area_m2 || parcelData.stated_area_m2 || data.area || 0))) || 0;
+              const calcArea = parseFloat(toEnglishNumerals(String(data.calculated_area_m2 || parcelData.calculated_area_m2 || data.area || 0))) || statedArea;
+
+              // بناء كائن activeParcel المتكامل
+              activeParcel = {
+                parcel_id: parcelData.parcel_id || data.parcel_id || '0',
+                applicant_name: applicantName,
+                national_id: toEnglishNumerals(String(data.national_id || parcelData.national_id || '')),
+                receipt_no: toEnglishNumerals(String(data.receipt_no || parcelData.receipt_no || '')),
+                district: distName,
+                district_id: distId,
+                district_matched: true,
+                village: data.village || parcelData.village || '',
+                address: data.address || parcelData.address || '',
+                stated_area_m2: statedArea,
+                calculated_area_m2: calcArea,
+                order_no: data.order_no || parcelData.order_no || '٢٦٠٥s',
+                deal_type: data.deal_type || parcelData.deal_type || 'انشاء',
+                site_desc: data.site_desc || parcelData.site_desc || 'موقع عينة تجريبية',
+                security_token: data.security_token || data.token || parcelData.security_token || 'DUDC SECURE',
+                survey_technician: data.survey_technician || parcelData.survey_technician || 'محمد ابراهيم بدير',
+                system_officer: data.system_officer || parcelData.system_officer || 'شريف محمد',
+                segments: data.segments || parcelData.segments || [],
+                boundaries: data.boundaries || parcelData.boundaries || {},
+                vertices: data.vertices || parcelData.vertices || []
+              };
+
+              // 1. استعادة مسؤولي الخطوة 1
+              const selTech = document.getElementById('selSurveyTech');
+              if (selTech && activeParcel.survey_technician) {
+                let found = false;
+                for (let opt of selTech.options) {
+                  if (opt.value === activeParcel.survey_technician) { opt.selected = true; found = true; break; }
+                }
+                if (!found) {
+                  selTech.add(new Option(activeParcel.survey_technician, activeParcel.survey_technician, true, true));
+                }
+                selTech.value = activeParcel.survey_technician;
+              }
+
+              const selOff = document.getElementById('selSysOfficer');
+              if (selOff && activeParcel.system_officer) {
+                let found = false;
+                for (let opt of selOff.options) {
+                  if (opt.value === activeParcel.system_officer) { opt.selected = true; found = true; break; }
+                }
+                if (!found) {
+                  selOff.add(new Option(activeParcel.system_officer, activeParcel.system_officer, true, true));
+                }
+                selOff.value = activeParcel.system_officer;
+              }
+
+              updateStep1State();
+
+              // 2. إظهار قسم نتائج الرفع
+              const resultsSec = document.getElementById('surveyResultsSection');
+              if (resultsSec) {
+                resultsSec.style.display = 'flex';
+                resultsSec.style.flexDirection = 'column';
+              }
+
+              // 3. ملء بيانات المرحلة 1
+              document.getElementById('resApplicantName').textContent = activeParcel.applicant_name;
+              document.getElementById('resNationalId').textContent = activeParcel.national_id || '--';
+              document.getElementById('resReceiptNo').textContent = activeParcel.receipt_no || '--';
+              document.getElementById('resStatedArea').textContent = `${activeParcel.stated_area_m2.toFixed(2)} م²`;
+              document.getElementById('resCalcArea').textContent = `${activeParcel.calculated_area_m2.toFixed(2)} م²`;
+              document.getElementById('resDeltaArea').textContent = '0.00 م²';
+
+              const badge = document.getElementById('badgeTolerance');
+              if (badge) {
+                badge.className = 'badge-pass';
+                badge.textContent = '✔ متطابق قانونياً (جلسة مستوردة معتمدة)';
+              }
+
+              renderDistrictSelector(activeParcel);
+
+              // 4. استعادة الصورتين إن وُجدتا
+              const croqSrc = data.croquis_base64 || data.croquis_url || data.croquis || (parcelData.croquis_url ? parcelData.croquis_url : null);
+              if (croqSrc) {
+                const cImg1 = document.getElementById('stage1CroquisImg');
+                const cImg2 = document.getElementById('imgCroquis');
+                if (cImg1) cImg1.src = croqSrc;
+                if (cImg2) cImg2.src = croqSrc;
+              }
+
+              const satSrc = data.satellite_base64 || data.satellite_url || data.satellite || (parcelData.satellite_url ? parcelData.satellite_url : null);
+              if (satSrc) {
+                const sImg1 = document.getElementById('stage1SatImg');
+                const sImg2 = document.getElementById('imgSatellite');
+                if (sImg1) sImg1.src = satSrc;
+                if (sImg2) sImg2.src = satSrc;
+              }
+
+              // 5. استعادة جدول الأضلاع
+              if (activeParcel.segments && activeParcel.segments.length > 0) {
+                buildSegmentsTable(activeParcel.segments);
+              } else if (data.boundaries && typeof data.boundaries === 'object') {
+                activeParcel.segments = [
+                  { from_point: 1, to_point: 2, direction: 'north', neighbor: data.boundaries.north?.neighbor || '', length_m: data.boundaries.north?.length_m || 0 },
+                  { from_point: 2, to_point: 3, direction: 'east', neighbor: data.boundaries.east?.neighbor || '', length_m: data.boundaries.east?.length_m || 0 },
+                  { from_point: 3, to_point: 4, direction: 'south', neighbor: data.boundaries.south?.neighbor || '', length_m: data.boundaries.south?.length_m || 0 },
+                  { from_point: 4, to_point: 1, direction: 'west', neighbor: data.boundaries.west?.neighbor || '', length_m: data.boundaries.west?.length_m || 0 }
+                ];
+                buildSegmentsTable(activeParcel.segments);
+              }
+
+              // 6. استعادة إعدادات السلايدرات والمسافات والعلامة المائية
+              const sliders = data.sliders || data;
+              const elMargin = document.getElementById('rngMargin');
+              const elGapHeader = document.getElementById('rngGapHeader');
+              const elGapApplicant = document.getElementById('rngGapApplicant');
+              const elGapCoords = document.getElementById('rngGapCoords');
+              const elGapImages = document.getElementById('rngGapImages');
+              const elTablePad = document.getElementById('rngTablePad');
+              const elImageHeight = document.getElementById('rngImageHeight');
+
+              if (sliders.margin !== undefined || sliders.margin_mm !== undefined) { if (elMargin) elMargin.value = sliders.margin ?? sliders.margin_mm; }
+              if (sliders.gapHeader !== undefined || sliders.gap_header !== undefined) { if (elGapHeader) elGapHeader.value = sliders.gapHeader ?? sliders.gap_header; }
+              if (sliders.gapApplicant !== undefined || sliders.gap_applicant !== undefined) { if (elGapApplicant) elGapApplicant.value = sliders.gapApplicant ?? sliders.gap_applicant; }
+              if (sliders.gapCoords !== undefined || sliders.gap_coords !== undefined) { if (elGapCoords) elGapCoords.value = sliders.gapCoords ?? sliders.gap_coords; }
+              if (sliders.gapImages !== undefined || sliders.gap_images !== undefined) { if (elGapImages) elGapImages.value = sliders.gapImages ?? sliders.gap_images; }
+              if (sliders.tablePad !== undefined || sliders.table_pad !== undefined) { if (elTablePad) elTablePad.value = sliders.tablePad ?? sliders.table_pad; }
+              if (sliders.imageHeight !== undefined || sliders.image_height !== undefined) { if (elImageHeight) elImageHeight.value = sliders.imageHeight ?? sliders.image_height; }
+
+              const wm = data.watermark || data;
+              const elWmActive = document.getElementById('chkWatermarkActive');
+              const elWmOpacity = document.getElementById('rngWmOpacity');
+              const elWmAngle = document.getElementById('rngWmAngle');
+              const elWmSize = document.getElementById('rngWmSize');
+
+              if (wm.active !== undefined || wm.wm_active !== undefined) { if (elWmActive) elWmActive.checked = Boolean(wm.active ?? wm.wm_active); }
+              if (wm.opacity !== undefined || wm.wm_opacity !== undefined) { if (elWmOpacity) elWmOpacity.value = wm.opacity ?? wm.wm_opacity; }
+              if (wm.angle !== undefined || wm.wm_angle !== undefined) { if (elWmAngle) elWmAngle.value = wm.angle ?? wm.wm_angle; }
+              if (wm.size !== undefined || wm.wm_size !== undefined) { if (elWmSize) elWmSize.value = wm.size ?? wm.wm_size; }
+
+              if (typeof updateSpacing === 'function') updateSpacing();
+              if (typeof renderWatermark === 'function') renderWatermark();
+
+              // 7. استعادة تخصيصات النصوص إن وجدت
+              if (data.text_customs) {
+                savedTextDefaults = data.text_customs;
+                applySavedTextDefaults(data.text_customs);
+              }
+
+              // 8. المزامنة إلى استوديو التحرير (Stage 2)
+              syncStage1ToStage2();
+
+              if (data.deal_type) document.getElementById('valDealType').textContent = data.deal_type;
+              if (data.site_desc) document.getElementById('valSiteDesc').textContent = data.site_desc;
+              if (data.order_no) document.getElementById('valOrderNo').textContent = data.order_no;
+
+              // 9. مزامنة الجلسة مع الباك إند
+              fetch('/api/restore-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  parcel: activeParcel,
+                  croquis_base64: croqSrc || '',
+                  satellite_base64: satSrc || ''
+                })
+              }).then(res => res.json()).then(resData => {
+                if (resData.croquis_url && (!croqSrc || croqSrc.length < 20)) {
+                  const c1 = document.getElementById('stage1CroquisImg');
+                  const c2 = document.getElementById('imgCroquis');
+                  if (c1) c1.src = resData.croquis_url;
+                  if (c2) c2.src = resData.croquis_url;
+                }
+                if (resData.satellite_url && (!satSrc || satSrc.length < 20)) {
+                  const s1 = document.getElementById('stage1SatImg');
+                  const s2 = document.getElementById('imgSatellite');
+                  if (s1) s1.src = resData.satellite_url;
+                  if (s2) s2.src = resData.satellite_url;
+                }
+              }).catch(() => {});
+
+              // 10. الانتقال مباشرة إلى استوديو التحرير مع إشعار النجاح
+              switchStage(2);
+              hideLoading();
+
+              const saveToast = document.getElementById('saveToast');
+              const msgSpan = document.getElementById('saveToastMsg');
+              if (msgSpan) msgSpan.textContent = `✔ تم استيراد جلسة (${activeParcel.applicant_name}) بنجاح!`;
+              saveToast.classList.add('show');
+              setTimeout(() => saveToast.classList.remove('show'), 3500);
+
+            } catch (err) {
+              hideLoading();
+              alert('⚠️ خطأ في قراءة ملف الجلسة: الملف غير صالح أو تالف.\n' + err.message);
+            }
+          };
+
+          reader.onerror = () => {
+            hideLoading();
+            alert('⚠️ فشل قراءة الملف من القرص.');
+          };
+
+          reader.readAsText(file, 'utf-8');
+        });
+      }
+
+      // (قائمة المراكز الرسمية تم تعريفها بالأعلى)
 
       // --------------------------------------------------------------------------
       // منطق التحقق من الخطوة 1 (اختيار الفني ومسؤول النظم المعتمد)
@@ -2832,9 +3158,11 @@
         }
 
         // بيانات المواطن والتحقق
-        document.getElementById('resApplicantName').textContent = parcel.applicant_name || 'غير محدد';
-        document.getElementById('resNationalId').textContent = parcel.national_id || 'غير محدد';
-        document.getElementById('resReceiptNo').textContent = parcel.receipt_no || '0';
+        document.getElementById('resApplicantName').textContent = parcel.applicant_name || 'لا يوجد بيانات متاحة';
+        const st1Nid = (parcel.national_id && String(parcel.national_id).trim() !== '0') ? String(parcel.national_id).trim() : '';
+        document.getElementById('resNationalId').textContent = st1Nid || 'لا يوجد بيانات متاحة';
+        const st1Rcp = (parcel.receipt_no && String(parcel.receipt_no).trim() !== '0') ? String(parcel.receipt_no).trim() : '';
+        document.getElementById('resReceiptNo').textContent = st1Rcp || 'لا يوجد بيانات متاحة';
 
         // تهيئة قائمة المراكز وتأمين الرمز الأمني
         renderDistrictSelector(parcel);
@@ -3182,25 +3510,50 @@
         return String(val).replace(/[0-9]/g, d => arabicDigits[+d]);
       }
 
+      function toEnglishNumerals(val) {
+        if (val === null || val === undefined) return '';
+        return String(val)
+          .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+      }
+
       function syncStage1ToStage2() {
         if (!activeParcel) return;
 
         // ملء بيانات المواطن بالشهادة بالأرقام العربية
-        document.getElementById('valApplicantName').textContent = activeParcel.applicant_name || 'محمد إبراهيم محمد حسن';
-        document.getElementById('valReceiptNo').textContent = toArabicNumerals(activeParcel.receipt_no || '104523');
-        document.getElementById('valNationalId').textContent = toArabicNumerals(activeParcel.national_id || '29001011234567');
-        document.getElementById('valCenter').textContent = activeParcel.district || 'نبروه';
-        document.getElementById('valVillage').textContent = activeParcel.village || 'كفر الجنينة';
-        document.getElementById('valAddress').textContent = activeParcel.address || 'شارع داير الناحية';
+        document.getElementById('valApplicantName').textContent = activeParcel.applicant_name || 'لا يوجد بيانات متاحة';
+        
+        const rcp = (activeParcel.receipt_no && String(activeParcel.receipt_no).trim() !== '0') ? String(activeParcel.receipt_no).trim() : '';
+        document.getElementById('valReceiptNo').textContent = rcp ? toArabicNumerals(rcp) : 'لا يوجد بيانات متاحة';
+        
+        const nid = (activeParcel.national_id && String(activeParcel.national_id).trim() !== '0') ? String(activeParcel.national_id).trim() : '';
+        document.getElementById('valNationalId').textContent = nid ? toArabicNumerals(nid) : 'لا يوجد بيانات متاحة';
+        
+        document.getElementById('valCenter').textContent = activeParcel.district || 'لا يوجد بيانات متاحة';
+        document.getElementById('valVillage').textContent = activeParcel.village || '--------';
+        document.getElementById('valAddress').textContent = activeParcel.address || activeParcel.village || 'لا يوجد بيانات متاحة';
         
         // المساحة تتكتب أرقام عربية وبدون علامة _
         const areaVal = (parseFloat(activeParcel.calculated_area_m2) || 0).toFixed(2);
         document.getElementById('valArea').textContent = `${toArabicNumerals(areaVal)} م²`;
-        document.getElementById('valOrderNo').textContent = `${toArabicNumerals('2605')}s`;
+        if (savedTextDefaults && savedTextDefaults['valOrderNo'] && savedTextDefaults['valOrderNo'].html) {
+          document.getElementById('valOrderNo').innerHTML = savedTextDefaults['valOrderNo'].html;
+        } else {
+          const rawOrder = activeParcel.request_no || activeParcel.order_no || '';
+          const reqNo = (rawOrder && String(rawOrder).trim() !== '0') ? String(rawOrder).trim() : '';
+          document.getElementById('valOrderNo').textContent = reqNo ? `${toArabicNumerals(reqNo)}s` : 'لا يوجد بيانات متاحة';
+        }
+
+        // ملء وصف التعامل ووصف الموقع من بيانات الرفع الحقيقية
+        document.getElementById('valDealType').textContent = activeParcel.transaction_type || activeParcel.deal_type || 'إنشاء';
+        document.getElementById('valSiteDesc').textContent = activeParcel.site_status || activeParcel.site_desc || 'أرض فضاء';
 
         // التوقيعات المحددة
         document.getElementById('sigTech').textContent = `أ / ${document.getElementById('selSurveyTech').value}`;
         document.getElementById('sigGis').textContent = `أ / ${document.getElementById('selSysOfficer').value}`;
+
+        // إعادة تطبيق التنسيقات المحفوظة على الحقول الديناميكية
+        reapplyDynamicTextStyles();
 
         // تاريخ اليوم بالأرقام العربية
         const now = new Date();
@@ -3244,11 +3597,43 @@
         // قراءة الإحداثيات من النقاط
         const verts = activeParcel.vertices || [];
 
+        // التحقق من وجود تنسيقات افتراضية مخصصة لخلايا جدول الإحداثيات
+        const titleStyle = (savedTextDefaults && savedTextDefaults['__coords_title_styles']) ? savedTextDefaults['__coords_title_styles'] : null;
+        const coordStyle = (savedTextDefaults && savedTextDefaults['__coord_num_styles']) ? savedTextDefaults['__coord_num_styles'] : null;
+        const betoolStyle = (savedTextDefaults && savedTextDefaults['__coords_betool_styles']) ? savedTextDefaults['__coords_betool_styles'] : null;
+        const betoolText = (savedTextDefaults && savedTextDefaults['__coords_betool_text']) ? savedTextDefaults['__coords_betool_text'] : 'بطول';
+
+        let titleStyleAttr = 'font-weight: bold;';
+        if (titleStyle) {
+          if (titleStyle.fontFamily) titleStyleAttr += ` font-family: ${titleStyle.fontFamily};`;
+          if (titleStyle.fontSize) titleStyleAttr += ` font-size: ${titleStyle.fontSize};`;
+          if (titleStyle.color) titleStyleAttr += ` color: ${titleStyle.color};`;
+          if (titleStyle.textAlign) titleStyleAttr += ` text-align: ${titleStyle.textAlign};`;
+        }
+
+        let coordStyleAttr = '';
+        if (coordStyle) {
+          if (coordStyle.fontFamily) coordStyleAttr += ` font-family: ${coordStyle.fontFamily};`;
+          if (coordStyle.fontSize) coordStyleAttr += ` font-size: ${coordStyle.fontSize};`;
+          if (coordStyle.fontWeight) coordStyleAttr += ` font-weight: ${coordStyle.fontWeight};`;
+          if (coordStyle.color) coordStyleAttr += ` color: ${coordStyle.color};`;
+        }
+
+        let betoolStyleAttr = '';
+        if (betoolStyle) {
+          if (betoolStyle.fontFamily) betoolStyleAttr += ` font-family: ${betoolStyle.fontFamily};`;
+          if (betoolStyle.fontSize) betoolStyleAttr += ` font-size: ${betoolStyle.fontSize};`;
+          if (betoolStyle.fontWeight) betoolStyleAttr += ` font-weight: ${betoolStyle.fontWeight};`;
+          if (betoolStyle.color) betoolStyleAttr += ` color: ${betoolStyle.color};`;
+        }
+
         directions.forEach((d, dIdx) => {
           const group = dirGroups[d.key];
           const totalLen = group.reduce((acc, curr) => acc + curr.len, 0);
           const neighborName = group.map(g => g.neighbor).filter(Boolean).join(' • ') || '';
           const rowCount = Math.max(1, group.length);
+
+          const customTitle = (savedTextDefaults && savedTextDefaults[`__dir_${d.key}`]) ? savedTextDefaults[`__dir_${d.key}`] : d.title;
 
           for (let r = 0; r < rowCount; r++) {
             const tr = document.createElement('tr');
@@ -3259,17 +3644,17 @@
 
             if (r === 0) {
               tr.innerHTML = `
-                <td rowspan="${rowCount}" style="font-weight: bold;" contenteditable="true" spellcheck="false">${d.title}</td>
-                <td rowspan="${rowCount}" contenteditable="true" spellcheck="false">${neighborName}</td>
-                <td rowspan="${rowCount}" contenteditable="true" spellcheck="false">بطول</td>
-                <td rowspan="${rowCount}" style="font-weight: bold;" contenteditable="true" spellcheck="false">${totalLen > 0 ? toArabicNumerals(totalLen.toFixed(2)) : ''}</td>
-                <td><span class="coord-num" contenteditable="true" spellcheck="false">${lonStr}</span></td>
-                <td><span class="coord-num" contenteditable="true" spellcheck="false">${latStr}</span></td>
+                <td rowspan="${rowCount}" class="cell-dir-title" data-dir-key="${d.key}" style="${titleStyleAttr}" contenteditable="true" spellcheck="false">${customTitle}</td>
+                <td rowspan="${rowCount}" class="cell-dir-neighbor" contenteditable="true" spellcheck="false">${neighborName}</td>
+                <td rowspan="${rowCount}" class="cell-dir-betool" style="${betoolStyleAttr}" contenteditable="true" spellcheck="false">${betoolText}</td>
+                <td rowspan="${rowCount}" class="cell-dir-len" style="font-weight: bold;" contenteditable="true" spellcheck="false">${totalLen > 0 ? toArabicNumerals(totalLen.toFixed(2)) : ''}</td>
+                <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${lonStr}</span></td>
+                <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${latStr}</span></td>
               `;
             } else {
               tr.innerHTML = `
-                <td><span class="coord-num" contenteditable="true" spellcheck="false">${lonStr}</span></td>
-                <td><span class="coord-num" contenteditable="true" spellcheck="false">${latStr}</span></td>
+                <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${lonStr}</span></td>
+                <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${latStr}</span></td>
               `;
             }
             tbody.appendChild(tr);
@@ -3593,83 +3978,315 @@
         };
       });
 
-      // حفظ كإعدادات افتراضية
+      // ==========================================================================
+      // محرك حفظ واستعادة الإعدادات الافتراضية الشاملة (Layout + النصوص والتنسيقات)
+      // ==========================================================================
+      // (savedTextDefaults تم تعريفها بالأعلى)
+
+      function collectAllTextCustomizations() {
+        const customs = {};
+
+        // جمع كافة العناصر التي تحتوي على data-text-id أو id أو نصوص الملاحظات
+        const elements = certPage.querySelectorAll('[data-text-id], [id^="val"], [id^="sig"], .cert-notes p');
+        elements.forEach(el => {
+          const key = el.getAttribute('data-text-id') || el.id;
+          if (!key) return;
+
+          const isDynamic = el.getAttribute('data-dynamic') === 'true';
+
+          const styles = {};
+          if (el.style.fontFamily) styles.fontFamily = el.style.fontFamily;
+          if (el.style.fontSize) styles.fontSize = el.style.fontSize;
+          if (el.style.fontWeight) styles.fontWeight = el.style.fontWeight;
+          if (el.style.color) styles.color = el.style.color;
+          if (el.style.textAlign) styles.textAlign = el.style.textAlign;
+
+          const item = {
+            isDynamic: isDynamic,
+            styles: styles
+          };
+
+          // حفظ محتوى النص للعناصر الثابتة والرسمية (الملاحظات، العناوين، مدير المركز، إلخ)
+          if (!isDynamic) {
+            item.html = el.innerHTML;
+          }
+
+          customs[key] = item;
+        });
+
+        // تخصيصات جدول الإحداثيات
+        const firstDirTitle = certPage.querySelector('.cell-dir-title');
+        if (firstDirTitle) {
+          customs['__coords_title_styles'] = {
+            fontFamily: firstDirTitle.style.fontFamily || '',
+            fontSize: firstDirTitle.style.fontSize || '',
+            fontWeight: firstDirTitle.style.fontWeight || '',
+            color: firstDirTitle.style.color || '',
+            textAlign: firstDirTitle.style.textAlign || ''
+          };
+        }
+        const firstCoordNum = certPage.querySelector('.coord-num');
+        if (firstCoordNum) {
+          customs['__coord_num_styles'] = {
+            fontFamily: firstCoordNum.style.fontFamily || '',
+            fontSize: firstCoordNum.style.fontSize || '',
+            fontWeight: firstCoordNum.style.fontWeight || '',
+            color: firstCoordNum.style.color || ''
+          };
+        }
+        const firstBetool = certPage.querySelector('.cell-dir-betool');
+        if (firstBetool) {
+          customs['__coords_betool_text'] = firstBetool.textContent.trim();
+          customs['__coords_betool_styles'] = {
+            fontFamily: firstBetool.style.fontFamily || '',
+            fontSize: firstBetool.style.fontSize || '',
+            fontWeight: firstBetool.style.fontWeight || '',
+            color: firstBetool.style.color || ''
+          };
+        }
+
+        // حفظ مسميات الحدود الأربعة إن تم تعديلها
+        certPage.querySelectorAll('.cell-dir-title[data-dir-key]').forEach(el => {
+          const dirKey = el.getAttribute('data-dir-key');
+          if (dirKey) {
+            customs[`__dir_${dirKey}`] = el.textContent.trim();
+          }
+        });
+
+        return customs;
+      }
+
+      function applySavedTextDefaults(textData) {
+        if (!textData) return;
+
+        for (const [key, item] of Object.entries(textData)) {
+          if (key.startsWith('__')) continue;
+
+          const el = certPage.querySelector(`[data-text-id="${key}"]`) || document.getElementById(key);
+          if (!el) continue;
+
+          // 1. استعادة النص أو الصياغة للعناصر غير الديناميكية
+          if (!item.isDynamic && item.html !== undefined && item.html !== null) {
+            el.innerHTML = item.html;
+          }
+
+          // 2. تطبيق التنسيقات (الخط، الحجم، اللون، البولد، المحاذاة) على كافة العناصر
+          if (item.styles) {
+            if (item.styles.fontFamily) el.style.fontFamily = item.styles.fontFamily;
+            if (item.styles.fontSize) el.style.fontSize = item.styles.fontSize;
+            if (item.styles.fontWeight) el.style.fontWeight = item.styles.fontWeight;
+            if (item.styles.color) el.style.color = item.styles.color;
+            if (item.styles.textAlign) el.style.textAlign = item.styles.textAlign;
+          }
+        }
+      }
+
+      function reapplyDynamicTextStyles() {
+        if (!savedTextDefaults) return;
+        for (const [key, item] of Object.entries(savedTextDefaults)) {
+          if (!item.isDynamic || !item.styles) continue;
+          const el = certPage.querySelector(`[data-text-id="${key}"]`) || document.getElementById(key);
+          if (!el) continue;
+          if (item.styles.fontFamily) el.style.fontFamily = item.styles.fontFamily;
+          if (item.styles.fontSize) el.style.fontSize = item.styles.fontSize;
+          if (item.styles.fontWeight) el.style.fontWeight = item.styles.fontWeight;
+          if (item.styles.color) el.style.color = item.styles.color;
+          if (item.styles.textAlign) el.style.textAlign = item.styles.textAlign;
+        }
+      }
+
+      function applyLayoutDefaults(data) {
+        if (data) {
+          // ترقية القيم القديمة تلقائياً إلى القيم القياسية المحسنة
+          if (data.image_height && Number(data.image_height) < 200) {
+            data.margin_mm = 7;
+            data.gap_header = 0;
+            data.gap_applicant = 8;
+            data.gap_coords = 8;
+            data.gap_images = 5;
+            data.table_pad = 3.6;
+            data.image_height = 230;
+            data.wm_active = true;
+            data.wm_opacity = 10;
+            data.wm_angle = -30;
+            data.wm_size = 13;
+          }
+          rngMargin.value = data.margin_mm ?? 7;
+          rngGapHeader.value = data.gap_header ?? 0;
+          rngGapApplicant.value = data.gap_applicant ?? 8;
+          rngGapCoords.value = data.gap_coords ?? 8;
+          rngGapImages.value = data.gap_images ?? 5;
+          rngTablePad.value = data.table_pad ?? 3.6;
+          rngImageHeight.value = data.image_height ?? 230;
+          chkWatermarkActive.checked = data.wm_active ?? true;
+          rngWmOpacity.value = data.wm_opacity ?? 10;
+          rngWmAngle.value = data.wm_angle ?? -30;
+          rngWmSize.value = data.wm_size ?? 13;
+        } else {
+          rngMargin.value = 7;
+          rngGapHeader.value = 0;
+          rngGapApplicant.value = 8;
+          rngGapCoords.value = 8;
+          rngGapImages.value = 5;
+          rngTablePad.value = 3.6;
+          rngImageHeight.value = 230;
+          chkWatermarkActive.checked = true;
+          rngWmOpacity.value = 10;
+          rngWmAngle.value = -30;
+          rngWmSize.value = 13;
+        }
+        updateSpacing();
+        renderWatermark();
+      }
+
+      // حفظ كإعدادات افتراضية (Layout + النصوص والتنسيقات)
       const saveToast = document.getElementById('saveToast');
       document.getElementById('btnSaveAsDefault').addEventListener('click', () => {
+        const textCustoms = collectAllTextCustomizations();
+        savedTextDefaults = textCustoms;
+
         const defs = {
-          margin_mm: rngMargin.value, gap_header: rngGapHeader.value, gap_applicant: rngGapApplicant.value,
-          gap_coords: rngGapCoords.value, gap_images: rngGapImages.value, table_pad: rngTablePad.value,
-          image_height: rngImageHeight.value, wm_active: chkWatermarkActive.checked, wm_opacity: rngWmOpacity.value,
-          wm_angle: rngWmAngle.value, wm_size: rngWmSize.value
+          margin_mm: rngMargin.value,
+          gap_header: rngGapHeader.value,
+          gap_applicant: rngGapApplicant.value,
+          gap_coords: rngGapCoords.value,
+          gap_images: rngGapImages.value,
+          table_pad: rngTablePad.value,
+          image_height: rngImageHeight.value,
+          wm_active: chkWatermarkActive.checked,
+          wm_opacity: rngWmOpacity.value,
+          wm_angle: rngWmAngle.value,
+          wm_size: rngWmSize.value,
+          text_customs: textCustoms
         };
+
+        // 1. الحفظ الفوري في ذاكرة المتصفح
         localStorage.setItem('dudc_v3_default_settings', JSON.stringify(defs));
+
+        // 2. الحفظ السحابي/المحلي الدائم في السيرفر (user_default_settings.json)
+        fetch('/api/save-defaults', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(defs)
+        }).catch(() => {});
+
+        const msgSpan = document.getElementById('saveToastMsg');
+        if (msgSpan) msgSpan.textContent = 'تم حفظ الإعدادات الافتراضية وتعديلات النصوص بنجاح!';
         saveToast.classList.add('show');
-        setTimeout(() => saveToast.classList.remove('show'), 3000);
+        setTimeout(() => saveToast.classList.remove('show'), 3200);
       });
+
+      // زر استعادة الإعدادات الأصلية المصنعية
+      const btnResetDefaultSettings = document.getElementById('btnResetDefaultSettings');
+      if (btnResetDefaultSettings) {
+        btnResetDefaultSettings.addEventListener('click', () => {
+          if (confirm('هل تود استعادة جميع نصوص وتنسيقات وإعدادات الشهادة إلى الحالة الأصلية الافتراضية وحذف التخصيصات؟')) {
+            localStorage.removeItem('dudc_v3_default_settings');
+            fetch('/api/reset-defaults', { method: 'POST' }).finally(() => {
+              location.reload();
+            });
+          }
+        });
+      }
 
       function loadDefaultSettings() {
         const saved = localStorage.getItem('dudc_v3_default_settings');
         if (saved) {
           try {
             const data = JSON.parse(saved);
-            // ترقية القيم القديمة المخزنة تلقائياً إلى القيم الافتراضية المحسنة
-            if (data.image_height && Number(data.image_height) < 200) {
-              data.margin_mm = 7;
-              data.gap_header = 0;
-              data.gap_applicant = 8;
-              data.gap_coords = 8;
-              data.gap_images = 5;
-              data.table_pad = 3.6;
-              data.image_height = 230;
-              data.wm_active = true;
-              data.wm_opacity = 10;
-              data.wm_angle = -30;
-              data.wm_size = 13;
-              localStorage.setItem('dudc_v3_default_settings', JSON.stringify(data));
+            applyLayoutDefaults(data);
+            if (data.text_customs) {
+              savedTextDefaults = data.text_customs;
+              applySavedTextDefaults(savedTextDefaults);
             }
-            rngMargin.value = data.margin_mm ?? 7;
-            rngGapHeader.value = data.gap_header ?? 0;
-            rngGapApplicant.value = data.gap_applicant ?? 8;
-            rngGapCoords.value = data.gap_coords ?? 8;
-            rngGapImages.value = data.gap_images ?? 5;
-            rngTablePad.value = data.table_pad ?? 3.6;
-            rngImageHeight.value = data.image_height ?? 230;
-            chkWatermarkActive.checked = data.wm_active ?? true;
-            rngWmOpacity.value = data.wm_opacity ?? 10;
-            rngWmAngle.value = data.wm_angle ?? -30;
-            rngWmSize.value = data.wm_size ?? 13;
-            return;
-          } catch (e) {}
+          } catch (e) {
+            applyLayoutDefaults(null);
+          }
+        } else {
+          applyLayoutDefaults(null);
         }
-        // القيم الافتراضية الدائمة المطابقة تماماً للأصل
-        rngMargin.value = 7;
-        rngGapHeader.value = 0;
-        rngGapApplicant.value = 8;
-        rngGapCoords.value = 8;
-        rngGapImages.value = 5;
-        rngTablePad.value = 3.6;
-        rngImageHeight.value = 230;
-        chkWatermarkActive.checked = true;
-        rngWmOpacity.value = 10;
-        rngWmAngle.value = -30;
-        rngWmSize.value = 13;
+
+        // المزامنة الهادئة مع السيرفر إن وجدت إعدادات مخزنة سابقة
+        fetch('/api/get-defaults')
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success && resData.defaults) {
+              const data = resData.defaults;
+              if (!saved) {
+                applyLayoutDefaults(data);
+              }
+              if (data.text_customs) {
+                savedTextDefaults = data.text_customs;
+                applySavedTextDefaults(savedTextDefaults);
+                localStorage.setItem('dudc_v3_default_settings', JSON.stringify(data));
+              }
+            }
+          })
+          .catch(() => {});
       }
 
       /* ==========================================================================
          المرحلة 3: الإخراج النهائي وتصدير الحزمة
          ========================================================================== */
       function syncStage2ToStage3() {
-        const name = document.getElementById('valApplicantName').textContent.trim() || 'محمد إبراهيم محمد حسن';
-        const center = document.getElementById('valCenter').textContent.trim() || 'نبروه';
+        const name = document.getElementById('valApplicantName').textContent.trim() || activeParcel?.applicant_name || 'مواطن';
+        const center = document.getElementById('valCenter').textContent.trim() || activeParcel?.district || '';
         const area = document.getElementById('valArea').textContent.trim() || '-- م²';
+        const fileBase = center ? `${name}-${center}` : name;
 
         document.getElementById('stage3CitizenName').textContent = name;
         document.getElementById('stage3Center').textContent = center;
         document.getElementById('stage3Area').textContent = area;
 
-        document.getElementById('lblFilePdf').textContent = `${name}.pdf (الشهادة الرسمية مقفولة A4)`;
-        document.getElementById('lblFileDocx').textContent = `${name}.docx (الشهادة الرسمية Word)`;
-        document.getElementById('lblFileJson').textContent = `${name}_session.json (ملف الجلسة الكامل)`;
+        document.getElementById('lblFilePdf').textContent = `${fileBase}.pdf (الشهادة الرسمية مقفولة A4)`;
+        document.getElementById('lblFileDocx').textContent = `${fileBase}.docx (الشهادة الرسمية Word)`;
+        document.getElementById('lblFileJson').textContent = `${fileBase}_session.json (ملف الجلسة الكامل)`;
+      }
+
+      // بناء صفحة HTML مستقلة كاملة التنسيقات لشهادة الـ PDF
+      function buildStandaloneCertificateHtml() {
+        const certPage = document.getElementById('certPage');
+        if (!certPage) return '';
+        
+        const clone = certPage.cloneNode(true);
+        
+        // ضمان عمل روابط الشعارات والصور بالمسار الكامل
+        const isoImg = document.getElementById('logoIso');
+        const dudcImg = document.getElementById('logoDudc');
+        const cloneIso = clone.querySelector('#logoIso');
+        const cloneDudc = clone.querySelector('#logoDudc');
+        if (isoImg && cloneIso) cloneIso.src = isoImg.src;
+        if (dudcImg && cloneDudc) cloneDudc.src = dudcImg.src;
+
+        const croqImg = document.getElementById('imgCroquis');
+        const satImg = document.getElementById('imgSatellite');
+        const cloneCroq = clone.querySelector('#imgCroquis');
+        const cloneSat = clone.querySelector('#imgSatellite');
+        if (croqImg && cloneCroq) cloneCroq.src = croqImg.src;
+        if (satImg && cloneSat) cloneSat.src = satImg.src;
+
+        let styles = '';
+        document.querySelectorAll('style').forEach(s => { styles += s.innerHTML + '\n'; });
+
+        return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<base href="${window.location.origin}/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+${styles}
+@page { size: A4 portrait; margin: 0; }
+body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+.certificate-page { width: 100% !important; min-height: 297mm !important; max-height: 297mm !important; box-shadow: none !important; margin: 0 auto !important; border-radius: 0 !important; page-break-inside: avoid !important; }
+</style>
+</head>
+<body style="background: #ffffff; margin: 0; padding: 0;">
+${clone.outerHTML}
+</body>
+</html>`;
       }
 
       // منطق الاعتماد السحابي الرسمي للطباعة والتصدير (Stage 3)
@@ -3773,10 +4390,18 @@
         });
       });
 
-      // طباعة الـ PDF الفورية
+      // طباعة الـ PDF الفورية - ترث اسم العميل-المركز تلقائياً
       function triggerPdfPrint() {
         switchStage(2);
-        setTimeout(() => window.print(), 150);
+        const citizenName = document.getElementById('valApplicantName').textContent.trim() || activeParcel?.applicant_name || 'مواطن';
+        const center = document.getElementById('valCenter').textContent.trim() || activeParcel?.district || '';
+        const prevTitle = document.title;
+        const fileBase = center ? `${citizenName}-${center}` : citizenName;
+        document.title = fileBase;
+        setTimeout(() => {
+          window.print();
+          setTimeout(() => { document.title = prevTitle; }, 1200);
+        }, 150);
       }
 
       document.getElementById('btnActionPrintPdf').addEventListener('click', triggerPdfPrint);
@@ -3793,9 +4418,14 @@
         }
 
         const citizenName = document.getElementById('valApplicantName').textContent.trim() || activeParcel.applicant_name;
+        const centerName = document.getElementById('valCenter').textContent.trim() || activeParcel.district || '';
+        const fileBase = centerName ? `${citizenName}-${centerName}` : citizenName;
+
         const payload = {
           parcel_index: 0,
           applicant_name: citizenName,
+          district: centerName,
+          certificate_html: buildStandaloneCertificateHtml(),
           survey_technician: document.getElementById('selSurveyTech').value,
           system_officer: document.getElementById('selSysOfficer').value,
           croquis_base64: document.getElementById('imgCroquis').src,
@@ -3804,8 +4434,20 @@
             applicant_name: citizenName,
             receipt_no: document.getElementById('valReceiptNo').textContent.trim(),
             national_id: document.getElementById('valNationalId').textContent.trim(),
-            district: document.getElementById('valCenter').textContent.trim(),
+            district: centerName,
+            village: document.getElementById('valVillage').textContent.trim(),
+            address: document.getElementById('valAddress').textContent.trim(),
             area: document.getElementById('valArea').textContent.trim(),
+            deal_type: document.getElementById('valDealType').textContent.trim(),
+            site_desc: document.getElementById('valSiteDesc').textContent.trim(),
+            order_no: document.getElementById('valOrderNo').textContent.trim(),
+            survey_technician: document.getElementById('selSurveyTech').value,
+            system_officer: document.getElementById('selSysOfficer').value,
+            security_token: activeParcel.security_token || '',
+            parcel: activeParcel,
+            croquis_base64: document.getElementById('imgCroquis').src,
+            satellite_base64: document.getElementById('imgSatellite').src,
+            text_customs: typeof collectAllTextCustomizations === 'function' ? collectAllTextCustomizations() : null,
             sliders: {
               margin: rngMargin.value, gapHeader: rngGapHeader.value, gapApplicant: rngGapApplicant.value,
               gapCoords: rngGapCoords.value, gapImages: rngGapImages.value, tablePad: rngTablePad.value,
@@ -3817,7 +4459,7 @@
           }
         };
 
-        showLoading('تصدير حزمة المشروع الكاملة', `جاري إنشاء ملفات PDF و Word DOCX لمجلد المواطن: ${citizenName}`);
+        showLoading('تصدير حزمة المشروع الكاملة', `جاري إنشاء ملفات PDF و Word DOCX لمجلد: ${fileBase}`);
         fetch('/api/export-package', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -3825,7 +4467,7 @@
         }).then(res => res.json()).then(data => {
           hideLoading();
           if (data.success) {
-            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}`);
+            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}\nالملفات المُخرجة:\n• PDF: ${data.files.pdf || 'تم إنشاؤه'}\n• Word: ${data.files.docx}\n• Session JSON: ${data.files.session_json}`);
             // فتح المجلد تلقائياً
             fetch('/api/open-folder', {
               method: 'POST',

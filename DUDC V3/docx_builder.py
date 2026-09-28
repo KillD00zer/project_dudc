@@ -252,27 +252,38 @@ def generate_certificate_docx(parcel, croquis_img_path, satellite_img_path, outp
     
     # 1. Applicant & Parcel Metadata (Rows 1 to 5)
     # Row 1: Applicant Name & Receipt No
-    set_cell_text(table.rows[1].cells[1], parcel.get("applicant_name", ""), bold=True, font_size=12)
-    set_cell_text(table.rows[1].cells[5], to_arabic_numerals(parcel.get("receipt_no", "")), bold=True, font_size=12)
-    
+    _applicant = parcel.get("applicant_name", "").strip() or "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[1].cells[1], _applicant, bold=True, font_size=12)
+    _receipt = to_arabic_numerals(parcel.get("receipt_no", ""))
+    _receipt_display = _receipt if (_receipt and _receipt.strip("0")) else "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[1].cells[5], _receipt_display, bold=True, font_size=12)
+
     # Row 2: National ID & Request No
-    set_cell_text(table.rows[2].cells[1], to_arabic_numerals(parcel.get("national_id", "")), bold=True, font_size=12)
-    set_cell_text(table.rows[2].cells[5], to_arabic_numerals(parcel.get("request_no", "")), bold=True, font_size=12)
+    _nid = to_arabic_numerals(parcel.get("national_id", ""))
+    _nid_display = _nid if (_nid and _nid.strip("0")) else "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[2].cells[1], _nid_display, bold=True, font_size=12)
+    _req = to_arabic_numerals(parcel.get("request_no", ""))
+    _req_display = _req if (_req and _req.strip("0")) else "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[2].cells[5], _req_display, bold=True, font_size=12)
     
     # Row 3: District & Village
-    set_cell_text(table.rows[3].cells[1], parcel.get("district", ""), bold=True, font_size=12)
-    village_str = parcel.get("village", "") or "--------"
+    _dist = parcel.get("district", "").strip() or "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[3].cells[1], _dist, bold=True, font_size=12)
+    village_str = parcel.get("village", "").strip() or "--------"
     set_cell_text(table.rows[3].cells[5], village_str, bold=True, font_size=12)
     
     # Row 4: Address & Area
-    set_cell_text(table.rows[4].cells[1], parcel.get("address", ""), bold=True, font_size=12)
+    _addr = parcel.get("address", "").strip() or parcel.get("village", "").strip() or "لا يوجد بيانات متاحة"
+    set_cell_text(table.rows[4].cells[1], _addr, bold=True, font_size=12)
     area_val = parcel.get('stated_area_m2', '')
-    area_str = f"{to_arabic_numerals(area_val)} م²" if area_val else ""
+    area_str = f"{to_arabic_numerals(area_val)} م²" if (area_val and str(area_val) not in ('0', '0.0')) else "لا يوجد بيانات متاحة"
     set_cell_text(table.rows[4].cells[5], area_str, bold=True, font_size=12)
     
     # Row 5: Transaction & Site Status
-    set_cell_text(table.rows[5].cells[1], parcel.get("transaction_type", "إنشاء"), bold=False, font_size=12)
-    set_cell_text(table.rows[5].cells[5], parcel.get("site_status", "أرض فضاء"), bold=False, font_size=12)
+    _trans = parcel.get("transaction_type", "").strip() or "إنشاء"
+    _site = parcel.get("site_status", "").strip() or "أرض فضاء"
+    set_cell_text(table.rows[5].cells[1], _trans, bold=False, font_size=12)
+    set_cell_text(table.rows[5].cells[5], _site, bold=False, font_size=12)
     
     # 2. 4 Cardinal Boundaries with Vertical Merging
     cardinal_dirs = [

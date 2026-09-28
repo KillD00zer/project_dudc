@@ -33,6 +33,38 @@ def clean_num_str(val):
     s = re.sub(r'[^\d.-]', '', s)
     return s
 
+def clean_id_field(val):
+    """Clean national ID / receipt number fields.
+    Returns "" if value is missing, zero, or not a meaningful number.
+    Handles scientific notation (e.g. 2.99102E+13 → proper string).
+    """
+    if pd.isna(val) or val is None:
+        return ""
+    # Handle numeric types directly (avoids '2.99e+13' string issue)
+    if isinstance(val, (int, float)):
+        if val == 0:
+            return ""
+        # Convert float that looks like integer (e.g. 29910200000000.0)
+        if float(val) == int(float(val)):
+            return str(int(float(val)))
+        return str(val)
+    s = str(val).strip()
+    if not s or s in ('0', '0.0', 'nan', 'None', '-'):
+        return ""
+    # Handle scientific notation strings like '2.99102E+13'
+    try:
+        as_float = float(s)
+        if as_float == 0:
+            return ""
+        if as_float == int(as_float):
+            return str(int(as_float))
+        return str(as_float)
+    except ValueError:
+        pass
+    # Strip non-digit chars for plain string IDs
+    digits = re.sub(r'[^\d]', '', s)
+    return digits if digits and int(digits) != 0 else ""
+
 def clean_area_num(val):
     clean = clean_num_str(val)
     try:
@@ -110,8 +142,8 @@ def read_survey_file(file_path):
         first_row = group_df.iloc[0]
         
         applicant_name = clean_text_val(first_row.get(c_name, ""))
-        national_id = clean_num_str(first_row.get(c_nid, ""))
-        receipt_no = clean_num_str(first_row.get(c_rcp, ""))
+        national_id = clean_id_field(first_row.get(c_nid, "") if c_nid else "")
+        receipt_no  = clean_id_field(first_row.get(c_rcp, "") if c_rcp else "")
         district = clean_text_val(first_row.get(c_dist, ""))
         village = clean_text_val(first_row.get(c_vill, ""))
         address = clean_text_val(first_row.get(c_addr, "")) or village

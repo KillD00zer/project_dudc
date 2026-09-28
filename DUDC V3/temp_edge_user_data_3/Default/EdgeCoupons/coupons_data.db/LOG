@@ -1,0 +1,5 @@
+2026/09/28-12:30:34.513 4048 Creating DB D:\Work\GIS_tools\project_dudc\DUDC V3\temp_edge_user_data_3\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/09/28-12:30:34.562 4048 Reusing MANIFEST D:\Work\GIS_tools\project_dudc\DUDC V3\temp_edge_user_data_3\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/28-12:30:38.256 6f5c Level-0 table #5: started
+2026/09/28-12:30:38.263 6f5c Level-0 table #5: 683284 bytes OK
+2026/09/28-12:30:38.269 6f5c Delete type=0 #3

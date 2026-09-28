@@ -38,6 +38,7 @@ from centers import resolve_center, get_center_name, list_all_centers
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(APP_DIR, "app_config.json")
+DEFAULTS_FILE = os.path.join(APP_DIR, "user_default_settings.json")
 
 def load_saved_config():
     if os.path.exists(CONFIG_FILE):
@@ -57,39 +58,51 @@ def save_persistent_config(key, val):
     except Exception:
         pass
 
+import threading as _threading
+import subprocess as _subprocess
+_folder_picker_lock = _threading.Lock()
+
 def open_folder_picker(initial_dir=""):
-    init_dir = initial_dir if (initial_dir and os.path.exists(initial_dir)) else (OUTPUT_DIR if os.path.exists(OUTPUT_DIR) else os.getcwd())
+    """
+    Open Windows native folder picker via PowerShell only.
+    - No Tkinter (crashes from non-main thread)
+    - Threading lock prevents double-dialog if button clicked twice
+    """
+    # Non-blocking acquire: if dialog already open, return immediately
+    if not _folder_picker_lock.acquire(blocking=False):
+        return ""
     try:
-        import tkinter as tk
-        from tkinter import filedialog
-        root = tk.Tk()
-        root.withdraw()
-        root.wm_attributes("-topmost", 1)
-        root.focus_force()
-        folder = filedialog.askdirectory(title="اختر مجلد حفظ الشهادات المساحية", initialdir=init_dir)
-        root.destroy()
-        if folder:
-            return os.path.normpath(folder)
-    except Exception:
-        pass
-
-    try:
-        import subprocess
-        ps_cmd = (
-            "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
-            "$f = New-Object System.Windows.Forms.FolderBrowserDialog; "
-            "$f.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
-            f"$f.SelectedPath = '{init_dir}'; "
-            "if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $f.SelectedPath }"
+        init_dir = (
+            initial_dir
+            if (initial_dir and os.path.exists(initial_dir))
+            else (OUTPUT_DIR if os.path.exists(OUTPUT_DIR) else os.getcwd())
         )
-        res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True, timeout=120)
-        out = res.stdout.strip()
-        if out and os.path.exists(out):
-            return os.path.normpath(out)
-    except Exception:
-        pass
+        safe_dir = init_dir.replace("'", "''").replace('"', '')
 
-    return ""
+        # Modern Windows Vista+ FolderBrowserDialog via PowerShell
+        ps_script = (
+            "Add-Type -AssemblyName System.Windows.Forms; "
+            "$d = New-Object System.Windows.Forms.FolderBrowserDialog; "
+            "$d.ShowNewFolderButton = $true; "
+            "try { $d.UseDescriptionForTitle = $true } catch {}; "
+            "$d.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
+            f"$d.SelectedPath = '{safe_dir}'; "
+            "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
+            "{ Write-Output $d.SelectedPath }"
+        )
+        res = _subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
+            capture_output=True, text=True, timeout=180
+        )
+        out = res.stdout.strip()
+        if out:
+            return os.path.normpath(out)
+        return ""
+    except Exception:
+        return ""
+    finally:
+        _folder_picker_lock.release()
+
 
 _saved_cfg = load_saved_config()
 OUTPUT_DIR = _saved_cfg.get("output_dir") or os.path.join(APP_DIR, "generated_certificates")
@@ -173,6 +186,55 @@ def enrich_parcels_with_security_tokens(parcels, system_officer="", survey_techn
 
     return parcels
 
+def export_certificate_pdf(cert_html, output_pdf_path):
+    """
+    Renders standalone certificate HTML to an official A4 PDF using Microsoft Edge headless.
+    """
+    edge_paths = [
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    ]
+    edge_exe = None
+    for ep in edge_paths:
+        if os.path.exists(ep):
+            edge_exe = ep
+            break
+
+    if not edge_exe:
+        print("[!] Microsoft Edge not found; skipping headless PDF generation.")
+        return False
+
+    temp_html_path = os.path.join(TEMP_ASSETS_DIR, f"temp_print_{int(time.time()*1000)}.html")
+    try:
+        with open(temp_html_path, "w", encoding="utf-8") as f:
+            f.write(cert_html)
+
+        cmd = [
+            edge_exe,
+            "--headless",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--no-pdf-header-footer",
+            "--run-all-compositor-stages-before-draw",
+            f"--print-to-pdf={output_pdf_path}",
+            temp_html_path
+        ]
+        res = _subprocess.run(cmd, capture_output=True, text=True, timeout=45)
+        if os.path.exists(output_pdf_path) and os.path.getsize(output_pdf_path) > 0:
+            return True
+        else:
+            print(f"[!] Edge PDF generation warning: {res.stderr or res.stdout}")
+            return False
+    except Exception as e:
+        print(f"[!] Error exporting PDF via Edge: {e}")
+        return False
+    finally:
+        if os.path.exists(temp_html_path):
+            try:
+                os.remove(temp_html_path)
+            except Exception:
+                pass
+
 class DUDCV3RequestHandler(BaseHTTPRequestHandler):
     def _send_json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')
@@ -210,6 +272,16 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             self._send_json({"status": "online", "version": "3.5", "timestamp": time.time()})
         elif path == '/api/get-output-dir':
             self._send_json({"output_dir": OUTPUT_DIR})
+        elif path == '/api/get-defaults':
+            if os.path.exists(DEFAULTS_FILE):
+                try:
+                    with open(DEFAULTS_FILE, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    self._send_json({"success": True, "defaults": data})
+                    return
+                except Exception:
+                    pass
+            self._send_json({"success": False, "defaults": None})
         elif path == '/api/get-centers':
             self._send_json({"centers": list_all_centers()})
         elif path.startswith('/assets/'):
@@ -559,10 +631,16 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
 
                 # Update parcel with latest edited data from studio
                 citizen_name = req_data.get('applicant_name') or parcel.get("applicant_name", f"citizen_{pid}")
-                clean_name = re.sub(r'[\\/*?:"<>|]', '_', citizen_name.strip())
+                district_name = req_data.get('district') or req_data.get('session_data', {}).get('district') or parcel.get("district", "")
 
-                # Dedicated citizen subfolder inside OUTPUT_DIR
-                citizen_dir = os.path.join(OUTPUT_DIR, clean_name)
+                clean_name = re.sub(r'[\\/*?:"<>|]', '_', citizen_name.strip())
+                clean_dist = re.sub(r'[\\/*?:"<>|]', '_', district_name.strip())
+
+                # Standard filename pattern: [ClientName]-[Center]
+                file_base_name = f"{clean_name}-{clean_dist}" if clean_dist else clean_name
+
+                # Dedicated citizen subfolder inside OUTPUT_DIR named [Client]-[Center]
+                citizen_dir = os.path.join(OUTPUT_DIR, file_base_name)
                 os.makedirs(citizen_dir, exist_ok=True)
 
                 # 1 & 2: Images (Croquis + Satellite)
@@ -570,11 +648,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 sat_target_path = os.path.join(citizen_dir, f"satellite_{clean_name}.jpg")
 
                 # If studio sent custom base64 images (after cropping/zooming)
-                if req_data.get('croquis_base64'):
-                    c_b64 = req_data['croquis_base64']
-                    if ',' in c_b64: c_b64 = c_b64.split(',', 1)[1]
-                    with open(croq_target_path, 'wb') as f:
-                        f.write(base64.b64decode(c_b64))
+                c_b64 = req_data.get('croquis_base64', '')
+                if c_b64 and 'data:' in c_b64 and ',' in c_b64:
+                    try:
+                        c_data = base64.b64decode(c_b64.split(',', 1)[1])
+                        with open(croq_target_path, 'wb') as f:
+                            f.write(c_data)
+                    except Exception as e:
+                        print(f"[!] Croquis base64 decode error: {e}")
                 else:
                     src_croq = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png")
                     if os.path.exists(src_croq):
@@ -589,11 +670,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                             font_size_text=parcel.get("font_size_text", 16)
                         )
 
-                if req_data.get('satellite_base64'):
-                    s_b64 = req_data['satellite_base64']
-                    if ',' in s_b64: s_b64 = s_b64.split(',', 1)[1]
-                    with open(sat_target_path, 'wb') as f:
-                        f.write(base64.b64decode(s_b64))
+                s_b64 = req_data.get('satellite_base64', '')
+                if s_b64 and 'data:' in s_b64 and ',' in s_b64:
+                    try:
+                        s_data = base64.b64decode(s_b64.split(',', 1)[1])
+                        with open(sat_target_path, 'wb') as f:
+                            f.write(s_data)
+                    except Exception as e:
+                        print(f"[!] Satellite base64 decode error: {e}")
                 else:
                     src_sat = os.path.join(TEMP_ASSETS_DIR, f"sat_{pid}.jpg")
                     if os.path.exists(src_sat):
@@ -601,9 +685,19 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     else:
                         generate_satellite_image(parcel, sat_target_path)
 
-                # 3: Official Word Document (.docx)
+                # Convert images to base64 for embedding directly inside the final session JSON
+                croq_b64_embed = ""
+                sat_b64_embed = ""
+                if os.path.exists(croq_target_path):
+                    with open(croq_target_path, 'rb') as f:
+                        croq_b64_embed = "data:image/png;base64," + base64.b64encode(f.read()).decode('utf-8')
+                if os.path.exists(sat_target_path):
+                    with open(sat_target_path, 'rb') as f:
+                        sat_b64_embed = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode('utf-8')
+
+                # 3: Official Word Document (.docx) named [Client]-[Center].docx
                 template_docx = os.path.join(APP_DIR, "شهادة.docx")
-                docx_out_path = os.path.join(citizen_dir, f"{clean_name}.docx")
+                docx_out_path = os.path.join(citizen_dir, f"{file_base_name}.docx")
                 
                 survey_tech = req_data.get('survey_technician', 'محمد ابراهيم بدير')
                 sys_officer = req_data.get('system_officer', 'شريف محمد')
@@ -627,15 +721,35 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     security_token=parcel.get("security_token")
                 )
 
-                # 4: Full Session State File (.json)
-                json_path = os.path.join(citizen_dir, f"{clean_name}_session.json")
+                # 4: Official PDF Document (.pdf) named [Client]-[Center].pdf
+                pdf_out_path = os.path.join(citizen_dir, f"{file_base_name}.pdf")
+                cert_html = req_data.get('certificate_html', '')
+                pdf_created = False
+                if cert_html:
+                    pdf_created = export_certificate_pdf(cert_html, pdf_out_path)
+
+                # 5: Full Session State File (.json) containing full base64 images
+                json_path = os.path.join(citizen_dir, f"{file_base_name}_session.json")
                 session_state = req_data.get('session_data', {})
                 session_state["exported_at"] = datetime.now().isoformat()
                 session_state["citizen_folder"] = citizen_dir
+                session_state["applicant_name"] = clean_name
+                session_state["district"] = clean_dist
+                session_state["file_base_name"] = file_base_name
+                if croq_b64_embed:
+                    session_state["croquis_base64"] = croq_b64_embed
+                if sat_b64_embed:
+                    session_state["satellite_base64"] = sat_b64_embed
+                if "parcel" in session_state and isinstance(session_state["parcel"], dict):
+                    if croq_b64_embed:
+                        session_state["parcel"]["croquis_base64"] = croq_b64_embed
+                    if sat_b64_embed:
+                        session_state["parcel"]["satellite_base64"] = sat_b64_embed
+
                 with open(json_path, 'w', encoding='utf-8') as f:
                     json.dump(session_state, f, ensure_ascii=False, indent=2)
 
-                # 5: Archive Original Survey Input File
+                # 6: Archive Original Survey Input File
                 archived_survey_file = None
                 if CURRENT_SURVEY_FILE_PATH and os.path.exists(CURRENT_SURVEY_FILE_PATH):
                     fname = CURRENT_SURVEY_FILENAME or os.path.basename(CURRENT_SURVEY_FILE_PATH)
@@ -646,10 +760,13 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 self._send_json({
                     "success": True,
                     "citizen_name": clean_name,
+                    "district": clean_dist,
+                    "file_base_name": file_base_name,
                     "folder_path": citizen_dir,
                     "files": {
-                        "docx": f"{clean_name}.docx",
-                        "session_json": f"{clean_name}_session.json",
+                        "pdf": f"{file_base_name}.pdf" if pdf_created else None,
+                        "docx": f"{file_base_name}.docx",
+                        "session_json": f"{file_base_name}_session.json",
                         "croquis": f"croquis_{clean_name}.png",
                         "satellite": f"satellite_{clean_name}.jpg",
                         "survey_input": archived_survey_file
@@ -667,11 +784,10 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
                 req_data = json.loads(body) if body else {}
                 target = req_data.get('folder_path') or OUTPUT_DIR
-                if os.path.exists(target):
-                    os.startfile(target)
-                    self._send_json({"success": True})
-                else:
-                    self._send_json({"error": "Directory does not exist"}, status=404)
+                # Create the folder if it doesn't exist yet
+                os.makedirs(target, exist_ok=True)
+                os.startfile(target)
+                self._send_json({"success": True})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
@@ -696,10 +812,114 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
+        # 9. Save Default Settings (Layout Sliders & Text Customizations)
+        elif path == '/api/save-defaults':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                with open(DEFAULTS_FILE, "w", encoding="utf-8") as f:
+                    json.dump(req_data, f, ensure_ascii=False, indent=2)
+                self._send_json({"success": True, "message": "تم حفظ الإعدادات الافتراضية بنجاح"})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
+        # 10. Reset Default Settings
+        elif path == '/api/reset-defaults':
+            try:
+                if os.path.exists(DEFAULTS_FILE):
+                    os.remove(DEFAULTS_FILE)
+                self._send_json({"success": True, "message": "تم استعادة الإعدادات الأصلية بنجاح"})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
+        # 11. Restore Session from JSON
+        elif path == '/api/restore-session':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                parcel = req_data.get('parcel')
+                if not parcel:
+                    self._send_json({"error": "بيانات المعاملة غير متوفرة في ملف الجلسة"}, status=400)
+                    return
+                
+                pid = parcel.get('parcel_id', '0')
+                CURRENT_PARCELS = [parcel]
+                
+                # استعادة الصور في temp_assets إن وجدت base64 أو توليدها تلقائياً
+                croq_name = f"croq_{pid}.png"
+                croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
+                croq_b64 = req_data.get('croquis_base64')
+                if croq_b64 and isinstance(croq_b64, str) and len(croq_b64) > 50:
+                    try:
+                        c_raw = croq_b64.split(',', 1)[1] if ',' in croq_b64 else croq_b64
+                        with open(croq_path, 'wb') as f:
+                            f.write(base64.b64decode(c_raw))
+                    except Exception as ce:
+                        print(f"[!] Warning decoding croquis: {ce}")
+                elif not os.path.exists(croq_path) and parcel.get('vertices'):
+                    try:
+                        generate_croquis_image(parcel, croq_path, security_token=parcel.get('security_token'))
+                    except Exception as ge:
+                        print(f"[!] Warning generating croquis: {ge}")
+                        
+                sat_name = f"sat_{pid}.jpg"
+                sat_path = os.path.join(TEMP_ASSETS_DIR, sat_name)
+                sat_b64 = req_data.get('satellite_base64')
+                if sat_b64 and isinstance(sat_b64, str) and len(sat_b64) > 50:
+                    try:
+                        s_raw = sat_b64.split(',', 1)[1] if ',' in sat_b64 else sat_b64
+                        with open(sat_path, 'wb') as f:
+                            f.write(base64.b64decode(s_raw))
+                    except Exception as se:
+                        print(f"[!] Warning decoding satellite: {se}")
+                elif not os.path.exists(sat_path) and parcel.get('vertices'):
+                    try:
+                        generate_satellite_image(parcel, sat_path)
+                    except Exception as se:
+                        print(f"[!] Warning generating satellite: {se}")
+
+                self._send_json({
+                    "success": True,
+                    "message": "تم استعادة الجلسة في السيرفر بنجاح",
+                    "parcel": parcel,
+                    "croquis_url": f"/temp_assets/{croq_name}?t={int(time.time())}" if os.path.exists(croq_path) else None,
+                    "satellite_url": f"/temp_assets/{sat_name}?t={int(time.time())}" if os.path.exists(sat_path) else None
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         else:
             self.send_error(404, "Not Found")
 
+def kill_existing_on_port(port):
+    """Try to kill any existing process listening on the given port (Windows only)."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["netstat", "-ano"],
+            capture_output=True, text=True
+        )
+        for line in result.stdout.splitlines():
+            if f"127.0.0.1:{port}" in line and "LISTENING" in line:
+                parts = line.strip().split()
+                pid = parts[-1]
+                try:
+                    subprocess.run(["taskkill", "/F", "/PID", pid],
+                                   capture_output=True, timeout=5)
+                    print(f"[INIT] Killed stale process PID {pid} on port {port}")
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
 def start_server(port=8765):
+    # First, clean up any stale process holding our preferred port
+    kill_existing_on_port(port)
+    import time as _time
+    _time.sleep(0.3)  # Short wait for OS to release the port
+
     for p in range(port, port + 20):
         try:
             server = HTTPServer(('127.0.0.1', p), DUDCV3RequestHandler)
@@ -714,9 +934,18 @@ def start_server(port=8765):
 
 if __name__ == '__main__':
     server, port = start_server(8765)
-    webbrowser.open(f"http://127.0.0.1:{port}")
+    url = f"http://127.0.0.1:{port}"
+    print(f"[INFO] Opening browser: {url}")
+    # Small delay to let server fully initialize before opening browser
+    import threading
+    def _open_browser():
+        import time as _t
+        _t.sleep(0.8)
+        webbrowser.open(url)
+    threading.Thread(target=_open_browser, daemon=True).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nStopping DUDC V3.5 Server...")
         server.server_close()
+
