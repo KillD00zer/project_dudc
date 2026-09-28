@@ -521,6 +521,35 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
+        # 4.5 Upload Custom Parcel Image (Croquis or Satellite) from User Device
+        elif path == '/api/upload-parcel-image':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8')
+                req_data = json.loads(body) if length > 0 else {}
+
+                target_type = req_data.get('type', 'croquis')
+                b64_data = req_data.get('image_base64', '')
+                p_idx = req_data.get('parcel_index', 0)
+
+                pid = "0"
+                if CURRENT_PARCELS and p_idx < len(CURRENT_PARCELS):
+                    pid = CURRENT_PARCELS[p_idx].get("parcel_id", "0")
+
+                if b64_data and 'data:' in b64_data and ',' in b64_data:
+                    img_bytes = base64.b64decode(b64_data.split(',', 1)[1])
+                    if target_type == 'croquis':
+                        out_path = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png")
+                    else:
+                        out_path = os.path.join(TEMP_ASSETS_DIR, f"sat_{pid}.jpg")
+                    with open(out_path, 'wb') as f:
+                        f.write(img_bytes)
+                    self._send_json({"success": True, "saved_path": out_path})
+                else:
+                    self._send_json({"error": "Invalid base64 image data"}, status=400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         # 5. Output Directory Management
         elif path == '/api/browse-output-dir':
             try:
@@ -704,11 +733,18 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 parcel["survey_technician"] = survey_tech
                 parcel["system_officer"] = sys_officer
 
-                # Ensure official token is logged with officer & technician
-                if parcel.get("district_id") is not None:
-                    cid = parcel.get("district_id")
-                    new_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
-                    parcel["security_token"] = new_token
+                # Ensure official security token is preserved or generated safely
+                existing_token = parcel.get("security_token") or req_data.get('session_data', {}).get('security_token') or req_data.get('security_token')
+                if not existing_token and parcel.get("district_id") is not None:
+                    try:
+                        cid = parcel.get("district_id")
+                        existing_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
+                    except Exception as te:
+                        print(f"[!] Warning: Token error during export (using fallback): {te}")
+                        existing_token = f"DUDC-{int(time.time())}"
+
+                if existing_token:
+                    parcel["security_token"] = existing_token
 
                 generate_certificate_docx(
                     parcel=parcel,

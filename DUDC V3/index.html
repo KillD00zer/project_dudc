@@ -737,6 +737,115 @@
       color: #000000;
     }
 
+    .image-header-container {
+      position: relative;
+      background: #D3DFEE;
+      border-bottom: 1px solid #4F81BD;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-header-container .image-header {
+      border-bottom: none;
+      background: transparent;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn-cert-img-upload {
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0f172a;
+      color: #34d399;
+      border: 1px solid #10b981;
+      border-radius: 4px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-cert-img-upload:hover {
+      background: #10b981;
+      color: #0b0f19;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-stage1-upload {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #34d399;
+      font-family: 'Cairo', sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-stage1-upload:hover {
+      background: #10b981;
+      color: #0b0f19;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .stage1-dropzone {
+      height: 220px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      border: 2px dashed transparent;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .stage1-dropzone.drag-over,
+    .image-preview-wrapper.drag-over {
+      border: 2px dashed #10b981 !important;
+      background: rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .stage1-img-overlay {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .stage1-dropzone:hover .stage1-img-overlay {
+      opacity: 1;
+    }
+
     .image-preview-wrapper {
       height: var(--image-height);
       position: relative;
@@ -1475,6 +1584,8 @@
         <span>📂</span> استيراد جلسة
       </button>
       <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
+      <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'croquis')">
+      <input type="file" id="inputUploadSatellite" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'satellite')">
     </div>
   </header>
 
@@ -1596,18 +1707,34 @@
           <div class="card">
             <div class="card-title" style="justify-content: space-between; align-items: center;">
               <span>📐 كروكي الموقع (CAD Croquis)</span>
-              <button type="button" class="btn btn-glass" id="btnQuickRefreshCroquis" onclick="updateCroquisDiagram()" style="padding: 2px 8px; font-size: 11px; gap: 4px;" title="إعادة رسم الكروكي">
-                🔄 تحديث
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('croquis')" title="رفع صورة كروكي مخصصة من جهازك">
+                  📁 إضافة صورة من الجهاز
+                </button>
+                <button type="button" class="btn btn-glass" id="btnQuickRefreshCroquis" onclick="updateCroquisDiagram()" style="padding: 3px 8px; font-size: 11px; gap: 4px;" title="إعادة رسم الكروكي وتوليده تلقائياً">
+                  🔄 تحديث
+                </button>
+              </div>
             </div>
-            <div style="height: 220px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div id="dropZoneCroquis" class="stage1-dropzone" onclick="triggerImageUpload('croquis')" title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
               <img id="stage1CroquisImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
+              <div class="stage1-img-overlay">
+                <span>📁 انقر لرفع صورة من الجهاز</span>
+              </div>
             </div>
           </div>
           <div class="card">
-            <div class="card-title">🛰️ صورة فضائية (Google Satellite)</div>
-            <div style="height: 220px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div class="card-title" style="justify-content: space-between; align-items: center;">
+              <span>🛰️ صورة فضائية (Google Satellite)</span>
+              <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('satellite')" title="رفع صورة فضائية مخصصة من جهازك">
+                📁 إضافة صورة من الجهاز
+              </button>
+            </div>
+            <div id="dropZoneSat" class="stage1-dropzone" onclick="triggerImageUpload('satellite')" title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
               <img id="stage1SatImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
+              <div class="stage1-img-overlay">
+                <span>📁 انقر لرفع صورة من الجهاز</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1711,6 +1838,14 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
             <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">✂️ قص كروكي</button>
             <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص قمر</button>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
+            <button type="button" class="btn btn-glass" onclick="triggerImageUpload('croquis')" style="font-size: 11px; justify-content: center; color: var(--accent-green-light); border-color: rgba(16,185,129,0.4);" title="رفع صورة كروكي مخصصة من جهازك">
+              📁 رفع كروكي
+            </button>
+            <button type="button" class="btn btn-glass" onclick="triggerImageUpload('satellite')" style="font-size: 11px; justify-content: center; color: var(--accent-green-light); border-color: rgba(16,185,129,0.4);" title="رفع صورة فضائية مخصصة من جهازك">
+              📁 رفع قمر
+            </button>
           </div>
         </div>
 
@@ -1913,21 +2048,33 @@
             <!-- 5. قسم الصورتين -->
             <div class="images-grid" id="secImages">
               <div class="image-card">
-                <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
-                <div class="image-preview-wrapper" id="croquisWrapper">
+                <div class="image-header-container">
+                  <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+                  <button type="button" class="btn-cert-img-upload no-print" onclick="triggerImageUpload('croquis')" title="رفع صورة كروكي مخصصة من جهازك">
+                    📁 إضافة صورة من الجهاز
+                  </button>
+                </div>
+                <div class="image-preview-wrapper" id="croquisWrapper" title="انقر أو اسحب صورة لإفلاتها هنا">
                   <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
                   <div class="img-action-overlay">
-                    <button class="img-tool-btn" id="btnCropCroqQuick">✂️ قص وضبط</button>
+                    <button type="button" class="img-tool-btn" onclick="triggerImageUpload('croquis')">📁 رفع من الجهاز</button>
+                    <button type="button" class="img-tool-btn" id="btnCropCroqQuick">✂️ قص وضبط</button>
                   </div>
                 </div>
               </div>
 
               <div class="image-card">
-                <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
-                <div class="image-preview-wrapper" id="satWrapper">
+                <div class="image-header-container">
+                  <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
+                  <button type="button" class="btn-cert-img-upload no-print" onclick="triggerImageUpload('satellite')" title="رفع صورة فضائية مخصصة من جهازك">
+                    📁 إضافة صورة من الجهاز
+                  </button>
+                </div>
+                <div class="image-preview-wrapper" id="satWrapper" title="انقر أو اسحب صورة لإفلاتها هنا">
                   <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
                   <div class="img-action-overlay">
-                    <button class="img-tool-btn" id="btnCropSatQuick">✂️ قص وضبط</button>
+                    <button type="button" class="img-tool-btn" onclick="triggerImageUpload('satellite')">📁 رفع من الجهاز</button>
+                    <button type="button" class="img-tool-btn" id="btnCropSatQuick">✂️ قص وضبط</button>
                   </div>
                 </div>
               </div>
@@ -3477,11 +3624,132 @@
         });
       }
 
+      const customUploadedImages = { croquis: null, satellite: null };
+
+      function triggerImageUpload(targetType) {
+        if (targetType === 'croquis') {
+          const inp = document.getElementById('inputUploadCroquis');
+          if (inp) inp.click();
+        } else if (targetType === 'satellite') {
+          const inp = document.getElementById('inputUploadSatellite');
+          if (inp) inp.click();
+        }
+      }
+
+      function applyUploadedImageData(targetType, dataUrl) {
+        customUploadedImages[targetType] = dataUrl;
+        if (targetType === 'croquis') {
+          const img1 = document.getElementById('stage1CroquisImg');
+          const img2 = document.getElementById('imgCroquis');
+          if (img1) img1.src = dataUrl;
+          if (img2) img2.src = dataUrl;
+          if (activeParcel) {
+            activeParcel.croquis_base64 = dataUrl;
+            activeParcel.has_custom_croquis = true;
+          }
+        } else if (targetType === 'satellite') {
+          const img1 = document.getElementById('stage1SatImg');
+          const img2 = document.getElementById('imgSatellite');
+          if (img1) img1.src = dataUrl;
+          if (img2) img2.src = dataUrl;
+          if (activeParcel) {
+            activeParcel.satellite_base64 = dataUrl;
+            activeParcel.has_custom_sat = true;
+          }
+        }
+
+        // مزامنة الصورة المرفوعة مع السيرفر في الخلفية
+        fetch('/api/upload-parcel-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: targetType,
+            image_base64: dataUrl,
+            parcel_index: 0
+          })
+        }).catch(() => {});
+
+        const label = targetType === 'croquis' ? 'الكروكي (CAD Croquis)' : 'الصورة الفضائية (Satellite)';
+        showSaveToast(`✔ تم رفع وتعيين صورة ${label} بنجاح من جهازك`);
+      }
+
+      function handleImageFileSelected(input, targetType) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          alert('يرجى اختيار ملف صورة صالح (PNG, JPG, JPEG, WebP)');
+          input.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          applyUploadedImageData(targetType, e.target.result);
+        };
+        reader.readAsDataURL(file);
+        input.value = '';
+      }
+
+      function initImageDragAndDrop() {
+        const setupDrop = (elemId, targetType) => {
+          const el = document.getElementById(elemId);
+          if (!el) return;
+
+          ['dragenter', 'dragover'].forEach(evt => {
+            el.addEventListener(evt, e => {
+              e.preventDefault();
+              e.stopPropagation();
+              el.classList.add('drag-over');
+            });
+          });
+
+          ['dragleave', 'drop'].forEach(evt => {
+            el.addEventListener(evt, e => {
+              e.preventDefault();
+              e.stopPropagation();
+              el.classList.remove('drag-over');
+            });
+          });
+
+          el.addEventListener('drop', e => {
+            const dt = e.dataTransfer;
+            if (dt && dt.files && dt.files[0]) {
+              const file = dt.files[0];
+              if (!file.type.startsWith('image/')) {
+                alert('يرجى سحب وإفلات ملف صورة صالح (PNG, JPG, WebP)');
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = ev => applyUploadedImageData(targetType, ev.target.result);
+              reader.readAsDataURL(file);
+            }
+          });
+        };
+
+        setupDrop('dropZoneCroquis', 'croquis');
+        setupDrop('dropZoneSat', 'satellite');
+        setupDrop('croquisWrapper', 'croquis');
+        setupDrop('satWrapper', 'satellite');
+      }
+
+      function showSaveToast(text) {
+        const saveToast = document.getElementById('saveToast');
+        const msgSpan = document.getElementById('saveToastMsg');
+        if (msgSpan) msgSpan.textContent = text;
+        if (saveToast) {
+          saveToast.classList.add('show');
+          setTimeout(() => saveToast.classList.remove('show'), 3200);
+        }
+      }
+
       // إتاحة الدوال على كائن window للتفاعل الفوري مع أحداث HTML المباشرة (onclick, onchange)
       window.adjustCroqFont = adjustCroqFont;
       window.updateCroquisDiagram = updateCroquisDiagram;
       window.copySecurityToken = copySecurityToken;
       window.handleDistrictChange = handleDistrictChange;
+      window.triggerImageUpload = triggerImageUpload;
+      window.handleImageFileSelected = handleImageFileSelected;
 
       function updateRunningSums() {
         let sums = { north: 0, east: 0, south: 0, west: 0 };
@@ -3566,6 +3834,25 @@
         const certTokElem = document.getElementById('certTokenPrintVal');
         if (certTokElem) {
           certTokElem.textContent = activeParcel.security_token || document.getElementById('resSecurityToken')?.textContent?.trim() || '--';
+        }
+
+        // مزامنة الصورتين مع الاستوديو (سواء كانت صورة مخصصة مرفوعة أو معاينة افتراضية)
+        if (customUploadedImages.croquis || (activeParcel && activeParcel.croquis_base64)) {
+          document.getElementById('imgCroquis').src = customUploadedImages.croquis || activeParcel.croquis_base64;
+        } else {
+          const s1Croq = document.getElementById('stage1CroquisImg');
+          if (s1Croq && s1Croq.src && !s1Croq.src.endsWith('/') && s1Croq.src !== window.location.href) {
+            document.getElementById('imgCroquis').src = s1Croq.src;
+          }
+        }
+
+        if (customUploadedImages.satellite || (activeParcel && activeParcel.satellite_base64)) {
+          document.getElementById('imgSatellite').src = customUploadedImages.satellite || activeParcel.satellite_base64;
+        } else {
+          const s1Sat = document.getElementById('stage1SatImg');
+          if (s1Sat && s1Sat.src && !s1Sat.src.endsWith('/') && s1Sat.src !== window.location.href) {
+            document.getElementById('imgSatellite').src = s1Sat.src;
+          }
         }
 
         // بناء جدول الحدود والإحداثيات بالدمج الرأسي الدقيق
@@ -4249,6 +4536,8 @@
         if (!certPage) return '';
         
         const clone = certPage.cloneNode(true);
+        // إزالة أزرار وأدوات التحرير من كود الـ PDF المطبوع
+        clone.querySelectorAll('.no-print, .btn-cert-img-upload, .img-action-overlay').forEach(el => el.remove());
         
         // ضمان عمل روابط الشعارات والصور بالمسار الكامل
         const isoImg = document.getElementById('logoIso');
@@ -4512,6 +4801,7 @@ ${clone.outerHTML}
       updateSpacing();
       renderWatermark();
       updateStep1State();
+      initImageDragAndDrop();
     });
   </script>
 </body>
