@@ -737,49 +737,7 @@
       color: #000000;
     }
 
-    .image-header-container {
-      position: relative;
-      background: #D3DFEE;
-      border-bottom: 1px solid #4F81BD;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
 
-    .image-header-container .image-header {
-      border-bottom: none;
-      background: transparent;
-      flex: 1;
-      text-align: center;
-    }
-
-    .btn-cert-img-upload {
-      position: absolute;
-      left: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #0f172a;
-      color: #34d399;
-      border: 1px solid #10b981;
-      border-radius: 4px;
-      font-family: 'Cairo', sans-serif;
-      font-size: 10.5px;
-      font-weight: 700;
-      padding: 2px 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-      z-index: 10;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-    }
-
-    .btn-cert-img-upload:hover {
-      background: #10b981;
-      color: #0b0f19;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-    }
 
     .btn-stage1-upload {
       background: rgba(16, 185, 129, 0.15);
@@ -1519,7 +1477,8 @@
       @page { size: A4 portrait; margin: 0; }
       body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
       .workflow-header, .studio-sidebar, .viewport-toolbar, .floating-text-toolbar,
-      .image-modal-backdrop, .img-action-overlay, .save-toast, .loading-overlay, #stage1View, #stage3View {
+      .image-modal-backdrop, .img-action-overlay, .save-toast, .loading-overlay, #stage1View, #stage3View,
+      .no-print {
         display: none !important;
       }
       #stage2View { display: block !important; height: auto !important; }
@@ -1839,14 +1798,6 @@
             <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">✂️ قص كروكي</button>
             <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص قمر</button>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
-            <button type="button" class="btn btn-glass" onclick="triggerImageUpload('croquis')" style="font-size: 11px; justify-content: center; color: var(--accent-green-light); border-color: rgba(16,185,129,0.4);" title="رفع صورة كروكي مخصصة من جهازك">
-              📁 رفع كروكي
-            </button>
-            <button type="button" class="btn btn-glass" onclick="triggerImageUpload('satellite')" style="font-size: 11px; justify-content: center; color: var(--accent-green-light); border-color: rgba(16,185,129,0.4);" title="رفع صورة فضائية مخصصة من جهازك">
-              📁 رفع قمر
-            </button>
-          </div>
         </div>
 
         <!-- كارت 2: محرك العلامة المائية (الكود السري المولد) -->
@@ -2048,32 +1999,20 @@
             <!-- 5. قسم الصورتين -->
             <div class="images-grid" id="secImages">
               <div class="image-card">
-                <div class="image-header-container">
-                  <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
-                  <button type="button" class="btn-cert-img-upload no-print" onclick="triggerImageUpload('croquis')" title="رفع صورة كروكي مخصصة من جهازك">
-                    📁 إضافة صورة من الجهاز
-                  </button>
-                </div>
-                <div class="image-preview-wrapper" id="croquisWrapper" title="انقر أو اسحب صورة لإفلاتها هنا">
+                <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+                <div class="image-preview-wrapper" id="croquisWrapper">
                   <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
                   <div class="img-action-overlay">
-                    <button type="button" class="img-tool-btn" onclick="triggerImageUpload('croquis')">📁 رفع من الجهاز</button>
                     <button type="button" class="img-tool-btn" id="btnCropCroqQuick">✂️ قص وضبط</button>
                   </div>
                 </div>
               </div>
 
               <div class="image-card">
-                <div class="image-header-container">
-                  <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
-                  <button type="button" class="btn-cert-img-upload no-print" onclick="triggerImageUpload('satellite')" title="رفع صورة فضائية مخصصة من جهازك">
-                    📁 إضافة صورة من الجهاز
-                  </button>
-                </div>
-                <div class="image-preview-wrapper" id="satWrapper" title="انقر أو اسحب صورة لإفلاتها هنا">
+                <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
+                <div class="image-preview-wrapper" id="satWrapper">
                   <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
                   <div class="img-action-overlay">
-                    <button type="button" class="img-tool-btn" onclick="triggerImageUpload('satellite')">📁 رفع من الجهاز</button>
                     <button type="button" class="img-tool-btn" id="btnCropSatQuick">✂️ قص وضبط</button>
                   </div>
                 </div>
@@ -3729,8 +3668,6 @@
 
         setupDrop('dropZoneCroquis', 'croquis');
         setupDrop('dropZoneSat', 'satellite');
-        setupDrop('croquisWrapper', 'croquis');
-        setupDrop('satWrapper', 'satellite');
       }
 
       function showSaveToast(text) {
