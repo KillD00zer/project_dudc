@@ -449,27 +449,6 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             ext = os.path.splitext(fname)[1].lower()
             mime = 'image/jpeg' if ext in ('.jpg', '.jpeg') else 'image/png'
             self._send_file(fpath, mime)
-        # 8. Confirm Certificate Issuance in Cloud
-        elif path == '/api/confirm-issuance':
-            try:
-                length = int(self.headers.get('Content-Length', 0))
-                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
-                req_data = json.loads(body) if body else {}
-                token = req_data.get('token', '').strip()
-                if not token:
-                    self._send_json({"error": "الكود الأمني مطلوب للاعتماد"}, status=400)
-                    return
-                
-                conf_res = confirm_cloud_issuance(token)
-                self._send_json({
-                    "success": True,
-                    "token": token,
-                    "confirmed_at": conf_res.get("confirmed_at", ""),
-                    "message": "تم اعتماد الشهادة بنجاح وتسجيلها رسمي للطباعة"
-                })
-            except Exception as e:
-                self._send_json({"error": str(e)}, status=500)
-
         else:
             self.send_error(404, "Not Found")
 
@@ -1007,10 +986,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
 
                 p_idx = req_data.get('parcel_index', 0)
                 if not CURRENT_PARCELS or p_idx >= len(CURRENT_PARCELS):
-                    self._send_json({"error": "لا توجد قطعة مساحية نشطة للاعتماد"}, status=400)
-                    return
-
-                parcel = CURRENT_PARCELS[p_idx]
+                    if req_data.get('parcel') and isinstance(req_data['parcel'], dict):
+                        CURRENT_PARCELS = [req_data['parcel']]
+                        parcel = CURRENT_PARCELS[0]
+                    else:
+                        self._send_json({"error": "لا توجد قطعة مساحية نشطة للاعتماد"}, status=400)
+                        return
+                else:
+                    parcel = CURRENT_PARCELS[p_idx]
 
                 # Update parcel with latest edited data from studio before generating code
                 if req_data.get('applicant_name'):
@@ -1026,10 +1009,25 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                         parcel["district"] = cname
                         parcel["district_id"] = cid_res
                         parcel["district_matched"] = True
+                if req_data.get('village'):
+                    parcel["village"] = req_data['village'].strip()
+                if req_data.get('address'):
+                    parcel["address"] = req_data['address'].strip()
+                if req_data.get('order_no'):
+                    parcel["order_no"] = req_data['order_no'].strip()
+                    parcel["request_no"] = req_data['order_no'].strip()
+                if req_data.get('deal_type'):
+                    parcel["deal_type"] = req_data['deal_type'].strip()
+                    parcel["transaction_type"] = req_data['deal_type'].strip()
+                if req_data.get('site_desc'):
+                    parcel["site_desc"] = req_data['site_desc'].strip()
+                    parcel["site_status"] = req_data['site_desc'].strip()
                 if req_data.get('survey_technician'):
                     parcel["survey_technician"] = req_data['survey_technician'].strip()
                 if req_data.get('system_officer'):
                     parcel["system_officer"] = req_data['system_officer'].strip()
+
+                CURRENT_PARCELS[p_idx] = parcel
 
                 cid = parcel.get("district_id")
                 if cid is None:
@@ -1047,7 +1045,7 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 # Confirm in cloud audit registry
                 conf_res = confirm_cloud_issuance(official_token)
 
-                # Regenerate croquis with authentic verified token watermark
+                # Regenerate croquis
                 pid = parcel.get("parcel_id", "0")
                 croq_name = f"croq_{pid}.png"
                 croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
@@ -1059,6 +1057,39 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     font_size_dims=parcel.get("font_size_dims", 16),
                     font_size_text=parcel.get("font_size_text", 16)
                 )
+
+                # Auto-sync draft file on disk if draft_id is provided
+                draft_id = req_data.get('draft_id')
+                if draft_id:
+                    file_id = draft_id if draft_id.startswith("draft_") else f"draft_{draft_id}"
+                    draft_file = os.path.join(DRAFTS_DIR, f"{file_id}.json")
+                    if os.path.exists(draft_file):
+                        try:
+                            with open(draft_file, 'r', encoding='utf-8') as df:
+                                ddata = json.load(df)
+                            ddata["security_token"] = official_token
+                            ddata["applicant_name"] = parcel.get("applicant_name", ddata.get("applicant_name"))
+                            ddata["district"] = parcel.get("district", ddata.get("district"))
+                            ddata["saved_at"] = datetime.now().strftime("%Y/%m/%d %I:%M %p")
+                            ddata["parcel"] = parcel
+                            if "session_data" in ddata and isinstance(ddata["session_data"], dict):
+                                ddata["session_data"]["security_token"] = official_token
+                                ddata["session_data"]["parcel"] = parcel
+                                ddata["session_data"]["applicant_name"] = parcel.get("applicant_name")
+                                ddata["session_data"]["district"] = parcel.get("district")
+                                ddata["session_data"]["national_id"] = parcel.get("national_id")
+                                ddata["session_data"]["receipt_no"] = parcel.get("receipt_no")
+                                ddata["session_data"]["village"] = parcel.get("village")
+                                ddata["session_data"]["address"] = parcel.get("address")
+                                ddata["session_data"]["order_no"] = parcel.get("order_no")
+                                ddata["session_data"]["deal_type"] = parcel.get("deal_type")
+                                ddata["session_data"]["site_desc"] = parcel.get("site_desc")
+                                ddata["session_data"]["survey_technician"] = parcel.get("survey_technician")
+                                ddata["session_data"]["system_officer"] = parcel.get("system_officer")
+                            with open(draft_file, 'w', encoding='utf-8') as df:
+                                json.dump(ddata, df, ensure_ascii=False, indent=2)
+                        except Exception as de:
+                            print(f"[!] Warning updating draft on token confirmation: {de}")
 
                 self._send_json({
                     "success": True,
@@ -1109,7 +1140,7 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 croq_name = f"croq_{pid}.png"
                 croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
                 croq_b64 = req_data.get('croquis_base64')
-                if croq_b64 and isinstance(croq_b64, str) and len(croq_b64) > 50:
+                if croq_b64 and isinstance(croq_b64, str) and 'data:image' in croq_b64:
                     try:
                         c_raw = croq_b64.split(',', 1)[1] if ',' in croq_b64 else croq_b64
                         with open(croq_path, 'wb') as f:
@@ -1125,7 +1156,7 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 sat_name = f"sat_{pid}.jpg"
                 sat_path = os.path.join(TEMP_ASSETS_DIR, sat_name)
                 sat_b64 = req_data.get('satellite_base64')
-                if sat_b64 and isinstance(sat_b64, str) and len(sat_b64) > 50:
+                if sat_b64 and isinstance(sat_b64, str) and 'data:image' in sat_b64:
                     try:
                         s_raw = sat_b64.split(',', 1)[1] if ',' in sat_b64 else sat_b64
                         with open(sat_path, 'wb') as f:
@@ -1146,6 +1177,9 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     "satellite_url": f"/temp_assets/{sat_name}?t={int(time.time())}" if os.path.exists(sat_path) else None
                 })
             except Exception as e:
+                import traceback
+                print(f"[!] Error in restore-session: {e}")
+                traceback.print_exc()
                 self._send_json({"error": str(e)}, status=500)
 
         # 12. Save Certificate Draft
@@ -1169,6 +1203,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 
                 p = req_data.get("parcel") or req_data.get("session_data", {}).get("parcel", {})
                 pid = p.get('parcel_id', '0') if isinstance(p, dict) else '0'
+                if p and isinstance(p, dict) and p.get('applicant_name'):
+                    CURRENT_PARCELS = [p]
 
                 # Convert both croquis and satellite images to guaranteed Base64 strings
                 raw_croq = req_data.get("croquis_base64") or req_data.get("session_data", {}).get("croquis_base64")

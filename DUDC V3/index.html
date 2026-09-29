@@ -1814,9 +1814,10 @@
           <button class="btn btn-glass" id="btnBackToStage1" style="flex: 1; font-size: 11px;">⬅ العودة للمطابقة</button>
           <button class="btn btn-green" id="btnGoToStage3" style="flex: 1; font-size: 11px;">الإخراج النهائي ➔</button>
         </div>
-        <button class="btn btn-glass" id="btnQuickSaveDraft" style="width: 100%; font-size: 11px; margin-bottom: 8px; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; justify-content: center;">
+        <button class="btn btn-glass" id="btnQuickSaveDraft" style="width: 100%; font-size: 11px; margin-bottom: 4px; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; justify-content: center;">
           <span>💾</span> حفظ كمسودة مؤقتة
         </button>
+        <div id="draftAutoSaveStatus" style="font-size: 10px; color: #10b981; text-align: center; margin-bottom: 8px; display: none; line-height: 1.3;"></div>
 
         <!-- كارت 1: تحرير وضبط الصورتين (الارتفاع يبدأ من 200 إلى 320 px) -->
         <div class="card" style="padding: 12px;">
@@ -2410,6 +2411,7 @@
           updateSpacing();
           renderWatermark();
         } else if (stageNum === 3) {
+          syncDomToActiveParcel();
           syncStage2ToStage3();
         }
       }
@@ -2871,14 +2873,165 @@
         };
       }
 
+      function toArabicNumerals(val) {
+        if (val === null || val === undefined) return '';
+        const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(val).replace(/[0-9]/g, d => arabicDigits[+d]);
+      }
+
+      function toEnglishNumerals(val) {
+        if (val === null || val === undefined) return '';
+        return String(val)
+          .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+      }
+
+      function syncDomToActiveParcel() {
+        if (!activeParcel) return;
+        
+        const nameEl = document.getElementById('valApplicantName');
+        if (nameEl) {
+          const val = nameEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.applicant_name = val;
+            const r1 = document.getElementById('resApplicantName');
+            if (r1) r1.textContent = val;
+            const s3 = document.getElementById('stage3CitizenName');
+            if (s3) s3.textContent = val;
+          }
+        }
+
+        const rcpEl = document.getElementById('valReceiptNo');
+        if (rcpEl) {
+          const val = rcpEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.receipt_no = toEnglishNumerals(val);
+            const r1 = document.getElementById('resReceiptNo');
+            if (r1) r1.textContent = val;
+          }
+        }
+
+        const nidEl = document.getElementById('valNationalId');
+        if (nidEl) {
+          const val = nidEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.national_id = toEnglishNumerals(val);
+            const r1 = document.getElementById('resNationalId');
+            if (r1) r1.textContent = val;
+          }
+        }
+
+        const centerEl = document.getElementById('valCenter');
+        if (centerEl) {
+          const val = centerEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.district = val;
+            const s3 = document.getElementById('stage3Center');
+            if (s3) s3.textContent = val;
+          }
+        }
+
+        const vilEl = document.getElementById('valVillage');
+        if (vilEl) {
+          const val = vilEl.textContent.trim();
+          if (val && val !== '--------' && val !== '--') {
+            activeParcel.village = val;
+          }
+        }
+
+        const addrEl = document.getElementById('valAddress');
+        if (addrEl) {
+          const val = addrEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.address = val;
+          }
+        }
+
+        const orderEl = document.getElementById('valOrderNo');
+        if (orderEl) {
+          const val = orderEl.textContent.trim();
+          if (val && val !== 'لا يوجد بيانات متاحة' && val !== '--') {
+            activeParcel.order_no = toEnglishNumerals(val.replace(/s$/i, '').trim());
+            activeParcel.request_no = activeParcel.order_no;
+          }
+        }
+
+        const dealEl = document.getElementById('valDealType');
+        if (dealEl) {
+          const val = dealEl.textContent.trim();
+          if (val && val !== '--') {
+            activeParcel.deal_type = val;
+            activeParcel.transaction_type = val;
+          }
+        }
+
+        const siteEl = document.getElementById('valSiteDesc');
+        if (siteEl) {
+          const val = siteEl.textContent.trim();
+          if (val && val !== '--') {
+            activeParcel.site_desc = val;
+            activeParcel.site_status = val;
+          }
+        }
+
+        const techEl = document.getElementById('selSurveyTech');
+        if (techEl && techEl.value) {
+          activeParcel.survey_technician = techEl.value;
+          const s = document.getElementById('sigTech');
+          if (s) s.textContent = `أ / ${techEl.value}`;
+        }
+
+        const offEl = document.getElementById('selSysOfficer');
+        if (offEl && offEl.value) {
+          activeParcel.system_officer = offEl.value;
+          const s = document.getElementById('sigGis');
+          if (s) s.textContent = `أ / ${offEl.value}`;
+        }
+      }
+
+      function showAutoSaveIndicator(state) {
+        const el = document.getElementById('draftAutoSaveStatus');
+        if (!el) return;
+        if (state === 'saving') {
+          el.style.display = 'block';
+          el.style.color = '#38bdf8';
+          el.innerHTML = '<span>⏳ جاري حفظ التعديل بالمسودة...</span>';
+        } else if (state === 'saved') {
+          el.style.display = 'block';
+          el.style.color = '#10b981';
+          const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          el.innerHTML = `<span>✔ تم تحديث المسودة تلقائياً (${timeStr})</span>`;
+        } else if (state === 'error') {
+          el.style.display = 'block';
+          el.style.color = '#ef4444';
+          el.innerHTML = '<span>⚠️ تعذر حفظ التعديل تلقائياً</span>';
+        }
+      }
+
+      let draftAutoSaveTimer = null;
+      function scheduleDraftAutoSave() {
+        if (!activeParcel) return;
+        syncDomToActiveParcel();
+        if (currentActiveDraftId) {
+          showAutoSaveIndicator('saving');
+          clearTimeout(draftAutoSaveTimer);
+          draftAutoSaveTimer = setTimeout(() => {
+            saveCurrentDraft(false);
+          }, 350);
+        }
+      }
+
       function saveCurrentDraft(showFeedback = true) {
         if (!activeParcel) {
-          alert('⚠️ يرجى تحميل ملف الرفع المساحي أو بيانات المعاملة أولاً قبل الحفظ كمسودة.');
+          if (showFeedback) alert('⚠️ يرجى تحميل ملف الرفع المساحي أو بيانات المعاملة أولاً قبل الحفظ كمسودة.');
           return;
         }
 
+        syncDomToActiveParcel();
         const payload = getDraftPayload();
         if (!payload) return;
+
+        if (!showFeedback) showAutoSaveIndicator('saving');
 
         fetch('/api/save-draft', {
           method: 'POST',
@@ -2890,15 +3043,22 @@
           if (data.success) {
             currentActiveDraftId = data.draft_id;
             refreshDraftsBadge();
+            showAutoSaveIndicator('saved');
             if (showFeedback) {
               showSaveToast(`✔ تم حفظ (${payload.applicant_name}) في صندوق مسودات اليوم`);
             }
           } else {
-            alert('خطأ في حفظ المسودة: ' + (data.error || 'تعذر الحفظ'));
+            showAutoSaveIndicator('error');
+            if (showFeedback) {
+              alert('خطأ في حفظ المسودة: ' + (data.error || 'تعذر الحفظ'));
+            }
           }
         })
         .catch(err => {
-          alert('خطأ في الاتصال أثناء حفظ المسودة: ' + err.message);
+          showAutoSaveIndicator('error');
+          if (showFeedback) {
+            alert('خطأ في الاتصال أثناء حفظ المسودة: ' + err.message);
+          }
         });
       }
 
@@ -3578,6 +3738,10 @@
               if (croqImg) croqImg.src = data.croquis_url;
               if (imgCroqStage2) imgCroqStage2.src = data.croquis_url;
             }
+
+            if (typeof scheduleDraftAutoSave === 'function') {
+              scheduleDraftAutoSave();
+            }
           } else {
             alert('خطأ في حفظ المركز: ' + (data.error || 'غير معروف'));
           }
@@ -4089,36 +4253,73 @@
           .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
       }
 
-      function syncStage1ToStage2() {
+      function syncStage1ToStage2(force = false) {
         if (!activeParcel) return;
 
-        // ملء بيانات المواطن بالشهادة بالأرقام العربية
-        document.getElementById('valApplicantName').textContent = activeParcel.applicant_name || 'لا يوجد بيانات متاحة';
-        
-        const rcp = (activeParcel.receipt_no && String(activeParcel.receipt_no).trim() !== '0') ? String(activeParcel.receipt_no).trim() : '';
-        document.getElementById('valReceiptNo').textContent = rcp ? toArabicNumerals(rcp) : 'لا يوجد بيانات متاحة';
-        
-        const nid = (activeParcel.national_id && String(activeParcel.national_id).trim() !== '0') ? String(activeParcel.national_id).trim() : '';
-        document.getElementById('valNationalId').textContent = nid ? toArabicNumerals(nid) : 'لا يوجد بيانات متاحة';
-        
-        document.getElementById('valCenter').textContent = activeParcel.district || 'لا يوجد بيانات متاحة';
-        document.getElementById('valVillage').textContent = activeParcel.village || '--------';
-        document.getElementById('valAddress').textContent = activeParcel.address || activeParcel.village || 'لا يوجد بيانات متاحة';
-        
-        // المساحة تتكتب أرقام عربية وبدون علامة _
-        const areaVal = (parseFloat(activeParcel.calculated_area_m2) || 0).toFixed(2);
-        document.getElementById('valArea').textContent = `${toArabicNumerals(areaVal)} م²`;
-        if (savedTextDefaults && savedTextDefaults['valOrderNo'] && savedTextDefaults['valOrderNo'].html) {
-          document.getElementById('valOrderNo').innerHTML = savedTextDefaults['valOrderNo'].html;
-        } else {
-          const rawOrder = activeParcel.request_no || activeParcel.order_no || '';
-          const reqNo = (rawOrder && String(rawOrder).trim() !== '0') ? String(rawOrder).trim() : '';
-          document.getElementById('valOrderNo').textContent = reqNo ? `${toArabicNumerals(reqNo)}s` : 'لا يوجد بيانات متاحة';
+        // Sync any current DOM edits into activeParcel first
+        if (!force && typeof syncDomToActiveParcel === 'function') {
+          syncDomToActiveParcel();
         }
 
-        // ملء وصف التعامل ووصف الموقع من بيانات الرفع الحقيقية
-        document.getElementById('valDealType').textContent = activeParcel.transaction_type || activeParcel.deal_type || 'إنشاء';
-        document.getElementById('valSiteDesc').textContent = activeParcel.site_status || activeParcel.site_desc || 'أرض فضاء';
+        // Only overwrite elements if forced OR if currently blank/placeholder
+        const nameEl = document.getElementById('valApplicantName');
+        if (force || !nameEl.textContent.trim() || nameEl.textContent.trim() === 'لا يوجد بيانات متاحة' || nameEl.textContent.trim() === '--') {
+          nameEl.textContent = activeParcel.applicant_name || 'لا يوجد بيانات متاحة';
+        }
+        
+        const rcpEl = document.getElementById('valReceiptNo');
+        if (force || !rcpEl.textContent.trim() || rcpEl.textContent.trim() === 'لا يوجد بيانات متاحة' || rcpEl.textContent.trim() === '--') {
+          const rcp = (activeParcel.receipt_no && String(activeParcel.receipt_no).trim() !== '0') ? String(activeParcel.receipt_no).trim() : '';
+          rcpEl.textContent = rcp ? toArabicNumerals(rcp) : 'لا يوجد بيانات متاحة';
+        }
+        
+        const nidEl = document.getElementById('valNationalId');
+        if (force || !nidEl.textContent.trim() || nidEl.textContent.trim() === 'لا يوجد بيانات متاحة' || nidEl.textContent.trim() === '--') {
+          const nid = (activeParcel.national_id && String(activeParcel.national_id).trim() !== '0') ? String(activeParcel.national_id).trim() : '';
+          nidEl.textContent = nid ? toArabicNumerals(nid) : 'لا يوجد بيانات متاحة';
+        }
+        
+        const centerEl = document.getElementById('valCenter');
+        if (force || !centerEl.textContent.trim() || centerEl.textContent.trim() === 'لا يوجد بيانات متاحة' || centerEl.textContent.trim() === '--') {
+          centerEl.textContent = activeParcel.district || 'لا يوجد بيانات متاحة';
+        }
+
+        const vilEl = document.getElementById('valVillage');
+        if (force || !vilEl.textContent.trim() || vilEl.textContent.trim() === '--------' || vilEl.textContent.trim() === '--') {
+          vilEl.textContent = activeParcel.village || '--------';
+        }
+
+        const addrEl = document.getElementById('valAddress');
+        if (force || !addrEl.textContent.trim() || addrEl.textContent.trim() === 'لا يوجد بيانات متاحة' || addrEl.textContent.trim() === '--') {
+          addrEl.textContent = activeParcel.address || activeParcel.village || 'لا يوجد بيانات متاحة';
+        }
+        
+        const areaEl = document.getElementById('valArea');
+        if (force || !areaEl.textContent.trim() || areaEl.textContent.trim() === '-- م²' || areaEl.textContent.trim() === '--') {
+          const areaVal = (parseFloat(activeParcel.calculated_area_m2) || 0).toFixed(2);
+          areaEl.textContent = `${toArabicNumerals(areaVal)} م²`;
+        }
+
+        const orderEl = document.getElementById('valOrderNo');
+        if (force || !orderEl.textContent.trim() || orderEl.textContent.trim() === 'لا يوجد بيانات متاحة' || orderEl.textContent.trim() === '--') {
+          if (savedTextDefaults && savedTextDefaults['valOrderNo'] && savedTextDefaults['valOrderNo'].html) {
+            orderEl.innerHTML = savedTextDefaults['valOrderNo'].html;
+          } else {
+            const rawOrder = activeParcel.request_no || activeParcel.order_no || '';
+            const reqNo = (rawOrder && String(rawOrder).trim() !== '0') ? String(rawOrder).trim() : '';
+            orderEl.textContent = reqNo ? `${toArabicNumerals(reqNo)}s` : 'لا يوجد بيانات متاحة';
+          }
+        }
+
+        const dealEl = document.getElementById('valDealType');
+        if (force || !dealEl.textContent.trim() || dealEl.textContent.trim() === '--') {
+          dealEl.textContent = activeParcel.transaction_type || activeParcel.deal_type || 'إنشاء';
+        }
+
+        const siteEl = document.getElementById('valSiteDesc');
+        if (force || !siteEl.textContent.trim() || siteEl.textContent.trim() === '--') {
+          siteEl.textContent = activeParcel.site_status || activeParcel.site_desc || 'أرض فضاء';
+        }
 
         // التوقيعات المحددة
         document.getElementById('sigTech').textContent = `أ / ${document.getElementById('selSurveyTech').value}`;
@@ -4168,8 +4369,11 @@
           }
         }
 
-        // بناء جدول الحدود والإحداثيات بالدمج الرأسي الدقيق
-        buildCertCoordsTable();
+        // بناء جدول الحدود والإحداثيات بالدمج الرأسي الدقيق (فقط إذا كان فارغاً أو إجباري)
+        const coordsTbody = document.getElementById('certCoordsTbody');
+        if (force || !coordsTbody || coordsTbody.children.length === 0) {
+          buildCertCoordsTable();
+        }
       }
 
       function buildCertCoordsTable() {
@@ -4956,12 +5160,55 @@ ${clone.outerHTML}
           return;
         }
 
-        const applicantName = document.getElementById('valApplicantName')?.textContent?.trim() || activeParcel?.applicant_name || '';
-        const nationalId = document.getElementById('valNationalId')?.textContent?.trim() || activeParcel?.national_id || '';
-        const receiptNo = document.getElementById('valReceiptNo')?.textContent?.trim() || activeParcel?.receipt_no || '';
-        const centerName = document.getElementById('valCenter')?.textContent?.trim() || activeParcel?.district || '';
-        const techVal = document.getElementById('selSurveyTech')?.value || '';
-        const officerVal = document.getElementById('selSysOfficer')?.value || '';
+        // 1. Immediately flush auto-save timer and sync all DOM values into activeParcel
+        if (draftAutoSaveTimer) {
+          clearTimeout(draftAutoSaveTimer);
+          draftAutoSaveTimer = null;
+        }
+        syncDomToActiveParcel();
+
+        const domName = document.getElementById('valApplicantName')?.textContent?.trim();
+        const applicantName = (domName && domName !== 'لا يوجد بيانات متاحة' && domName !== '--') ? domName : (activeParcel.applicant_name || '');
+
+        const domNid = document.getElementById('valNationalId')?.textContent?.trim();
+        const nationalId = (domNid && domNid !== 'لا يوجد بيانات متاحة' && domNid !== '--') ? toEnglishNumerals(domNid) : (activeParcel.national_id || '');
+
+        const domRcp = document.getElementById('valReceiptNo')?.textContent?.trim();
+        const receiptNo = (domRcp && domRcp !== 'لا يوجد بيانات متاحة' && domRcp !== '--') ? toEnglishNumerals(domRcp) : (activeParcel.receipt_no || '');
+
+        const domCenter = document.getElementById('valCenter')?.textContent?.trim();
+        const centerName = (domCenter && domCenter !== 'لا يوجد بيانات متاحة' && domCenter !== '--') ? domCenter : (activeParcel.district || '');
+
+        const domVil = document.getElementById('valVillage')?.textContent?.trim();
+        const village = (domVil && domVil !== '--------' && domVil !== '--') ? domVil : (activeParcel.village || '');
+
+        const domAddr = document.getElementById('valAddress')?.textContent?.trim();
+        const address = (domAddr && domAddr !== 'لا يوجد بيانات متاحة' && domAddr !== '--') ? domAddr : (activeParcel.address || '');
+
+        const domOrder = document.getElementById('valOrderNo')?.textContent?.trim();
+        const orderNo = (domOrder && domOrder !== 'لا يوجد بيانات متاحة' && domOrder !== '--') ? toEnglishNumerals(domOrder.replace(/s$/i, '').trim()) : (activeParcel.order_no || '');
+
+        const domDeal = document.getElementById('valDealType')?.textContent?.trim();
+        const dealType = (domDeal && domDeal !== '--') ? domDeal : (activeParcel.deal_type || 'إنشاء');
+
+        const domSite = document.getElementById('valSiteDesc')?.textContent?.trim();
+        const siteDesc = (domSite && domSite !== '--') ? domSite : (activeParcel.site_desc || 'أرض فضاء');
+
+        const techVal = document.getElementById('selSurveyTech')?.value || activeParcel.survey_technician || '';
+        const officerVal = document.getElementById('selSysOfficer')?.value || activeParcel.system_officer || '';
+
+        // Update activeParcel directly with the latest confirmed values
+        activeParcel.applicant_name = applicantName;
+        activeParcel.national_id = nationalId;
+        activeParcel.receipt_no = receiptNo;
+        activeParcel.district = centerName;
+        activeParcel.village = village;
+        activeParcel.address = address;
+        activeParcel.order_no = orderNo;
+        activeParcel.deal_type = dealType;
+        activeParcel.site_desc = siteDesc;
+        activeParcel.survey_technician = techVal;
+        activeParcel.system_officer = officerVal;
 
         const btn = document.getElementById('btnConfirmIssuance');
         const icon = document.getElementById('confirmBtnIcon');
@@ -4980,12 +5227,19 @@ ${clone.outerHTML}
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             parcel_index: 0,
+            draft_id: currentActiveDraftId,
             applicant_name: applicantName,
             national_id: nationalId,
             receipt_no: receiptNo,
             district: centerName,
+            village: village,
+            address: address,
+            order_no: orderNo,
+            deal_type: dealType,
+            site_desc: siteDesc,
             survey_technician: techVal,
-            system_officer: officerVal
+            system_officer: officerVal,
+            parcel: activeParcel
           })
         })
         .then(res => res.json())
@@ -4993,6 +5247,11 @@ ${clone.outerHTML}
           if (data.success && data.token) {
             isCertificateConfirmed = true;
             activeParcel.security_token = data.token;
+
+            // Auto-save the draft immediately with the confirmed token
+            if (currentActiveDraftId) {
+              saveCurrentDraft(false);
+            }
 
             // تحديث كود الأمان على الشهادة لإزالة الكود التجريبي واستبداله بالكود الرسمي المعتمد
             const certTokElem = document.getElementById('certTokenPrintVal');
@@ -5010,8 +5269,8 @@ ${clone.outerHTML}
               tokDisplay.textContent = data.token;
             }
 
-            // تحديث صورة الكروكي بالبصمة الرسمية
-            if (data.croquis_url) {
+            // تحديث صورة الكروكي بالبصمة الرسمية (فقط إن لم تكن صورة مخصصة)
+            if (data.croquis_url && !customUploadedImages.croquis) {
               const bustUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
               const s1Croq = document.getElementById('stage1CroquisImg');
               const s2Croq = document.getElementById('imgCroquis');
@@ -5178,13 +5437,53 @@ ${clone.outerHTML}
         setZoom((viewport.clientWidth - 70) / 794);
       });
 
-      // مراقبة تعديل بيانات الشهادة بالاستوديو لإلغاء الاعتماد القديم في حال تعديل البيانات
+      // مراقبة تعديل بيانات الشهادة بالاستوديو وإلغاء الاعتماد القديم مع المزامنة والحفظ التلقائي في المسودة
       const certPageElem = document.getElementById('certPage');
       if (certPageElem) {
         certPageElem.addEventListener('input', () => {
           if (isCertificateConfirmed) {
             resetConfirmationState();
           }
+          syncDomToActiveParcel();
+          scheduleDraftAutoSave();
+        });
+
+        certPageElem.addEventListener('focusout', () => {
+          syncDomToActiveParcel();
+          if (currentActiveDraftId) {
+            if (draftAutoSaveTimer) {
+              clearTimeout(draftAutoSaveTimer);
+              draftAutoSaveTimer = null;
+            }
+            saveCurrentDraft(false);
+          }
+        });
+      }
+
+      // مراقبة تعديل مسؤولي الخطوة 1 للتزامن مع المسودة
+      const selTechEl = document.getElementById('selSurveyTech');
+      if (selTechEl) {
+        selTechEl.addEventListener('change', () => {
+          syncDomToActiveParcel();
+          scheduleDraftAutoSave();
+        });
+      }
+      const selOffEl = document.getElementById('selSysOfficer');
+      if (selOffEl) {
+        selOffEl.addEventListener('change', () => {
+          syncDomToActiveParcel();
+          scheduleDraftAutoSave();
+        });
+      }
+
+      // مراقبة تعديل جدول الأضلاع والحدود في المرحلة 1
+      const s1SegsTable = document.getElementById('stage1SegmentsTbody');
+      if (s1SegsTable) {
+        s1SegsTable.addEventListener('input', () => {
+          scheduleDraftAutoSave();
+        });
+        s1SegsTable.addEventListener('change', () => {
+          scheduleDraftAutoSave();
         });
       }
 

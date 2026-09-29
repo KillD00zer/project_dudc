@@ -114,7 +114,8 @@ def generate_croquis_image(parcel, output_path, security_token=None, font_size_p
         label_y = y + norm_dy * v_offset
         
         # Dark brown vertex font (configurable fontsize, default 11 bold)
-        ax.text(label_x, label_y, to_ar_num(verts[i]["point_index"]), 
+        v_idx = verts[i].get("point_index", i + 1) if isinstance(verts[i], dict) else (i + 1)
+        ax.text(label_x, label_y, to_ar_num(v_idx), 
                 color='#3E2723', fontsize=int(font_size_pts), fontweight='bold',
                 fontfamily='Arial', ha='center', va='center', zorder=5)
         
@@ -122,11 +123,11 @@ def generate_croquis_image(parcel, output_path, security_token=None, font_size_p
     side_longest_edge = {}
     for i in range(n_pts):
         next_i = (i + 1) % n_pts
-        length_m = segments[i]["length_m"] if i < len(segments) else 0.0
+        length_m = segments[i].get("length_m", 0.0) if (i < len(segments) and isinstance(segments[i], dict)) else 0.0
         # Check if segment has user-selected direction
-        side = segments[i].get("direction") if i < len(segments) else None
+        side = segments[i].get("direction") if (i < len(segments) and isinstance(segments[i], dict)) else None
         if not side:
-            side = get_edge_cardinal_direction(verts[i]["lon"], verts[i]["lat"], verts[next_i]["lon"], verts[next_i]["lat"], c_lon, c_lat)
+            side = get_edge_cardinal_direction(lons[i], lats[i], lons[next_i], lats[next_i], c_lon, c_lat)
         if side not in side_longest_edge or length_m > side_longest_edge[side][1]:
             side_longest_edge[side] = (i, length_m)
 
@@ -170,7 +171,7 @@ def generate_croquis_image(parcel, output_path, security_token=None, font_size_p
         len_x = mid_x + in_nx * len_offset
         len_y = mid_y + in_ny * len_offset
         
-        length_m = segments[i]["length_m"] if i < len(segments) else edge_len
+        length_m = segments[i].get("length_m", edge_len) if (i < len(segments) and isinstance(segments[i], dict)) else edge_len
         len_str = f"م {to_ar_num(f'{length_m:.2f}')}"
         
         # Draw red length label aligned with segment INSIDE the polygon
@@ -180,9 +181,9 @@ def generate_croquis_image(parcel, output_path, security_token=None, font_size_p
                 ha='center', va='center', zorder=5)
         
         # Check if this edge has a neighbor description (only drawn if provided by user)
-        side = segments[i].get("direction") if i < len(segments) else None
+        side = segments[i].get("direction") if (i < len(segments) and isinstance(segments[i], dict)) else None
         if not side:
-            side = get_edge_cardinal_direction(verts[i]["lon"], verts[i]["lat"], verts[next_i]["lon"], verts[next_i]["lat"], c_lon, c_lat)
+            side = get_edge_cardinal_direction(lons[i], lats[i], lons[next_i], lats[next_i], c_lon, c_lat)
             
         neighbor_text = ""
         # 1. Per-segment specific neighbor if given
