@@ -1044,6 +1044,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
 
                 # Confirm in cloud audit registry
                 conf_res = confirm_cloud_issuance(official_token)
+                if not conf_res.get("success"):
+                    raise RuntimeError(conf_res.get("error", "فشل توثيق الشهادة في السجل السحابي الرسمي"))
 
                 # Regenerate croquis
                 pid = parcel.get("parcel_id", "0")
