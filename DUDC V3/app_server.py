@@ -5,7 +5,7 @@ Dakahlia Utility Data Center (مركز معلومات شبكات المرافق)
 Provides local REST API endpoints for the complete 3-Stage Workflow:
 1. Stage 1: Survey Ingestion, Geodesic Validation, Satellite & Croquis Generation, Token Creation
 2. Stage 2: Studio Edit, Contextual Typography, Image Crop & Zoom, Watermark Control
-3. Stage 3: Direct Vector A4 PDF Print & Complete Citizen Package Export (PDF + DOCX + JSON + Images + Survey File)
+3. Stage 3: Direct Vector A4 PDF Print & Complete Citizen Package Export (PDF + JSON + Images + Survey File)
 """
 
 import sys
@@ -24,7 +24,11 @@ import tempfile
 import webbrowser
 import base64
 import time
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import uuid
+try:
+    from http.server import ThreadingHTTPServer as ServerClass, BaseHTTPRequestHandler
+except ImportError:
+    from http.server import HTTPServer as ServerClass, BaseHTTPRequestHandler
 import urllib.parse
 from datetime import datetime
 
@@ -32,13 +36,41 @@ from datetime import datetime
 from geo_engine import read_survey_file
 from satellite_engine import generate_satellite_image
 from croquis_engine import generate_croquis_image
-from docx_builder import generate_certificate_docx, format_issue_date
 from encoder_api import generate_dudc_token, confirm_cloud_issuance
 from centers import resolve_center, get_center_name, list_all_centers
+
+ARABIC_DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
+
+def to_arabic_numerals(text):
+    if text is None:
+        return ""
+    trans = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+    return str(text).translate(trans)
+
+def format_issue_date(issue_date_val=None):
+    if isinstance(issue_date_val, str) and issue_date_val.strip():
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d/%m/%Y"):
+            try:
+                dt = datetime.strptime(issue_date_val.strip(), fmt)
+                break
+            except ValueError:
+                dt = datetime.now()
+    elif isinstance(issue_date_val, datetime):
+        dt = issue_date_val
+    else:
+        dt = datetime.now()
+    day_name = ARABIC_DAYS[dt.weekday()]
+    date_str = to_arabic_numerals(f"{dt.year:04d}/{dt.month:02d}/{dt.day:02d}")
+    display_text = f"تحريراً في : {day_name} الموافق {date_str}"
+    iso_date = f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
+    return display_text, iso_date
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(APP_DIR, "app_config.json")
 DEFAULTS_FILE = os.path.join(APP_DIR, "user_default_settings.json")
+DRAFTS_DIR = os.path.join(APP_DIR, "drafts")
+os.makedirs(DRAFTS_DIR, exist_ok=True)
+TRIAL_TOKEN = "DUDC-TRIAL-SAMPLE-PREVIEW-000000-000000"
 
 def load_saved_config():
     if os.path.exists(CONFIG_FILE):
@@ -174,15 +206,11 @@ def enrich_parcels_with_security_tokens(parcels, system_officer="", survey_techn
 
         if is_matched:
             p["district"] = canon_name
-            try:
-                p["security_token"] = generate_token_for_parcel(p, cid, system_officer=p.get("system_officer", ""), survey_technician=p.get("survey_technician", ""))
-            except Exception as e:
-                print(f"[!] Warning: Token error during enrich: {e}")
-                p["security_token"] = None
         else:
-            # Rule: Security token is NOT generated or shown until center is secured!
             p["district"] = raw_dist
-            p["security_token"] = None
+
+        # Official security token generation is delayed until Stage 3 verification with final edited data
+        p["security_token"] = None
 
     return parcels
 
@@ -235,34 +263,135 @@ def export_certificate_pdf(cert_html, output_pdf_path):
             except Exception:
                 pass
 
+def ensure_base64_image(img_input, img_type='croquis', parcel=None, pid='0'):
+    """
+    Ensures an image reference (base64, local path, or URL) is resolved to a complete,
+    valid data:image/...;base64,... string for saving self-contained JSON drafts/sessions.
+    """
+    if img_input and isinstance(img_input, str) and img_input.startswith("data:image/"):
+        return img_input
+
+    target_disk_path = None
+    if img_input and isinstance(img_input, str) and img_input.strip():
+        clean = img_input.strip().split("?")[0]
+        if "temp_assets/" in clean:
+            fn = clean.split("temp_assets/")[-1]
+            p = os.path.join(TEMP_ASSETS_DIR, fn)
+            if os.path.exists(p) and os.path.getsize(p) > 0:
+                target_disk_path = p
+        elif "assets/" in clean:
+            fn = clean.split("assets/")[-1]
+            p = os.path.join(ASSETS_DIR, fn)
+            if os.path.exists(p) and os.path.getsize(p) > 0:
+                target_disk_path = p
+        elif os.path.exists(clean) and os.path.isfile(clean) and os.path.getsize(clean) > 0:
+            target_disk_path = clean
+
+    # Check default temp asset name
+    if not target_disk_path:
+        cand = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png" if img_type == "croquis" else f"sat_{pid}.jpg")
+        if os.path.exists(cand) and os.path.getsize(cand) > 0:
+            target_disk_path = cand
+
+    # Read from disk if found
+    if target_disk_path and os.path.exists(target_disk_path):
+        try:
+            mime = "image/png" if target_disk_path.lower().endswith(".png") else "image/jpeg"
+            with open(target_disk_path, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("utf-8")
+                return f"data:{mime};base64,{b64}"
+        except Exception as e:
+            print(f"[!] Warning reading image {target_disk_path}: {e}")
+
+    # Generate from parcel geometry if available
+    if parcel and isinstance(parcel, dict) and parcel.get("vertices"):
+        try:
+            if img_type == "croquis":
+                out_p = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png")
+                generate_croquis_image(
+                    parcel,
+                    out_p,
+                    security_token=parcel.get("security_token"),
+                    font_size_pts=parcel.get("font_size_pts", 16),
+                    font_size_dims=parcel.get("font_size_dims", 16),
+                    font_size_text=parcel.get("font_size_text", 16)
+                )
+                if os.path.exists(out_p) and os.path.getsize(out_p) > 0:
+                    with open(out_p, "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode("utf-8")
+                        return f"data:image/png;base64,{b64}"
+            else:
+                out_p = os.path.join(TEMP_ASSETS_DIR, f"sat_{pid}.jpg")
+                generate_satellite_image(parcel, out_p)
+                if os.path.exists(out_p) and os.path.getsize(out_p) > 0:
+                    with open(out_p, "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode("utf-8")
+                        return f"data:image/jpeg;base64,{b64}"
+        except Exception as ge:
+            print(f"[!] Warning generating {img_type} for draft: {ge}")
+
+    # Fallback to sample asset
+    sample = os.path.join(ASSETS_DIR, "sample_croquis.png" if img_type == "croquis" else "sample_satellite.jpg")
+    if os.path.exists(sample):
+        mime = "image/png" if sample.lower().endswith(".png") else "image/jpeg"
+        with open(sample, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode("utf-8")
+            return f"data:{mime};base64,{b64}"
+
+    return ""
+
 class DUDCV3RequestHandler(BaseHTTPRequestHandler):
+    def address_string(self):
+        # Override to prevent reverse DNS lookup on Windows (eliminates 2.0s delay per request)
+        return self.client_address[0]
+
+    def log_message(self, format, *args):
+        # High performance logger without reverse DNS
+        sys.stderr.write(f"[{self.log_date_time_string()}] {self.client_address[0]} - {format % args}\n")
     def _send_json(self, data, status=200):
-        body = json.dumps(data, ensure_ascii=False).encode('utf-8')
-        self.send_response(status)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.send_header('Content-Length', str(len(body)))
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            body = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):
+            pass
 
     def _send_file(self, file_path, content_type='text/html; charset=utf-8'):
         if not os.path.exists(file_path):
-            self.send_error(404, "File not found")
+            try:
+                self.send_error(404, "File not found")
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):
+                pass
             return
         with open(file_path, 'rb') as f:
             content = f.read()
-        self.send_response(200)
-        self.send_header('Content-Type', content_type)
-        self.send_header('Content-Length', str(len(content)))
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(content)
+        try:
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(content)))
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(content)
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):
+            pass
 
     def do_GET(self):
         global OUTPUT_DIR
+        host = self.headers.get('Host', '')
+        if host.startswith('localhost'):
+            port_str = f":{self.server.server_port}" if getattr(self.server, 'server_port', 8765) != 80 else ""
+            self.send_response(301)
+            self.send_header('Location', f"http://127.0.0.1{port_str}{self.path}")
+            self.end_headers()
+            return
+
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
@@ -284,6 +413,30 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             self._send_json({"success": False, "defaults": None})
         elif path == '/api/get-centers':
             self._send_json({"centers": list_all_centers()})
+        elif path == '/api/list-drafts':
+            try:
+                drafts = []
+                if os.path.exists(DRAFTS_DIR):
+                    for fname in os.listdir(DRAFTS_DIR):
+                        if fname.endswith('.json'):
+                            fpath = os.path.join(DRAFTS_DIR, fname)
+                            try:
+                                with open(fpath, 'r', encoding='utf-8') as f:
+                                    ddata = json.load(f)
+                                drafts.append({
+                                    "draft_id": ddata.get("draft_id", fname.replace(".json", "")),
+                                    "applicant_name": ddata.get("applicant_name") or ddata.get("parcel", {}).get("applicant_name") or "بدون اسم",
+                                    "district": ddata.get("district") or ddata.get("parcel", {}).get("district") or "غير محدد",
+                                    "area": ddata.get("area") or ddata.get("parcel", {}).get("contract_area_text") or "--",
+                                    "saved_at": ddata.get("saved_at") or "",
+                                    "filename": fname
+                                })
+                            except Exception:
+                                pass
+                drafts.sort(key=lambda x: x.get("saved_at", ""), reverse=True)
+                self._send_json({"success": True, "drafts": drafts, "count": len(drafts)})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
         elif path.startswith('/assets/'):
             rel_path = path.lstrip('/')
             full_path = os.path.join(APP_DIR, rel_path)
@@ -502,7 +655,7 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 generate_croquis_image(
                     parcel,
                     croq_path,
-                    security_token=parcel.get("security_token"),
+                    security_token=parcel.get("security_token") or TRIAL_TOKEN,
                     font_size_pts=font_size_pts,
                     font_size_dims=font_size_dims,
                     font_size_text=font_size_text
@@ -623,27 +776,35 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 parcel["district"] = canon_name
                 parcel["district_id"] = cid
                 parcel["district_matched"] = True
-                new_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
-                parcel["security_token"] = new_token
+                # Delay official token creation to Stage 3 verification
+                parcel["security_token"] = None
 
-                # Regenerate croquis image if cached to reflect verified token in watermark
+                # Generate croquis preview image with trial watermark
                 pid = parcel.get("parcel_id", "0")
                 croq_name = f"croq_{pid}.png"
                 croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
-                generate_croquis_image(parcel, croq_path, security_token=new_token)
+                generate_croquis_image(
+                    parcel,
+                    croq_path,
+                    security_token=TRIAL_TOKEN,
+                    font_size_pts=parcel.get("font_size_pts", 16),
+                    font_size_dims=parcel.get("font_size_dims", 16),
+                    font_size_text=parcel.get("font_size_text", 16)
+                )
 
                 self._send_json({
                     "success": True,
                     "district": canon_name,
                     "district_id": cid,
                     "district_matched": True,
-                    "security_token": new_token,
+                    "security_token": None,
+                    "trial_token": TRIAL_TOKEN,
                     "croquis_url": f"/temp_assets/{croq_name}?t={int(time.time())}"
                 })
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
-        # 6. Export Complete Citizen Package (The 6 Deliverables: PDF HTML/Data + DOCX + JSON + 2 Images + Input File)
+        # 6. Export Complete Citizen Package (Deliverables: Vector PDF + JSON + 2 Images + Survey Input File)
         elif path == '/api/export-package':
             try:
                 length = int(self.headers.get('Content-Length', 0))
@@ -724,16 +885,12 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     with open(sat_target_path, 'rb') as f:
                         sat_b64_embed = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode('utf-8')
 
-                # 3: Official Word Document (.docx) named [Client]-[Center].docx
-                template_docx = os.path.join(APP_DIR, "شهادة.docx")
-                docx_out_path = os.path.join(citizen_dir, f"{file_base_name}.docx")
-                
+                # 3: Ensure official security token is preserved or generated safely
                 survey_tech = req_data.get('survey_technician', 'محمد ابراهيم بدير')
                 sys_officer = req_data.get('system_officer', 'شريف محمد')
                 parcel["survey_technician"] = survey_tech
                 parcel["system_officer"] = sys_officer
 
-                # Ensure official security token is preserved or generated safely
                 existing_token = parcel.get("security_token") or req_data.get('session_data', {}).get('security_token') or req_data.get('security_token')
                 if not existing_token and parcel.get("district_id") is not None:
                     try:
@@ -745,17 +902,6 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
 
                 if existing_token:
                     parcel["security_token"] = existing_token
-
-                generate_certificate_docx(
-                    parcel=parcel,
-                    croquis_img_path=croq_target_path,
-                    satellite_img_path=sat_target_path,
-                    output_docx_path=docx_out_path,
-                    template_path=template_docx,
-                    survey_tech=survey_tech,
-                    sys_officer=sys_officer,
-                    security_token=parcel.get("security_token")
-                )
 
                 # 4: Official PDF Document (.pdf) named [Client]-[Center].pdf
                 pdf_out_path = os.path.join(citizen_dir, f"{file_base_name}.pdf")
@@ -793,6 +939,32 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     shutil.copy2(CURRENT_SURVEY_FILE_PATH, target_survey_path)
                     archived_survey_file = fname
 
+                # 7: Auto-remove draft associated with this session if exists
+                try:
+                    target_draft_id = req_data.get('draft_id') or req_data.get('session_data', {}).get('draft_id')
+                    if target_draft_id:
+                        fid = target_draft_id if target_draft_id.startswith("draft_") else f"draft_{target_draft_id}"
+                        dpath = os.path.join(DRAFTS_DIR, f"{fid}.json")
+                        if os.path.exists(dpath):
+                            os.remove(dpath)
+                            print(f"[Drafts] Auto-deleted draft {fid} after package export.")
+                    if os.path.exists(DRAFTS_DIR):
+                        for df in os.listdir(DRAFTS_DIR):
+                            if df.endswith('.json'):
+                                f_full = os.path.join(DRAFTS_DIR, df)
+                                try:
+                                    with open(f_full, 'r', encoding='utf-8') as f:
+                                        cd = json.load(f)
+                                    c_name = str(cd.get('applicant_name') or cd.get('parcel', {}).get('applicant_name', '')).strip()
+                                    if c_name and c_name == clean_name:
+                                        os.remove(f_full)
+                                        print(f"[Drafts] Auto-cleared matched draft {df} for {clean_name}")
+                                        break
+                                except Exception:
+                                    pass
+                except Exception as de:
+                    print(f"[!] Warning deleting draft on export: {de}")
+
                 self._send_json({
                     "success": True,
                     "citizen_name": clean_name,
@@ -801,7 +973,6 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     "folder_path": citizen_dir,
                     "files": {
                         "pdf": f"{file_base_name}.pdf" if pdf_created else None,
-                        "docx": f"{file_base_name}.docx",
                         "session_json": f"{file_base_name}_session.json",
                         "croquis": f"croquis_{clean_name}.png",
                         "satellite": f"satellite_{clean_name}.jpg",
@@ -827,23 +998,74 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
-        # 8. Confirm Certificate Issuance in Cloud
+        # 8. Generate and Confirm Official Security Token with Final Edited Data (Stage 3 Verification)
         elif path == '/api/confirm-issuance':
             try:
                 length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
                 req_data = json.loads(body) if body else {}
-                token = req_data.get('token', '').strip()
-                if not token:
-                    self._send_json({"error": "الكود الأمني مطلوب للاعتماد"}, status=400)
+
+                p_idx = req_data.get('parcel_index', 0)
+                if not CURRENT_PARCELS or p_idx >= len(CURRENT_PARCELS):
+                    self._send_json({"error": "لا توجد قطعة مساحية نشطة للاعتماد"}, status=400)
                     return
-                
-                conf_res = confirm_cloud_issuance(token)
+
+                parcel = CURRENT_PARCELS[p_idx]
+
+                # Update parcel with latest edited data from studio before generating code
+                if req_data.get('applicant_name'):
+                    parcel["applicant_name"] = req_data['applicant_name'].strip()
+                if req_data.get('national_id'):
+                    parcel["national_id"] = req_data['national_id'].strip()
+                if req_data.get('receipt_no'):
+                    parcel["receipt_no"] = req_data['receipt_no'].strip()
+                if req_data.get('district'):
+                    raw_d = req_data['district'].strip()
+                    is_m, cid_res, cname = resolve_center(raw_d)
+                    if is_m:
+                        parcel["district"] = cname
+                        parcel["district_id"] = cid_res
+                        parcel["district_matched"] = True
+                if req_data.get('survey_technician'):
+                    parcel["survey_technician"] = req_data['survey_technician'].strip()
+                if req_data.get('system_officer'):
+                    parcel["system_officer"] = req_data['system_officer'].strip()
+
+                cid = parcel.get("district_id")
+                if cid is None:
+                    is_m, cid_res, cname = resolve_center(parcel.get("district", "المنصورة"))
+                    cid = cid_res if is_m else 0
+                    if is_m: parcel["district"] = cname
+
+                sys_officer = parcel.get("system_officer", "شريف محمد")
+                survey_tech = parcel.get("survey_technician", "محمد ابراهيم بدير")
+
+                # Generate authentic official token using final confirmed data
+                official_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
+                parcel["security_token"] = official_token
+
+                # Confirm in cloud audit registry
+                conf_res = confirm_cloud_issuance(official_token)
+
+                # Regenerate croquis with authentic verified token watermark
+                pid = parcel.get("parcel_id", "0")
+                croq_name = f"croq_{pid}.png"
+                croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
+                generate_croquis_image(
+                    parcel,
+                    croq_path,
+                    security_token=official_token,
+                    font_size_pts=parcel.get("font_size_pts", 16),
+                    font_size_dims=parcel.get("font_size_dims", 16),
+                    font_size_text=parcel.get("font_size_text", 16)
+                )
+
                 self._send_json({
                     "success": True,
-                    "token": token,
-                    "confirmed_at": conf_res.get("confirmed_at", ""),
-                    "message": "تم اعتماد الشهادة بنجاح وتسجيلها رسمي للطباعة"
+                    "token": official_token,
+                    "confirmed_at": conf_res.get("confirmed_at", datetime.now().strftime("%Y/%m/%d %H:%M:%S")),
+                    "croquis_url": f"/temp_assets/{croq_name}?t={int(time.time())}",
+                    "message": "تم إصدار وتوثيق كود الأمان الرسمي بنجاح في السجل السحابي"
                 })
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
@@ -926,6 +1148,146 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
+        # 12. Save Certificate Draft
+        elif path == '/api/save-draft':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+
+                draft_id = req_data.get('draft_id')
+                if not draft_id:
+                    draft_id = f"draft_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+                
+                file_id = draft_id if draft_id.startswith("draft_") else f"draft_{draft_id}"
+                draft_filename = f"{file_id}.json"
+                draft_path = os.path.join(DRAFTS_DIR, draft_filename)
+
+                # Add metadata
+                req_data["draft_id"] = file_id
+                req_data["saved_at"] = datetime.now().strftime("%Y/%m/%d %I:%M %p")
+                
+                p = req_data.get("parcel") or req_data.get("session_data", {}).get("parcel", {})
+                pid = p.get('parcel_id', '0') if isinstance(p, dict) else '0'
+
+                # Convert both croquis and satellite images to guaranteed Base64 strings
+                raw_croq = req_data.get("croquis_base64") or req_data.get("session_data", {}).get("croquis_base64")
+                raw_sat = req_data.get("satellite_base64") or req_data.get("session_data", {}).get("satellite_base64")
+
+                croq_b64 = ensure_base64_image(raw_croq, "croquis", parcel=p, pid=pid)
+                sat_b64 = ensure_base64_image(raw_sat, "satellite", parcel=p, pid=pid)
+
+                # Embed in all relevant places in the draft JSON
+                req_data["croquis_base64"] = croq_b64
+                req_data["satellite_base64"] = sat_b64
+                if "session_data" in req_data and isinstance(req_data["session_data"], dict):
+                    req_data["session_data"]["croquis_base64"] = croq_b64
+                    req_data["session_data"]["satellite_base64"] = sat_b64
+                    if "parcel" in req_data["session_data"] and isinstance(req_data["session_data"]["parcel"], dict):
+                        req_data["session_data"]["parcel"]["croquis_base64"] = croq_b64
+                        req_data["session_data"]["parcel"]["satellite_base64"] = sat_b64
+                if "parcel" in req_data and isinstance(req_data["parcel"], dict):
+                    req_data["parcel"]["croquis_base64"] = croq_b64
+                    req_data["parcel"]["satellite_base64"] = sat_b64
+
+                req_data["applicant_name"] = req_data.get("applicant_name") or p.get("applicant_name") or "بدون اسم"
+                req_data["district"] = req_data.get("district") or p.get("district") or "غير محدد"
+                req_data["area"] = req_data.get("area") or p.get("contract_area_text") or "--"
+
+                with open(draft_path, "w", encoding="utf-8") as f:
+                    json.dump(req_data, f, ensure_ascii=False, indent=2)
+
+                self._send_json({
+                    "success": True,
+                    "draft_id": file_id,
+                    "saved_at": req_data["saved_at"],
+                    "message": "تم حفظ المسودة بنجاح في صندوق مسودات اليوم"
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
+        # 13. Load Certificate Draft
+        elif path == '/api/load-draft':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                draft_id = req_data.get('draft_id', '').strip()
+                if not draft_id:
+                    self._send_json({"error": "معرف المسودة مطلوب"}, status=400)
+                    return
+                
+                file_id = draft_id if draft_id.startswith("draft_") else f"draft_{draft_id}"
+                draft_path = os.path.join(DRAFTS_DIR, f"{file_id}.json")
+                if not os.path.exists(draft_path):
+                    self._send_json({"error": "المسودة غير موجودة أو تم حذفها"}, status=404)
+                    return
+                
+                with open(draft_path, "r", encoding="utf-8") as f:
+                    draft_data = json.load(f)
+
+                # Sync into server state
+                p = draft_data.get("parcel") or draft_data.get("session_data", {}).get("parcel")
+                croq_url = None
+                sat_url = None
+                if p and isinstance(p, dict):
+                    CURRENT_PARCELS = [p]
+                    pid = p.get('parcel_id', '0')
+                    
+                    # Unpack images into temp_assets if present
+                    croq_b64 = draft_data.get('croquis_base64') or draft_data.get('session_data', {}).get('croquis_base64')
+                    if croq_b64 and isinstance(croq_b64, str) and 'data:image' in croq_b64:
+                        try:
+                            c_raw = croq_b64.split(',', 1)[1] if ',' in croq_b64 else croq_b64
+                            croq_out = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png")
+                            with open(croq_out, 'wb') as f:
+                                f.write(base64.b64decode(c_raw))
+                            croq_url = f"/temp_assets/croq_{pid}.png?t={int(time.time())}"
+                        except Exception as ce:
+                            print(f"[!] Error unpacking croquis: {ce}")
+
+                    sat_b64 = draft_data.get('satellite_base64') or draft_data.get('session_data', {}).get('satellite_base64')
+                    if sat_b64 and isinstance(sat_b64, str) and 'data:image' in sat_b64:
+                        try:
+                            s_raw = sat_b64.split(',', 1)[1] if ',' in sat_b64 else sat_b64
+                            sat_out = os.path.join(TEMP_ASSETS_DIR, f"sat_{pid}.jpg")
+                            with open(sat_out, 'wb') as f:
+                                f.write(base64.b64decode(s_raw))
+                            sat_url = f"/temp_assets/sat_{pid}.jpg?t={int(time.time())}"
+                        except Exception as se:
+                            print(f"[!] Error unpacking satellite: {se}")
+
+                self._send_json({
+                    "success": True,
+                    "draft_id": file_id,
+                    "draft": draft_data,
+                    "croquis_url": croq_url,
+                    "satellite_url": sat_url
+                })
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
+        # 14. Delete Certificate Draft
+        elif path == '/api/delete-draft':
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
+                req_data = json.loads(body) if body else {}
+                draft_id = req_data.get('draft_id', '').strip()
+                if not draft_id:
+                    self._send_json({"error": "معرف المسودة مطلوب للحذف"}, status=400)
+                    return
+                
+                file_id = draft_id if draft_id.startswith("draft_") else f"draft_{draft_id}"
+                draft_path = os.path.join(DRAFTS_DIR, f"{file_id}.json")
+                if os.path.exists(draft_path):
+                    os.remove(draft_path)
+                    self._send_json({"success": True, "message": "تم حذف المسودة بنجاح"})
+                else:
+                    self._send_json({"success": True, "message": "المسودة غير موجودة بالفعل"})
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+
         else:
             self.send_error(404, "Not Found")
 
@@ -958,7 +1320,7 @@ def start_server(port=8765):
 
     for p in range(port, port + 20):
         try:
-            server = HTTPServer(('127.0.0.1', p), DUDCV3RequestHandler)
+            server = ServerClass(('127.0.0.1', p), DUDCV3RequestHandler)
             print(f"==================================================")
             print(f"  🏛️ DUDC V3.5 Cadastral Studio Server Running")
             print(f"  URL: http://127.0.0.1:{p}")

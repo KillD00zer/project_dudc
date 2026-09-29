@@ -10,6 +10,7 @@ import os
 import math
 import ssl
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw
 
 # Ignore SSL verification for tile fetching if needed
@@ -20,6 +21,9 @@ SSL_CTX.verify_mode = ssl.CERT_NONE
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 }
+
+TILE_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_assets", "tile_cache")
+os.makedirs(TILE_CACHE_DIR, exist_ok=True)
 
 def lonlat_to_tile(lon, lat, zoom):
     lat_rad = math.radians(lat)
@@ -50,11 +54,22 @@ def determine_zoom(min_lon, max_lon, min_lat, max_lat, stated_area):
         return 18
 
 def fetch_tile(x, y, z):
+    cache_file = os.path.join(TILE_CACHE_DIR, f"{z}_{x}_{y}.png")
+    if os.path.exists(cache_file):
+        try:
+            return Image.open(cache_file).convert('RGBA')
+        except Exception:
+            pass
     sub = (x + y) % 4
     url = f"https://mt{sub}.google.com/vt/lyrs=s&hl=en&z={z}&x={x}&y={y}"
     req = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=12, context=SSL_CTX) as response:
-        return Image.open(response).convert('RGBA')
+    with urllib.request.urlopen(req, timeout=6, context=SSL_CTX) as response:
+        img = Image.open(response).convert('RGBA')
+        try:
+            img.save(cache_file, "PNG")
+        except Exception:
+            pass
+        return img
 
 def generate_satellite_image(parcel, output_path):
     """
@@ -106,15 +121,24 @@ def generate_satellite_image(parcel, output_path):
     
     stitched = Image.new('RGBA', (tiles_x * 256, tiles_y * 256))
     
-    # Download & stitch tiles
+    # Download tiles in parallel and stitch
+    tasks = []
     for ix, tx in enumerate(range(min_tx, max_tx + 1)):
         for iy, ty in enumerate(range(min_ty, max_ty + 1)):
-            try:
-                tile_img = fetch_tile(tx, ty, zoom)
+            tasks.append((ix, iy, tx, ty))
+
+    def _fetch_worker(t):
+        _ix, _iy, _tx, _ty = t
+        try:
+            return _ix, _iy, fetch_tile(_tx, _ty, zoom)
+        except Exception:
+            return _ix, _iy, None
+
+    worker_count = min(12, max(4, len(tasks)))
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        for ix, iy, tile_img in executor.map(_fetch_worker, tasks):
+            if tile_img:
                 stitched.paste(tile_img, (ix * 256, iy * 256))
-            except Exception as e:
-                # Fallback blank tile
-                pass
                 
     # Transform vertices to pixel coordinates in stitched image
     base_px = min_tx * 256.0

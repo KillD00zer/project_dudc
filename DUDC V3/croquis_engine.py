@@ -212,18 +212,6 @@ def generate_croquis_image(parcel, output_path, security_token=None, font_size_p
     ax.text(0.06, 0.96, 'N', transform=ax.transAxes,
             color='black', fontsize=13, fontweight='bold', fontfamily='Arial', ha='center', va='bottom', alpha=0.45, zorder=6)
     
-    # 5. Cryptographic Security Token Watermark (Background Layer)
-    if security_token:
-        ax.text(
-            0.5, 0.5,
-            str(security_token).strip(),
-            transform=ax.transAxes,
-            color='#64748B', fontsize=13, fontweight='bold', fontfamily='Consolas',
-            rotation=25, alpha=0.18,
-            ha='center', va='center',
-            zorder=1
-        )
-    
     # Set view limits with uniform aspect ratio
     ax.set_xlim(min_x - pad_x, max_x + pad_x)
     ax.set_ylim(min_y - pad_y, max_y + pad_y)

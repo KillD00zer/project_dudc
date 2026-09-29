@@ -1045,6 +1045,31 @@
       align-items: center;
       letter-spacing: 0.5px;
     }
+    .token-trial {
+      color: #94a3b8 !important;
+      background: rgba(148, 163, 184, 0.12) !important;
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.5px;
+    }
+    .badge-trial-tag {
+      font-size: 8pt;
+      font-weight: 600;
+      color: #64748b;
+      background: rgba(100, 116, 139, 0.12);
+      border: 1px dashed #94a3b8;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-right: 6px;
+      display: inline-block;
+      direction: rtl;
+      user-select: none;
+    }
 
     /* زر نسخ كود التشفير */
     .btn-copy-token {
@@ -1542,6 +1567,11 @@
       <button class="btn btn-glass" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
         <span>📂</span> استيراد جلسة
       </button>
+
+      <button class="btn btn-glass" id="btnOpenDraftsBox" title="صندوق المسودات والشهادات المؤجلة" style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24; position: relative;">
+        <span>📑</span> مسودات اليوم
+        <span id="draftsBadgeCount" style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
+      </button>
       <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
       <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'croquis')">
       <input type="file" id="inputUploadSatellite" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'satellite')">
@@ -1780,10 +1810,13 @@
       <!-- القائمة الجانبية لسلايدرات الاستوديو -->
       <aside class="studio-sidebar" id="sidebar">
 
-        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
           <button class="btn btn-glass" id="btnBackToStage1" style="flex: 1; font-size: 11px;">⬅ العودة للمطابقة</button>
           <button class="btn btn-green" id="btnGoToStage3" style="flex: 1; font-size: 11px;">الإخراج النهائي ➔</button>
         </div>
+        <button class="btn btn-glass" id="btnQuickSaveDraft" style="width: 100%; font-size: 11px; margin-bottom: 8px; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; justify-content: center;">
+          <span>💾</span> حفظ كمسودة مؤقتة
+        </button>
 
         <!-- كارت 1: تحرير وضبط الصورتين (الارتفاع يبدأ من 200 إلى 320 px) -->
         <div class="card" style="padding: 12px;">
@@ -2037,6 +2070,7 @@
             <div class="cert-security-token-print" id="certTokenPrint">
               <span>كود التأمين والرقابة السحابية (DUDC Token): </span>
               <span id="certTokenPrintVal">--</span>
+              <span id="certTrialBadge" class="badge-trial-tag no-print" style="display: none;"> (كود تجريبي لضبط الطباعة) </span>
             </div>
 
             <!-- 7. التوقيعات: كلمة يعتمد في أقصى اليسار فوق مدير المركز -->
@@ -2115,6 +2149,21 @@
           <div id="confirmationStatusMsg" style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #10b981; display: none;"></div>
         </div>
 
+        <!-- كارت حفظ كمسودة للمتابعة لاحقاً (البيانات غير مكتملة) -->
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+          <div>
+            <div style="font-weight: 800; font-size: 13.5px; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+              <span>💾</span> حفظ في صندوق المسودات (البيانات غير مكتملة)
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+              يمكنك حفظ الشهادة كمسودة للرجوع إليها واستكمال بياناتها لاحقاً دون الحاجة لاعتماد كود الأمان الآن.
+            </p>
+          </div>
+          <button class="btn btn-glass" id="btnSaveToDrafts" style="border-color: #fbbf24; color: #fbbf24; font-weight: bold; padding: 7px 16px; white-space: nowrap; font-size: 12px;">
+            <span>📥</span> حفظ كمسودة
+          </button>
+        </div>
+
         <!-- أزرار الإخراج الرئيسية (مقفولة حتى اعتماد الشهادة) -->
         <div class="delivery-actions-grid" id="deliveryActionsGrid" style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease;">
           <div class="action-box" id="btnActionPrintPdf">
@@ -2126,7 +2175,7 @@
           <div class="action-box" id="btnActionExportPackage" style="border-color: var(--accent-green);">
             <div class="action-icon">📦</div>
             <strong style="font-size: 14px; color: var(--accent-green-light);">تصدير حزمة المشروع الكاملة</strong>
-            <p style="font-size: 11px; color: var(--text-muted);">حفظ مجلد العميل (PDF + Word DOCX + JSON + Images + CSV)</p>
+            <p style="font-size: 11px; color: var(--text-muted);">حفظ مجلد العميل (PDF + JSON + Images + Survey File)</p>
           </div>
         </div>
 
@@ -2134,7 +2183,6 @@
         <div class="package-files-list">
           <span style="font-weight: bold; color: var(--accent-cyan);">📁 محتويات مجلد العميل عند التصدير:</span>
           <div class="file-item"><span>📄</span> <span id="lblFilePdf">الشهادة الرسمية بصيغة PDF (مقفولة A4)</span></div>
-          <div class="file-item"><span>📝</span> <span id="lblFileDocx">الشهادة الرسمية بصيغة Word (.docx)</span></div>
           <div class="file-item"><span>⚙️</span> <span id="lblFileJson">ملف الجلسة الكاملة (.json) لإعادة الفتح والتعديل</span></div>
           <div class="file-item"><span>🖼️</span> <span>صورة الكروكي الهندسي عالي الدقة (300 DPI)</span></div>
           <div class="file-item"><span>🛰️</span> <span>صورة القمر الصناعي مدمج بها مضلع الأرض</span></div>
@@ -2199,6 +2247,36 @@
       <div style="display: flex; justify-content: flex-end; gap: 8px;">
         <button class="btn btn-glass" id="btnCancelCrop">إلغاء</button>
         <button class="btn btn-green" id="btnApplyCrop">✔ حفظ وتطبيق على الشهادة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       نافذة صندوق المسودات والشهادات المؤجلة (Drafts Drawer / Modal)
+       ========================================================================== -->
+  <div class="image-modal-backdrop" id="draftsModalBackdrop" style="display: none;">
+    <div class="image-modal" style="max-width: 680px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">📑</span>
+          <span style="font-weight: 800; font-size: 16px; color: #fbbf24;">صندوق المسودات والشهادات المؤجلة</span>
+          <span id="draftsModalBadge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0 مسودات</span>
+        </div>
+        <button class="btn btn-glass" id="btnCloseDraftsModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+        الشهادات التي تم حفظها كمسودات خلال اليوم ولم تُعتمد وتُصدّر بعد. عند استكمال أي شهادة وتصدير حزمة المشروع النهائية، تُحذف تلقائياً من هذا الصندوق.
+      </div>
+
+      <!-- قائمة المسودات -->
+      <div id="draftsListContainer" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
+        <!-- يتم ملؤها ديناميكياً -->
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+        <span style="font-size: 11px; color: var(--text-muted);" id="draftsFooterNote">📁 التخزين: DUDC V3/drafts/</span>
+        <button class="btn btn-glass" id="btnCloseDraftsModalBottom">إغلاق</button>
       </div>
     </div>
   </div>
@@ -2282,7 +2360,15 @@
        6. المحرك البرمجي المتكامل لمسار العمل (Workflow JavaScript Controller)
        ========================================================================== -->
   <script>
+    // توجيه فوري إلى 127.0.0.1 لتفادي بطء استعلام DNS الخاص بـ IPv6 على ويندوز
+    if (window.location.hostname === 'localhost') {
+      window.location.replace(window.location.href.replace('localhost', '127.0.0.1'));
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      // كود الأمان التجريبي للمعاينة وضبط الإخراج الطباعي في الاستوديو
+      const TRIAL_TOKEN = 'DUDC-TRIAL-SAMPLE-PREVIEW-000000-000000';
+
       // متغيرات الحالة العالمية (Global Workflow State)
       let currentStage = 1;
       let activeParcel = null;
@@ -2331,8 +2417,8 @@
       stepTab1.addEventListener('click', () => switchStage(1));
       stepTab2.addEventListener('click', () => {
         if (!activeParcel) return;
-        if (!activeParcel.district_matched || !activeParcel.security_token) {
-          alert('⚠️ تنبيه أمني: يرجى تحديد وتأمين المركز أولاً من القائمة لتوليد كود التأمين الرقابي قبل الانتقال للاستوديو.');
+        if (!activeParcel.district_matched) {
+          alert('⚠️ تنبيه: يرجى اختيار وتحديد المركز أولاً من القائمة قبل الانتقال للاستوديو.');
           const sel = document.getElementById('selDistrict');
           if (sel) { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); sel.focus(); }
           return;
@@ -2341,8 +2427,8 @@
       });
       stepTab3.addEventListener('click', () => {
         if (!activeParcel) return;
-        if (!activeParcel.district_matched || !activeParcel.security_token) {
-          alert('⚠️ تنبيه أمني: يرجى تأمين المركز وكود الأمان أولاً.');
+        if (!activeParcel.district_matched) {
+          alert('⚠️ تنبيه: يرجى تحديد المركز أولاً من القائمة.');
           return;
         }
         switchStage(3);
@@ -2350,8 +2436,8 @@
 
       document.getElementById('btnGoToStage2').addEventListener('click', () => {
         if (!activeParcel) return;
-        if (!activeParcel.district_matched || !activeParcel.security_token) {
-          alert('⚠️ تنبيه أمني: لا يمكن الانتقال للاستوديو أو اعتماد الشهادة حتى يتم تأمين وتحديد خانة المركز من القائمة لتوليد كود التأمين الرقابي!');
+        if (!activeParcel.district_matched) {
+          alert('⚠️ تنبيه: لا يمكن الانتقال للاستوديو حتى يتم اختيار وتحديد خانة المركز من القائمة!');
           const sel = document.getElementById('selDistrict');
           if (sel) { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); sel.focus(); }
           return;
@@ -2446,8 +2532,233 @@
       loadOutputDir();
 
       // ==========================================================================
-      // استيراد جلسة عمل سابقة بالكامل (.json)
       // ==========================================================================
+      // استيراد جلسة عمل سابقة بالكامل (.json) ونظام إدارة المسودات (Drafts Box)
+      // ==========================================================================
+      let currentActiveDraftId = null;
+
+      function restoreSessionFromData(rawData, draftId = null) {
+        try {
+          const data = (rawData.session_data && typeof rawData.session_data === 'object')
+            ? Object.assign({}, rawData, rawData.session_data)
+            : rawData;
+          const parcelData = data.parcel || {};
+          const applicantName = data.applicant_name || parcelData.applicant_name || data.name || 'مواطن بدون اسم';
+
+          // قراءة واستخراج المركز والتحقق من القاموس الرسمي
+          let distName = data.district || parcelData.district || 'نبروه';
+          let distId = (data.district_id !== undefined && data.district_id !== null)
+            ? data.district_id
+            : parcelData.district_id;
+
+          if (distId === undefined || distId === null) {
+            const cleanDist = String(distName).trim();
+            const matched = OFFICIAL_CENTERS_FALLBACK.find(([cid, cname]) => cname === cleanDist || cleanDist.includes(cname));
+            if (matched) {
+              distId = matched[0];
+              distName = matched[1];
+            } else {
+              distId = 10;
+              distName = 'نبروه';
+            }
+          }
+
+          // تنظيف وتحويل المساحات بأمان
+          const statedArea = parseFloat(toEnglishNumerals(String(data.stated_area_m2 || parcelData.stated_area_m2 || data.area || 0))) || 0;
+          const calcArea = parseFloat(toEnglishNumerals(String(data.calculated_area_m2 || parcelData.calculated_area_m2 || data.area || 0))) || statedArea;
+
+          // بناء كائن activeParcel المتكامل
+          activeParcel = {
+            parcel_id: parcelData.parcel_id || data.parcel_id || '0',
+            applicant_name: applicantName,
+            national_id: toEnglishNumerals(String(data.national_id || parcelData.national_id || '')),
+            receipt_no: toEnglishNumerals(String(data.receipt_no || parcelData.receipt_no || '')),
+            district: distName,
+            district_id: distId,
+            district_matched: true,
+            village: data.village || parcelData.village || '',
+            address: data.address || parcelData.address || '',
+            stated_area_m2: statedArea,
+            calculated_area_m2: calcArea,
+            order_no: data.order_no || parcelData.order_no || '٢٦٠٥s',
+            deal_type: data.deal_type || parcelData.deal_type || 'انشاء',
+            site_desc: data.site_desc || parcelData.site_desc || 'موقع عينة تجريبية',
+            security_token: data.security_token || data.token || parcelData.security_token || null,
+            survey_technician: data.survey_technician || parcelData.survey_technician || 'محمد ابراهيم بدير',
+            system_officer: data.system_officer || parcelData.system_officer || 'شريف محمد',
+            segments: data.segments || parcelData.segments || [],
+            boundaries: data.boundaries || parcelData.boundaries || {},
+            vertices: data.vertices || parcelData.vertices || []
+          };
+
+          // 1. استعادة مسؤولي الخطوة 1
+          const selTech = document.getElementById('selSurveyTech');
+          if (selTech && activeParcel.survey_technician) {
+            let found = false;
+            for (let opt of selTech.options) {
+              if (opt.value === activeParcel.survey_technician) { opt.selected = true; found = true; break; }
+            }
+            if (!found) {
+              selTech.add(new Option(activeParcel.survey_technician, activeParcel.survey_technician, true, true));
+            }
+            selTech.value = activeParcel.survey_technician;
+          }
+
+          const selOff = document.getElementById('selSysOfficer');
+          if (selOff && activeParcel.system_officer) {
+            let found = false;
+            for (let opt of selOff.options) {
+              if (opt.value === activeParcel.system_officer) { opt.selected = true; found = true; break; }
+            }
+            if (!found) {
+              selOff.add(new Option(activeParcel.system_officer, activeParcel.system_officer, true, true));
+            }
+            selOff.value = activeParcel.system_officer;
+          }
+
+          updateStep1State();
+
+          // 2. إظهار قسم نتائج الرفع
+          const resultsSec = document.getElementById('surveyResultsSection');
+          if (resultsSec) {
+            resultsSec.style.display = 'flex';
+            resultsSec.style.flexDirection = 'column';
+          }
+
+          // 3. ملء بيانات المرحلة 1
+          document.getElementById('resApplicantName').textContent = activeParcel.applicant_name;
+          document.getElementById('resNationalId').textContent = activeParcel.national_id || '--';
+          document.getElementById('resReceiptNo').textContent = activeParcel.receipt_no || '--';
+          document.getElementById('resStatedArea').textContent = `${activeParcel.stated_area_m2.toFixed(2)} م²`;
+          document.getElementById('resCalcArea').textContent = `${activeParcel.calculated_area_m2.toFixed(2)} م²`;
+          document.getElementById('resDeltaArea').textContent = '0.00 م²';
+
+          const badge = document.getElementById('badgeTolerance');
+          if (badge) {
+            badge.className = 'badge-pass';
+            badge.textContent = draftId ? '✔ مسودة مسترجعة' : '✔ متطابق قانونياً (جلسة مستوردة معتمدة)';
+          }
+
+          renderDistrictSelector(activeParcel);
+
+          // 4. استعادة الصورتين إن وُجدتا
+          const croqSrc = data.croquis_base64 || data.session_data?.croquis_base64 || data.parcel?.croquis_base64 || data.croquis_url || data.croquis || (parcelData.croquis_url ? parcelData.croquis_url : null);
+          if (croqSrc) {
+            const cImg1 = document.getElementById('stage1CroquisImg');
+            const cImg2 = document.getElementById('imgCroquis');
+            if (cImg1) cImg1.src = croqSrc;
+            if (cImg2) cImg2.src = croqSrc;
+            customUploadedImages.croquis = croqSrc;
+            if (activeParcel) activeParcel.croquis_base64 = croqSrc;
+          }
+
+          const satSrc = data.satellite_base64 || data.session_data?.satellite_base64 || data.parcel?.satellite_base64 || data.satellite_url || data.satellite || (parcelData.satellite_url ? parcelData.satellite_url : null);
+          if (satSrc) {
+            const sImg1 = document.getElementById('stage1SatImg');
+            const sImg2 = document.getElementById('imgSatellite');
+            if (sImg1) sImg1.src = satSrc;
+            if (sImg2) sImg2.src = satSrc;
+            customUploadedImages.satellite = satSrc;
+            if (activeParcel) activeParcel.satellite_base64 = satSrc;
+          }
+
+          // 5. استعادة جدول الأضلاع
+          if (activeParcel.segments && activeParcel.segments.length > 0) {
+            buildSegmentsTable(activeParcel.segments);
+          } else if (data.boundaries && typeof data.boundaries === 'object') {
+            activeParcel.segments = [
+              { from_point: 1, to_point: 2, direction: 'north', neighbor: data.boundaries.north?.neighbor || '', length_m: data.boundaries.north?.length_m || 0 },
+              { from_point: 2, to_point: 3, direction: 'east', neighbor: data.boundaries.east?.neighbor || '', length_m: data.boundaries.east?.length_m || 0 },
+              { from_point: 3, to_point: 4, direction: 'south', neighbor: data.boundaries.south?.neighbor || '', length_m: data.boundaries.south?.length_m || 0 },
+              { from_point: 4, to_point: 1, direction: 'west', neighbor: data.boundaries.west?.neighbor || '', length_m: data.boundaries.west?.length_m || 0 }
+            ];
+            buildSegmentsTable(activeParcel.segments);
+          }
+
+          // 6. استعادة إعدادات السلايدرات والمسافات والعلامة المائية
+          const sliders = data.sliders || data;
+          const elMargin = document.getElementById('rngMargin');
+          const elGapHeader = document.getElementById('rngGapHeader');
+          const elGapApplicant = document.getElementById('rngGapApplicant');
+          const elGapCoords = document.getElementById('rngGapCoords');
+          const elGapImages = document.getElementById('rngGapImages');
+          const elTablePad = document.getElementById('rngTablePad');
+          const elImageHeight = document.getElementById('rngImageHeight');
+
+          if (sliders.margin !== undefined || sliders.margin_mm !== undefined) { if (elMargin) elMargin.value = sliders.margin ?? sliders.margin_mm; }
+          if (sliders.gapHeader !== undefined || sliders.gap_header !== undefined) { if (elGapHeader) elGapHeader.value = sliders.gapHeader ?? sliders.gap_header; }
+          if (sliders.gapApplicant !== undefined || sliders.gap_applicant !== undefined) { if (elGapApplicant) elGapApplicant.value = sliders.gapApplicant ?? sliders.gap_applicant; }
+          if (sliders.gapCoords !== undefined || sliders.gap_coords !== undefined) { if (elGapCoords) elGapCoords.value = sliders.gapCoords ?? sliders.gap_coords; }
+          if (sliders.gapImages !== undefined || sliders.gap_images !== undefined) { if (elGapImages) elGapImages.value = sliders.gapImages ?? sliders.gap_images; }
+          if (sliders.tablePad !== undefined || sliders.table_pad !== undefined) { if (elTablePad) elTablePad.value = sliders.tablePad ?? sliders.table_pad; }
+          if (sliders.imageHeight !== undefined || sliders.image_height !== undefined) { if (elImageHeight) elImageHeight.value = sliders.imageHeight ?? sliders.image_height; }
+
+          const wm = data.watermark || data;
+          const elWmActive = document.getElementById('chkWatermarkActive');
+          const elWmOpacity = document.getElementById('rngWmOpacity');
+          const elWmAngle = document.getElementById('rngWmAngle');
+          const elWmSize = document.getElementById('rngWmSize');
+
+          if (wm.active !== undefined || wm.wm_active !== undefined) { if (elWmActive) elWmActive.checked = Boolean(wm.active ?? wm.wm_active); }
+          if (wm.opacity !== undefined || wm.wm_opacity !== undefined) { if (elWmOpacity) elWmOpacity.value = wm.opacity ?? wm.wm_opacity; }
+          if (wm.angle !== undefined || wm.wm_angle !== undefined) { if (elWmAngle) elWmAngle.value = wm.angle ?? wm.wm_angle; }
+          if (wm.size !== undefined || wm.wm_size !== undefined) { if (elWmSize) elWmSize.value = wm.size ?? wm.wm_size; }
+
+          if (typeof updateSpacing === 'function') updateSpacing();
+          if (typeof renderWatermark === 'function') renderWatermark();
+
+          // 7. استعادة تخصيصات النصوص إن وجدت
+          if (data.text_customs) {
+            savedTextDefaults = data.text_customs;
+            applySavedTextDefaults(data.text_customs);
+          }
+
+          // 8. المزامنة إلى استوديو التحرير (Stage 2)
+          syncStage1ToStage2();
+
+          if (data.deal_type) document.getElementById('valDealType').textContent = data.deal_type;
+          if (data.site_desc) document.getElementById('valSiteDesc').textContent = data.site_desc;
+          if (data.order_no) document.getElementById('valOrderNo').textContent = data.order_no;
+
+          // 9. مزامنة الجلسة مع الباك إند
+          fetch('/api/restore-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              parcel: activeParcel,
+              croquis_base64: croqSrc || '',
+              satellite_base64: satSrc || ''
+            })
+          }).then(res => res.json()).then(resData => {
+            if (resData.croquis_url && (!croqSrc || croqSrc.length < 20)) {
+              const c1 = document.getElementById('stage1CroquisImg');
+              const c2 = document.getElementById('imgCroquis');
+              if (c1) c1.src = resData.croquis_url;
+              if (c2) c2.src = resData.croquis_url;
+            }
+            if (resData.satellite_url && (!satSrc || satSrc.length < 20)) {
+              const s1 = document.getElementById('stage1SatImg');
+              const s2 = document.getElementById('imgSatellite');
+              if (s1) s1.src = resData.satellite_url;
+              if (s2) s2.src = resData.satellite_url;
+            }
+          }).catch(() => {});
+
+          currentActiveDraftId = draftId;
+
+          // 10. الانتقال مباشرة إلى استوديو التحرير مع إشعار النجاح
+          switchStage(2);
+          hideLoading();
+
+          const label = draftId ? `✔ تم استرجاع مسودة (${activeParcel.applicant_name}) بنجاح!` : `✔ تم استيراد جلسة (${activeParcel.applicant_name}) بنجاح!`;
+          showSaveToast(label);
+
+        } catch (err) {
+          hideLoading();
+          alert('⚠️ خطأ في قراءة ملف الجلسة أو المسودة: ' + err.message);
+        }
+      }
+
       const btnImportJson = document.getElementById('btnImportJson');
       const fileJsonInput = document.getElementById('fileJsonInput');
 
@@ -2467,221 +2778,10 @@
           reader.onload = (event) => {
             try {
               const rawData = JSON.parse(event.target.result);
-              // دعم ملفات الجلسة سواء كانت مغلفة بـ session_data أو مسطحة مباشرة
-              const data = (rawData.session_data && typeof rawData.session_data === 'object')
-                ? Object.assign({}, rawData, rawData.session_data)
-                : rawData;
-              const parcelData = data.parcel || {};
-              const applicantName = data.applicant_name || parcelData.applicant_name || data.name || 'مواطن بدون اسم';
-
-              // قراءة واستخراج المركز والتحقق من القاموس الرسمي
-              let distName = data.district || parcelData.district || 'نبروه';
-              let distId = (data.district_id !== undefined && data.district_id !== null)
-                ? data.district_id
-                : parcelData.district_id;
-
-              if (distId === undefined || distId === null) {
-                const cleanDist = String(distName).trim();
-                const matched = OFFICIAL_CENTERS_FALLBACK.find(([cid, cname]) => cname === cleanDist || cleanDist.includes(cname));
-                if (matched) {
-                  distId = matched[0];
-                  distName = matched[1];
-                } else {
-                  distId = 10;
-                  distName = 'نبروه';
-                }
-              }
-
-              // تنظيف وتحويل المساحات بأمان
-              const statedArea = parseFloat(toEnglishNumerals(String(data.stated_area_m2 || parcelData.stated_area_m2 || data.area || 0))) || 0;
-              const calcArea = parseFloat(toEnglishNumerals(String(data.calculated_area_m2 || parcelData.calculated_area_m2 || data.area || 0))) || statedArea;
-
-              // بناء كائن activeParcel المتكامل
-              activeParcel = {
-                parcel_id: parcelData.parcel_id || data.parcel_id || '0',
-                applicant_name: applicantName,
-                national_id: toEnglishNumerals(String(data.national_id || parcelData.national_id || '')),
-                receipt_no: toEnglishNumerals(String(data.receipt_no || parcelData.receipt_no || '')),
-                district: distName,
-                district_id: distId,
-                district_matched: true,
-                village: data.village || parcelData.village || '',
-                address: data.address || parcelData.address || '',
-                stated_area_m2: statedArea,
-                calculated_area_m2: calcArea,
-                order_no: data.order_no || parcelData.order_no || '٢٦٠٥s',
-                deal_type: data.deal_type || parcelData.deal_type || 'انشاء',
-                site_desc: data.site_desc || parcelData.site_desc || 'موقع عينة تجريبية',
-                security_token: data.security_token || data.token || parcelData.security_token || 'DUDC SECURE',
-                survey_technician: data.survey_technician || parcelData.survey_technician || 'محمد ابراهيم بدير',
-                system_officer: data.system_officer || parcelData.system_officer || 'شريف محمد',
-                segments: data.segments || parcelData.segments || [],
-                boundaries: data.boundaries || parcelData.boundaries || {},
-                vertices: data.vertices || parcelData.vertices || []
-              };
-
-              // 1. استعادة مسؤولي الخطوة 1
-              const selTech = document.getElementById('selSurveyTech');
-              if (selTech && activeParcel.survey_technician) {
-                let found = false;
-                for (let opt of selTech.options) {
-                  if (opt.value === activeParcel.survey_technician) { opt.selected = true; found = true; break; }
-                }
-                if (!found) {
-                  selTech.add(new Option(activeParcel.survey_technician, activeParcel.survey_technician, true, true));
-                }
-                selTech.value = activeParcel.survey_technician;
-              }
-
-              const selOff = document.getElementById('selSysOfficer');
-              if (selOff && activeParcel.system_officer) {
-                let found = false;
-                for (let opt of selOff.options) {
-                  if (opt.value === activeParcel.system_officer) { opt.selected = true; found = true; break; }
-                }
-                if (!found) {
-                  selOff.add(new Option(activeParcel.system_officer, activeParcel.system_officer, true, true));
-                }
-                selOff.value = activeParcel.system_officer;
-              }
-
-              updateStep1State();
-
-              // 2. إظهار قسم نتائج الرفع
-              const resultsSec = document.getElementById('surveyResultsSection');
-              if (resultsSec) {
-                resultsSec.style.display = 'flex';
-                resultsSec.style.flexDirection = 'column';
-              }
-
-              // 3. ملء بيانات المرحلة 1
-              document.getElementById('resApplicantName').textContent = activeParcel.applicant_name;
-              document.getElementById('resNationalId').textContent = activeParcel.national_id || '--';
-              document.getElementById('resReceiptNo').textContent = activeParcel.receipt_no || '--';
-              document.getElementById('resStatedArea').textContent = `${activeParcel.stated_area_m2.toFixed(2)} م²`;
-              document.getElementById('resCalcArea').textContent = `${activeParcel.calculated_area_m2.toFixed(2)} م²`;
-              document.getElementById('resDeltaArea').textContent = '0.00 م²';
-
-              const badge = document.getElementById('badgeTolerance');
-              if (badge) {
-                badge.className = 'badge-pass';
-                badge.textContent = '✔ متطابق قانونياً (جلسة مستوردة معتمدة)';
-              }
-
-              renderDistrictSelector(activeParcel);
-
-              // 4. استعادة الصورتين إن وُجدتا
-              const croqSrc = data.croquis_base64 || data.croquis_url || data.croquis || (parcelData.croquis_url ? parcelData.croquis_url : null);
-              if (croqSrc) {
-                const cImg1 = document.getElementById('stage1CroquisImg');
-                const cImg2 = document.getElementById('imgCroquis');
-                if (cImg1) cImg1.src = croqSrc;
-                if (cImg2) cImg2.src = croqSrc;
-              }
-
-              const satSrc = data.satellite_base64 || data.satellite_url || data.satellite || (parcelData.satellite_url ? parcelData.satellite_url : null);
-              if (satSrc) {
-                const sImg1 = document.getElementById('stage1SatImg');
-                const sImg2 = document.getElementById('imgSatellite');
-                if (sImg1) sImg1.src = satSrc;
-                if (sImg2) sImg2.src = satSrc;
-              }
-
-              // 5. استعادة جدول الأضلاع
-              if (activeParcel.segments && activeParcel.segments.length > 0) {
-                buildSegmentsTable(activeParcel.segments);
-              } else if (data.boundaries && typeof data.boundaries === 'object') {
-                activeParcel.segments = [
-                  { from_point: 1, to_point: 2, direction: 'north', neighbor: data.boundaries.north?.neighbor || '', length_m: data.boundaries.north?.length_m || 0 },
-                  { from_point: 2, to_point: 3, direction: 'east', neighbor: data.boundaries.east?.neighbor || '', length_m: data.boundaries.east?.length_m || 0 },
-                  { from_point: 3, to_point: 4, direction: 'south', neighbor: data.boundaries.south?.neighbor || '', length_m: data.boundaries.south?.length_m || 0 },
-                  { from_point: 4, to_point: 1, direction: 'west', neighbor: data.boundaries.west?.neighbor || '', length_m: data.boundaries.west?.length_m || 0 }
-                ];
-                buildSegmentsTable(activeParcel.segments);
-              }
-
-              // 6. استعادة إعدادات السلايدرات والمسافات والعلامة المائية
-              const sliders = data.sliders || data;
-              const elMargin = document.getElementById('rngMargin');
-              const elGapHeader = document.getElementById('rngGapHeader');
-              const elGapApplicant = document.getElementById('rngGapApplicant');
-              const elGapCoords = document.getElementById('rngGapCoords');
-              const elGapImages = document.getElementById('rngGapImages');
-              const elTablePad = document.getElementById('rngTablePad');
-              const elImageHeight = document.getElementById('rngImageHeight');
-
-              if (sliders.margin !== undefined || sliders.margin_mm !== undefined) { if (elMargin) elMargin.value = sliders.margin ?? sliders.margin_mm; }
-              if (sliders.gapHeader !== undefined || sliders.gap_header !== undefined) { if (elGapHeader) elGapHeader.value = sliders.gapHeader ?? sliders.gap_header; }
-              if (sliders.gapApplicant !== undefined || sliders.gap_applicant !== undefined) { if (elGapApplicant) elGapApplicant.value = sliders.gapApplicant ?? sliders.gap_applicant; }
-              if (sliders.gapCoords !== undefined || sliders.gap_coords !== undefined) { if (elGapCoords) elGapCoords.value = sliders.gapCoords ?? sliders.gap_coords; }
-              if (sliders.gapImages !== undefined || sliders.gap_images !== undefined) { if (elGapImages) elGapImages.value = sliders.gapImages ?? sliders.gap_images; }
-              if (sliders.tablePad !== undefined || sliders.table_pad !== undefined) { if (elTablePad) elTablePad.value = sliders.tablePad ?? sliders.table_pad; }
-              if (sliders.imageHeight !== undefined || sliders.image_height !== undefined) { if (elImageHeight) elImageHeight.value = sliders.imageHeight ?? sliders.image_height; }
-
-              const wm = data.watermark || data;
-              const elWmActive = document.getElementById('chkWatermarkActive');
-              const elWmOpacity = document.getElementById('rngWmOpacity');
-              const elWmAngle = document.getElementById('rngWmAngle');
-              const elWmSize = document.getElementById('rngWmSize');
-
-              if (wm.active !== undefined || wm.wm_active !== undefined) { if (elWmActive) elWmActive.checked = Boolean(wm.active ?? wm.wm_active); }
-              if (wm.opacity !== undefined || wm.wm_opacity !== undefined) { if (elWmOpacity) elWmOpacity.value = wm.opacity ?? wm.wm_opacity; }
-              if (wm.angle !== undefined || wm.wm_angle !== undefined) { if (elWmAngle) elWmAngle.value = wm.angle ?? wm.wm_angle; }
-              if (wm.size !== undefined || wm.wm_size !== undefined) { if (elWmSize) elWmSize.value = wm.size ?? wm.wm_size; }
-
-              if (typeof updateSpacing === 'function') updateSpacing();
-              if (typeof renderWatermark === 'function') renderWatermark();
-
-              // 7. استعادة تخصيصات النصوص إن وجدت
-              if (data.text_customs) {
-                savedTextDefaults = data.text_customs;
-                applySavedTextDefaults(data.text_customs);
-              }
-
-              // 8. المزامنة إلى استوديو التحرير (Stage 2)
-              syncStage1ToStage2();
-
-              if (data.deal_type) document.getElementById('valDealType').textContent = data.deal_type;
-              if (data.site_desc) document.getElementById('valSiteDesc').textContent = data.site_desc;
-              if (data.order_no) document.getElementById('valOrderNo').textContent = data.order_no;
-
-              // 9. مزامنة الجلسة مع الباك إند
-              fetch('/api/restore-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  parcel: activeParcel,
-                  croquis_base64: croqSrc || '',
-                  satellite_base64: satSrc || ''
-                })
-              }).then(res => res.json()).then(resData => {
-                if (resData.croquis_url && (!croqSrc || croqSrc.length < 20)) {
-                  const c1 = document.getElementById('stage1CroquisImg');
-                  const c2 = document.getElementById('imgCroquis');
-                  if (c1) c1.src = resData.croquis_url;
-                  if (c2) c2.src = resData.croquis_url;
-                }
-                if (resData.satellite_url && (!satSrc || satSrc.length < 20)) {
-                  const s1 = document.getElementById('stage1SatImg');
-                  const s2 = document.getElementById('imgSatellite');
-                  if (s1) s1.src = resData.satellite_url;
-                  if (s2) s2.src = resData.satellite_url;
-                }
-              }).catch(() => {});
-
-              // 10. الانتقال مباشرة إلى استوديو التحرير مع إشعار النجاح
-              switchStage(2);
-              hideLoading();
-
-              const saveToast = document.getElementById('saveToast');
-              const msgSpan = document.getElementById('saveToastMsg');
-              if (msgSpan) msgSpan.textContent = `✔ تم استيراد جلسة (${activeParcel.applicant_name}) بنجاح!`;
-              saveToast.classList.add('show');
-              setTimeout(() => saveToast.classList.remove('show'), 3500);
-
+              restoreSessionFromData(rawData, null);
             } catch (err) {
               hideLoading();
-              alert('⚠️ خطأ في قراءة ملف الجلسة: الملف غير صالح أو تالف.\n' + err.message);
+              alert('⚠️ خطأ في تحليل ملف الجلسة JSON: ' + err.message);
             }
           };
 
@@ -2693,6 +2793,289 @@
           reader.readAsText(file, 'utf-8');
         });
       }
+
+      // --------------------------------------------------------------------------
+      // منطق حفظ واسترجاع وإدارة المسودات (Drafts Queue Management)
+      // --------------------------------------------------------------------------
+      function getDraftPayload() {
+        if (!activeParcel) return null;
+        const citizenName = document.getElementById('valApplicantName')?.textContent?.trim() || activeParcel.applicant_name || 'بدون اسم';
+        const centerName = document.getElementById('valCenter')?.textContent?.trim() || activeParcel.district || '';
+        const areaVal = document.getElementById('valArea')?.textContent?.trim() || (activeParcel.calculated_area_m2 ? `${activeParcel.calculated_area_m2} م²` : '--');
+
+        function extractElementBase64(imgEl, fallbackVal) {
+          if (fallbackVal && typeof fallbackVal === 'string' && fallbackVal.startsWith('data:image/')) {
+            return fallbackVal;
+          }
+          if (imgEl) {
+            if (imgEl.src && imgEl.src.startsWith('data:image/')) return imgEl.src;
+            try {
+              if (imgEl.complete && imgEl.naturalWidth > 0) {
+                const canvas = document.createElement('canvas');
+                canvas.width = imgEl.naturalWidth;
+                canvas.height = imgEl.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imgEl, 0, 0);
+                const isPng = (imgEl.src || '').toLowerCase().includes('.png');
+                return canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.95);
+              }
+            } catch(e) {}
+            if (imgEl.src && !imgEl.src.endsWith('/') && imgEl.src !== window.location.href) {
+              return imgEl.src;
+            }
+          }
+          return fallbackVal || '';
+        }
+
+        const croqEl = document.getElementById('imgCroquis') || document.getElementById('stage1CroquisImg');
+        const croqSrc = extractElementBase64(croqEl, customUploadedImages.croquis || activeParcel.croquis_base64 || (document.getElementById('stage1CroquisImg')?.src || ''));
+
+        const satEl = document.getElementById('imgSatellite') || document.getElementById('stage1SatImg');
+        const satSrc = extractElementBase64(satEl, customUploadedImages.satellite || activeParcel.satellite_base64 || (document.getElementById('stage1SatImg')?.src || ''));
+
+        return {
+          draft_id: currentActiveDraftId,
+          applicant_name: citizenName,
+          district: centerName,
+          area: areaVal,
+          parcel: activeParcel,
+          croquis_base64: croqSrc,
+          satellite_base64: satSrc,
+          session_data: {
+            applicant_name: citizenName,
+            receipt_no: document.getElementById('valReceiptNo')?.textContent?.trim() || activeParcel.receipt_no || '',
+            national_id: document.getElementById('valNationalId')?.textContent?.trim() || activeParcel.national_id || '',
+            district: centerName,
+            village: document.getElementById('valVillage')?.textContent?.trim() || activeParcel.village || '',
+            address: document.getElementById('valAddress')?.textContent?.trim() || activeParcel.address || '',
+            area: areaVal,
+            deal_type: document.getElementById('valDealType')?.textContent?.trim() || activeParcel.deal_type || 'إنشاء',
+            site_desc: document.getElementById('valSiteDesc')?.textContent?.trim() || activeParcel.site_desc || 'أرض فضاء',
+            order_no: document.getElementById('valOrderNo')?.textContent?.trim() || activeParcel.order_no || '',
+            survey_technician: document.getElementById('selSurveyTech')?.value || activeParcel.survey_technician || '',
+            system_officer: document.getElementById('selSysOfficer')?.value || activeParcel.system_officer || '',
+            security_token: activeParcel.security_token || '',
+            parcel: activeParcel,
+            croquis_base64: croqSrc,
+            satellite_base64: satSrc,
+            text_customs: typeof collectAllTextCustomizations === 'function' ? collectAllTextCustomizations() : null,
+            sliders: {
+              margin: rngMargin.value, gapHeader: rngGapHeader.value, gapApplicant: rngGapApplicant.value,
+              gapCoords: rngGapCoords.value, gapImages: rngGapImages.value, tablePad: rngTablePad.value,
+              imageHeight: rngImageHeight.value
+            },
+            watermark: {
+              active: chkWatermarkActive.checked, opacity: rngWmOpacity.value, angle: rngWmAngle.value, size: rngWmSize.value
+            }
+          }
+        };
+      }
+
+      function saveCurrentDraft(showFeedback = true) {
+        if (!activeParcel) {
+          alert('⚠️ يرجى تحميل ملف الرفع المساحي أو بيانات المعاملة أولاً قبل الحفظ كمسودة.');
+          return;
+        }
+
+        const payload = getDraftPayload();
+        if (!payload) return;
+
+        fetch('/api/save-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            currentActiveDraftId = data.draft_id;
+            refreshDraftsBadge();
+            if (showFeedback) {
+              showSaveToast(`✔ تم حفظ (${payload.applicant_name}) في صندوق مسودات اليوم`);
+            }
+          } else {
+            alert('خطأ في حفظ المسودة: ' + (data.error || 'تعذر الحفظ'));
+          }
+        })
+        .catch(err => {
+          alert('خطأ في الاتصال أثناء حفظ المسودة: ' + err.message);
+        });
+      }
+
+      function refreshDraftsBadge() {
+        fetch('/api/list-drafts')
+          .then(res => res.json())
+          .then(data => {
+            const badge = document.getElementById('draftsBadgeCount');
+            const modalBadge = document.getElementById('draftsModalBadge');
+            const count = data.count || 0;
+            if (badge) {
+              if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline-block';
+              } else {
+                badge.style.display = 'none';
+              }
+            }
+            if (modalBadge) {
+              modalBadge.textContent = `${count} مسودات`;
+            }
+          })
+          .catch(() => {});
+      }
+
+      function openDraftsModal() {
+        const modal = document.getElementById('draftsModalBackdrop');
+        const container = document.getElementById('draftsListContainer');
+        if (!modal || !container) return;
+
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">⏳ جاري تحميل قائمة المسودات...</div>';
+        modal.style.display = 'flex';
+
+        fetch('/api/list-drafts')
+          .then(res => res.json())
+          .then(data => {
+            const drafts = data.drafts || [];
+            refreshDraftsBadge();
+            if (drafts.length === 0) {
+              container.innerHTML = `
+                <div style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: rgba(0,0,0,0.2); border-radius: 8px;">
+                  <span style="font-size: 38px; display: block; margin-bottom: 10px;">📭</span>
+                  <strong style="color: #cbd5e1; font-size: 14px;">صندوق المسودات فارغ</strong>
+                  <p style="font-size: 11px; margin-top: 6px;">لا توجد أي شهادات محفوظة كمسودات حالياً. يمكنك استخدام زر "حفظ كمسودة" في أي وقت لحفظ الشهادات غير المكتملة.</p>
+                </div>
+              `;
+              return;
+            }
+
+            container.innerHTML = '';
+            drafts.forEach(d => {
+              const item = document.createElement('div');
+              item.style.cssText = `
+                display: flex; justify-content: space-between; align-items: center; gap: 12px;
+                background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.2);
+                border-radius: 8px; padding: 10px 14px; transition: all 0.2s ease;
+              `;
+              item.onmouseenter = () => item.style.borderColor = 'rgba(245, 158, 11, 0.6)';
+              item.onmouseleave = () => item.style.borderColor = 'rgba(56, 189, 248, 0.2)';
+
+              const isCurrent = currentActiveDraftId === d.draft_id;
+
+              item.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong style="color: #ffffff; font-size: 13px;">${d.applicant_name}</strong>
+                    <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 10.5px; padding: 1px 7px; border-radius: 6px; font-weight: bold;">
+                      🏛️ ${d.district}
+                    </span>
+                    ${isCurrent ? '<span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 10px; padding: 1px 6px; border-radius: 6px; font-weight: bold;">نشطة الآن</span>' : ''}
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); display: flex; gap: 14px;">
+                    <span>📐 المساحة: <strong style="color: #94a3b8;">${d.area}</strong></span>
+                    <span>🕒 حُفظت في: <strong style="color: #94a3b8;">${d.saved_at}</strong></span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <button class="btn btn-green btn-load-draft" data-id="${d.draft_id}" style="padding: 6px 12px; font-size: 11.5px; gap: 4px;">
+                    <span>▶</span> استكمال
+                  </button>
+                  <button class="btn btn-glass btn-delete-draft" data-id="${d.draft_id}" data-name="${d.applicant_name}" style="padding: 6px 10px; font-size: 11.5px; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                    <span>🗑️</span>
+                  </button>
+                </div>
+              `;
+              container.appendChild(item);
+            });
+
+            // Bind buttons
+            container.querySelectorAll('.btn-load-draft').forEach(b => {
+              b.addEventListener('click', () => {
+                loadDraftById(b.getAttribute('data-id'));
+              });
+            });
+            container.querySelectorAll('.btn-delete-draft').forEach(b => {
+              b.addEventListener('click', () => {
+                deleteDraftById(b.getAttribute('data-id'), b.getAttribute('data-name'));
+              });
+            });
+          })
+          .catch(err => {
+            container.innerHTML = `<div style="color: #ef4444; text-align: center; padding: 20px;">خطأ في قراءة المسودات: ${err.message}</div>`;
+          });
+      }
+
+      function loadDraftById(draftId) {
+        showLoading('استرجاع المسودة', 'جاري جلب بيانات الشهادة والصور وإعادة ضبط الاستوديو...');
+        fetch('/api/load-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ draft_id: draftId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.draft) {
+            document.getElementById('draftsModalBackdrop').style.display = 'none';
+            if (data.croquis_url && !data.draft.croquis_base64) data.draft.croquis_base64 = data.croquis_url;
+            if (data.satellite_url && !data.draft.satellite_base64) data.draft.satellite_base64 = data.satellite_url;
+            restoreSessionFromData(data.draft, data.draft_id);
+          } else {
+            hideLoading();
+            alert('تعذر استرجاع المسودة: ' + (data.error || 'غير موجودة'));
+          }
+        })
+        .catch(err => {
+          hideLoading();
+          alert('خطأ في الاتصال أثناء استرجاع المسودة: ' + err.message);
+        });
+      }
+
+      function deleteDraftById(draftId, name) {
+        if (!confirm(`هل أنت متأكد من حذف مسودة المعاملة (${name}) نهائياً من صندوق المسودات؟`)) {
+          return;
+        }
+
+        fetch('/api/delete-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ draft_id: draftId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            if (currentActiveDraftId === draftId) {
+              currentActiveDraftId = null;
+            }
+            openDraftsModal(); // Refresh modal
+            refreshDraftsBadge();
+            showSaveToast(`✔ تم حذف مسودة (${name}) بنجاح`);
+          } else {
+            alert('تعذر حذف المسودة: ' + (data.error || 'غير معروف'));
+          }
+        })
+        .catch(err => {
+          alert('خطأ في الاتصال أثناء الحذف: ' + err.message);
+        });
+      }
+
+      // ربط أزرار المسودات
+      const btnOpenDraftsBox = document.getElementById('btnOpenDraftsBox');
+      if (btnOpenDraftsBox) btnOpenDraftsBox.addEventListener('click', openDraftsModal);
+
+      const btnCloseDraftsModal = document.getElementById('btnCloseDraftsModal');
+      if (btnCloseDraftsModal) btnCloseDraftsModal.addEventListener('click', () => {
+        document.getElementById('draftsModalBackdrop').style.display = 'none';
+      });
+
+      const btnCloseDraftsModalBottom = document.getElementById('btnCloseDraftsModalBottom');
+      if (btnCloseDraftsModalBottom) btnCloseDraftsModalBottom.addEventListener('click', () => {
+        document.getElementById('draftsModalBackdrop').style.display = 'none';
+      });
+
+      const btnSaveToDrafts = document.getElementById('btnSaveToDrafts');
+      if (btnSaveToDrafts) btnSaveToDrafts.addEventListener('click', () => saveCurrentDraft(true));
+
+      const btnQuickSaveDraft = document.getElementById('btnQuickSaveDraft');
+      if (btnQuickSaveDraft) btnQuickSaveDraft.addEventListener('click', () => saveCurrentDraft(true));
 
       // (قائمة المراكز الرسمية تم تعريفها بالأعلى)
 
@@ -3075,43 +3458,12 @@
           });
       }
 
-      // التحديث اللحظي للشفرة السحابية وحالة الخطوة 1 عند تغيير الفني أو المسؤول
+      // التحديث اللحظي لحالة الخطوة 1 عند تغيير الفني أو المسؤول
       ['selSurveyTech', 'selSysOfficer'].forEach(id => {
         document.getElementById(id).addEventListener('change', () => {
           updateStep1State();
-
-          if (activeParcel && activeParcel.district_id !== null && activeParcel.district_id !== undefined) {
-            const newCid = activeParcel.district_id;
-            const techVal = document.getElementById('selSurveyTech').value;
-            const officerVal = document.getElementById('selSysOfficer').value;
-            if (!techVal || !officerVal) return;
-
-            const badge = document.getElementById('districtStatusBadge');
-            const tokDisplay = document.getElementById('resSecurityToken');
-            if (badge) badge.innerHTML = '<span style="color: var(--accent-cyan); font-size: 10px;">⏳ تحديث بالسحابة...</span>';
-
-            fetch('/api/update-center', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                parcel_index: 0,
-                center_id: parseInt(newCid),
-                survey_technician: techVal,
-                system_officer: officerVal
-              })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                activeParcel.security_token = data.security_token;
-                if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ موثق بالسحابة</span>';
-                if (tokDisplay) {
-                  tokDisplay.className = 'token-active';
-                  tokDisplay.textContent = data.security_token;
-                }
-                renderWatermark();
-              }
-            }).catch(() => {});
+          if (typeof isCertificateConfirmed !== 'undefined' && isCertificateConfirmed) {
+            resetConfirmationState();
           }
         });
       });
@@ -3136,11 +3488,16 @@
           });
 
           sel.className = 'district-select matched';
-          if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ مطابق</span>';
+          if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ تم تحديد المركز</span>';
 
           if (tokDisplay) {
-            tokDisplay.className = 'token-active';
-            tokDisplay.textContent = parcel.security_token || '--';
+            if (parcel.security_token) {
+              tokDisplay.className = 'token-active';
+              tokDisplay.textContent = parcel.security_token;
+            } else {
+              tokDisplay.className = 'token-trial';
+              tokDisplay.innerHTML = '<span style="font-size: 10px; color: #94a3b8;">🏷️ كود تجريبي (معاينة):</span> <span style="font-family: monospace;">' + TRIAL_TOKEN + '</span>';
+            }
           }
         } else {
           // حالة عدم التطابق - تنبيه أحمر وقائمة منسدلة
@@ -3162,10 +3519,9 @@
           sel.className = 'district-select unmatched';
           if (badge) badge.innerHTML = '<span style="color: #ef4444; font-weight: bold; font-size: 10px;">⚠️ يرجى الاختيار</span>';
 
-          // قاعدة صارمة: حجب كود التأمين حتى يتم تأمين المركز
           if (tokDisplay) {
             tokDisplay.className = 'token-locked';
-            tokDisplay.innerHTML = '<span>⏳ بانتظار تأمين المركز</span>';
+            tokDisplay.innerHTML = '<span>⏳ بانتظار تحديد المركز</span>';
           }
         }
       }
@@ -3177,7 +3533,7 @@
         const badge = document.getElementById('districtStatusBadge');
         const tokDisplay = document.getElementById('resSecurityToken');
 
-        if (badge) badge.innerHTML = '<span style="color: var(--accent-cyan); font-size: 10px;">⏳ جاري التشفير...</span>';
+        if (badge) badge.innerHTML = '<span style="color: var(--accent-cyan); font-size: 10px;">⏳ حفظ المركز...</span>';
 
         const techVal = document.getElementById('selSurveyTech') ? document.getElementById('selSurveyTech').value : '';
         const officerVal = document.getElementById('selSysOfficer') ? document.getElementById('selSysOfficer').value : '';
@@ -3198,23 +3554,24 @@
             activeParcel.district = data.district;
             activeParcel.district_id = data.district_id;
             activeParcel.district_matched = true;
-            activeParcel.security_token = data.security_token;
+            activeParcel.security_token = null; // Stays null until Stage 3 confirmation
 
             if (sel) sel.className = 'district-select matched';
-            if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ تم التأمين</span>';
+            if (badge) badge.innerHTML = '<span style="color: #34d399; font-weight: bold; font-size: 10px;">✔ تم تحديد المركز</span>';
 
             if (tokDisplay) {
-              tokDisplay.className = 'token-active';
-              tokDisplay.textContent = data.security_token;
+              tokDisplay.className = 'token-trial';
+              tokDisplay.innerHTML = '<span style="font-size: 10px; color: #94a3b8;">🏷️ كود تجريبي (معاينة):</span> <span style="font-family: monospace;">' + TRIAL_TOKEN + '</span>';
             }
 
+            resetConfirmationState();
             renderWatermark();
 
             // مزامنة الاستوديو في المرحلة 2
             const valCenterElem = document.getElementById('valCenter');
             if (valCenterElem) valCenterElem.textContent = data.district;
 
-            // تحديث كروكي المرحلة 1 لإظهار البصمة المشفرة
+            // تحديث كروكي المرحلة 1
             if (data.croquis_url) {
               const croqImg = document.getElementById('stage1CroquisImg');
               const imgCroqStage2 = document.getElementById('imgCroquis');
@@ -3222,7 +3579,7 @@
               if (imgCroqStage2) imgCroqStage2.src = data.croquis_url;
             }
           } else {
-            alert('خطأ في تأمين المركز: ' + (data.error || 'غير معروف'));
+            alert('خطأ في حفظ المركز: ' + (data.error || 'غير معروف'));
           }
         })
         .catch(err => {
@@ -3287,14 +3644,24 @@
 
         setLoadingStep(2, 'done');
         setLoadingStep(3, 'active');
+        setLoadingStep(4, 'active');
 
-        // تحميل الصورتين بالتوازي ومتابعة حالة التحميل
-        Promise.all([
-          loadCroquisPreview().catch(e => console.warn('Croquis preview warning:', e)),
-          loadSatellitePreview().catch(e => console.warn('Satellite preview warning:', e))
-        ]).then(() => {
-          setLoadingStep(3, 'done');
-          setLoadingStep(4, 'done');
+        // تحميل الصورتين بالتوازي ومتابعة حالة التحميل اللحظية لكل صورة فور اكتمالها
+        const pCroq = loadCroquisPreview()
+          .then(res => {
+            setLoadingStep(3, 'done');
+            return res;
+          })
+          .catch(e => console.warn('Croquis preview warning:', e));
+
+        const pSat = loadSatellitePreview()
+          .then(res => {
+            setLoadingStep(4, 'done');
+            return res;
+          })
+          .catch(e => console.warn('Satellite preview warning:', e));
+
+        Promise.all([pCroq, pSat]).then(() => {
           if (typeof onComplete === 'function') {
             onComplete();
           } else {
@@ -3767,10 +4134,19 @@
         const dateStr = toArabicNumerals(`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`);
         document.getElementById('certDateDisplay').textContent = `تم تحرير الشهادة في يوم ${dayName} الموافق ${dateStr}`;
 
-        // كود التأمين الرقابي الرسمي تحت التاريخ مطبوع وغير قابل للتعديل
+        // كود التأمين: إما الكود الرسمي المعتمد إذا تم تأكيده بالخطوة 3، أو كود تجريبي لضبط الطباعة بالاستوديو
         const certTokElem = document.getElementById('certTokenPrintVal');
+        const trialBadge = document.getElementById('certTrialBadge');
         if (certTokElem) {
-          certTokElem.textContent = activeParcel.security_token || document.getElementById('resSecurityToken')?.textContent?.trim() || '--';
+          if (activeParcel && activeParcel.security_token) {
+            certTokElem.textContent = activeParcel.security_token;
+            certTokElem.style.color = '#334155';
+            if (trialBadge) trialBadge.style.display = 'none';
+          } else {
+            certTokElem.textContent = TRIAL_TOKEN;
+            certTokElem.style.color = '#64748b';
+            if (trialBadge) trialBadge.style.display = 'inline-block';
+          }
         }
 
         // مزامنة الصورتين مع الاستوديو (سواء كانت صورة مخصصة مرفوعة أو معاينة افتراضية)
@@ -4195,8 +4571,12 @@
           const croppedUrl = canvas.toDataURL('image/jpeg', 0.95);
           if (currentEditingTarget === 'croquis') {
             document.getElementById('imgCroquis').src = croppedUrl;
+            customUploadedImages.croquis = croppedUrl;
+            if (activeParcel) activeParcel.croquis_base64 = croppedUrl;
           } else {
             document.getElementById('imgSatellite').src = croppedUrl;
+            customUploadedImages.satellite = croppedUrl;
+            if (activeParcel) activeParcel.satellite_base64 = croppedUrl;
           }
           closeModal();
         };
@@ -4463,7 +4843,6 @@
         document.getElementById('stage3Area').textContent = area;
 
         document.getElementById('lblFilePdf').textContent = `${fileBase}.pdf (الشهادة الرسمية مقفولة A4)`;
-        document.getElementById('lblFileDocx').textContent = `${fileBase}.docx (الشهادة الرسمية Word)`;
         document.getElementById('lblFileJson').textContent = `${fileBase}_session.json (ملف الجلسة الكامل)`;
       }
 
@@ -4520,6 +4899,26 @@ ${clone.outerHTML}
 
       function resetConfirmationState() {
         isCertificateConfirmed = false;
+        if (activeParcel) {
+          activeParcel.security_token = null;
+        }
+
+        const certTokElem = document.getElementById('certTokenPrintVal');
+        const trialBadge = document.getElementById('certTrialBadge');
+        if (certTokElem) {
+          certTokElem.textContent = TRIAL_TOKEN;
+          certTokElem.style.color = '#64748b';
+        }
+        if (trialBadge) trialBadge.style.display = 'inline-block';
+
+        const tokDisplay = document.getElementById('resSecurityToken');
+        if (tokDisplay) {
+          if (activeParcel && activeParcel.district_matched) {
+            tokDisplay.className = 'token-trial';
+            tokDisplay.innerHTML = '<span style="font-size: 10px; color: #94a3b8;">🏷️ كود تجريبي (معاينة):</span> <span style="font-family: monospace;">' + TRIAL_TOKEN + '</span>';
+          }
+        }
+
         const card = document.getElementById('cardOfficialConfirmation');
         const btn = document.getElementById('btnConfirmIssuance');
         const icon = document.getElementById('confirmBtnIcon');
@@ -4552,10 +4951,17 @@ ${clone.outerHTML}
       }
 
       document.getElementById('btnConfirmIssuance').addEventListener('click', () => {
-        if (!activeParcel || !activeParcel.security_token) {
-          alert('⚠️ تنبيه: لم يتم توليد كود الأمان للشهادة بعد!');
+        if (!activeParcel || !activeParcel.district_matched) {
+          alert('⚠️ تنبيه: يرجى اختيار وتحديد المركز أولاً من القائمة قبل الاعتماد!');
           return;
         }
+
+        const applicantName = document.getElementById('valApplicantName')?.textContent?.trim() || activeParcel?.applicant_name || '';
+        const nationalId = document.getElementById('valNationalId')?.textContent?.trim() || activeParcel?.national_id || '';
+        const receiptNo = document.getElementById('valReceiptNo')?.textContent?.trim() || activeParcel?.receipt_no || '';
+        const centerName = document.getElementById('valCenter')?.textContent?.trim() || activeParcel?.district || '';
+        const techVal = document.getElementById('selSurveyTech')?.value || '';
+        const officerVal = document.getElementById('selSysOfficer')?.value || '';
 
         const btn = document.getElementById('btnConfirmIssuance');
         const icon = document.getElementById('confirmBtnIcon');
@@ -4567,19 +4973,54 @@ ${clone.outerHTML}
 
         btn.disabled = true;
         icon.textContent = '⏳';
-        text.textContent = 'جاري الاعتماد السحابي وتوثيق السجل...';
+        text.textContent = 'جاري توليد كود الأمان الرسمي النهائي وتوثيق السجل...';
 
         fetch('/api/confirm-issuance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: activeParcel.security_token })
+          body: JSON.stringify({
+            parcel_index: 0,
+            applicant_name: applicantName,
+            national_id: nationalId,
+            receipt_no: receiptNo,
+            district: centerName,
+            survey_technician: techVal,
+            system_officer: officerVal
+          })
         })
         .then(res => res.json())
         .then(data => {
-          if (data.success) {
+          if (data.success && data.token) {
             isCertificateConfirmed = true;
+            activeParcel.security_token = data.token;
+
+            // تحديث كود الأمان على الشهادة لإزالة الكود التجريبي واستبداله بالكود الرسمي المعتمد
+            const certTokElem = document.getElementById('certTokenPrintVal');
+            const trialBadge = document.getElementById('certTrialBadge');
+            if (certTokElem) {
+              certTokElem.textContent = data.token;
+              certTokElem.style.color = '#334155';
+            }
+            if (trialBadge) trialBadge.style.display = 'none';
+
+            // تحديث كود التأمين في المرحلة 1
+            const tokDisplay = document.getElementById('resSecurityToken');
+            if (tokDisplay) {
+              tokDisplay.className = 'token-active';
+              tokDisplay.textContent = data.token;
+            }
+
+            // تحديث صورة الكروكي بالبصمة الرسمية
+            if (data.croquis_url) {
+              const bustUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
+              const s1Croq = document.getElementById('stage1CroquisImg');
+              const s2Croq = document.getElementById('imgCroquis');
+              if (s1Croq) s1Croq.src = bustUrl;
+              if (s2Croq) s2Croq.src = bustUrl;
+            }
+
             icon.textContent = '✔️';
-            text.textContent = 'تم اعتماد الشهادة رسمياً في السجل السحابي للطباعة والتسليم';
+            text.textContent = 'تم اعتماد الشهادة وإصدار كود الأمان الرسمي بنجاح';
             btn.style.background = 'linear-gradient(135deg, #059669, #047857)';
             btn.style.cursor = 'default';
             btn.style.boxShadow = 'none';
@@ -4590,7 +5031,7 @@ ${clone.outerHTML}
             }
             if (msg) {
               msg.style.display = 'block';
-              msg.innerHTML = `✔ تم توثيق الإصدار الرسمي في السجل السحابي بتاريخ: <strong>${data.confirmed_at}</strong>`;
+              msg.innerHTML = `✔ تم إصدار كود الأمان الرسمي: <strong style="font-family: monospace; color: var(--accent-cyan); font-size: 13px;">${data.token}</strong><br>وثّق بالسجل السحابي بتاريخ: <strong>${data.confirmed_at}</strong>`;
             }
             if (grid) {
               grid.style.opacity = '1';
@@ -4605,7 +5046,7 @@ ${clone.outerHTML}
             btn.disabled = false;
             icon.textContent = '🔒';
             text.textContent = 'إعادة محاولة الاعتماد السحابي';
-            alert('خطأ أثناء الاعتماد السحابي: ' + (data.error || 'تعذر الاتصال'));
+            alert('خطأ أثناء الاعتماد وتوليد الكود: ' + (data.error || 'تعذر الاتصال'));
           }
         })
         .catch(err => {
@@ -4649,6 +5090,7 @@ ${clone.outerHTML}
 
         const payload = {
           parcel_index: 0,
+          draft_id: currentActiveDraftId,
           applicant_name: citizenName,
           district: centerName,
           certificate_html: buildStandaloneCertificateHtml(),
@@ -4657,6 +5099,7 @@ ${clone.outerHTML}
           croquis_base64: document.getElementById('imgCroquis').src,
           satellite_base64: document.getElementById('imgSatellite').src,
           session_data: {
+            draft_id: currentActiveDraftId,
             applicant_name: citizenName,
             receipt_no: document.getElementById('valReceiptNo').textContent.trim(),
             national_id: document.getElementById('valNationalId').textContent.trim(),
@@ -4685,7 +5128,7 @@ ${clone.outerHTML}
           }
         };
 
-        showLoading('تصدير حزمة المشروع الكاملة', `جاري إنشاء ملفات PDF و Word DOCX لمجلد: ${fileBase}`);
+        showLoading('تصدير حزمة المشروع الكاملة', `جاري إنشاء ملف PDF وحزمة المشروع لمجلد: ${fileBase}`);
         fetch('/api/export-package', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4693,7 +5136,9 @@ ${clone.outerHTML}
         }).then(res => res.json()).then(data => {
           hideLoading();
           if (data.success) {
-            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}\nالملفات المُخرجة:\n• PDF: ${data.files.pdf || 'تم إنشاؤه'}\n• Word: ${data.files.docx}\n• Session JSON: ${data.files.session_json}`);
+            currentActiveDraftId = null;
+            refreshDraftsBadge();
+            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}\nالملفات المُخرجة:\n• PDF: ${data.files.pdf || 'تم إنشاؤه'}\n• Session JSON: ${data.files.session_json}\n• Croquis & Satellite Images`);
             // فتح المجلد تلقائياً
             fetch('/api/open-folder', {
               method: 'POST',
@@ -4733,12 +5178,23 @@ ${clone.outerHTML}
         setZoom((viewport.clientWidth - 70) / 794);
       });
 
+      // مراقبة تعديل بيانات الشهادة بالاستوديو لإلغاء الاعتماد القديم في حال تعديل البيانات
+      const certPageElem = document.getElementById('certPage');
+      if (certPageElem) {
+        certPageElem.addEventListener('input', () => {
+          if (isCertificateConfirmed) {
+            resetConfirmationState();
+          }
+        });
+      }
+
       // التهيئة الابتدائية
       loadDefaultSettings();
       updateSpacing();
       renderWatermark();
       updateStep1State();
       initImageDragAndDrop();
+      refreshDraftsBadge();
     });
   </script>
 </body>
