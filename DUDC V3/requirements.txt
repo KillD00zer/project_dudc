@@ -1,0 +1,27 @@
+# =====================================================================
+# DUDC V3 - Cadastral Certificate Workflow Studio Dependencies
+# =====================================================================
+
+# Data manipulation and coordinate parsing
+pandas>=2.0.0
+
+# Excel file readers for survey sheets (.xlsx and .xls)
+openpyxl>=3.1.0
+xlrd>=2.0.1
+
+# High-precision geodesic calculations & geometry validation (WGS84 ellipsoid)
+pyproj>=3.5.0
+shapely>=2.0.0
+
+# Image processing for satellite imagery & map caching
+pillow>=10.0.0
+
+# Scientific computing & vector mathematics for croquis diagramming
+numpy>=1.24.0
+
+# CAD-style croquis diagram & blueprint generation
+matplotlib>=3.7.0
+
+# Proper Arabic text reshaping and bidirectional algorithm support in matplotlib
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2
