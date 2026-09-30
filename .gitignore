@@ -1,4 +1,4 @@
-﻿# Cadastral Survey & Citizen Data
+# Cadastral Survey & Citizen Data
 *.docx
 !شهادة.docx
 *.csv
@@ -8,8 +8,17 @@
 # Generated outputs & packages
 generated_certificates/
 temp_assets/
+drafts/*
+DUDC V3/drafts/*
+!DUDC V3/drafts/.gitkeep
 output_test_folder/
 project_dudc_V2_Portable.zip
+
+# Machine-specific settings
+app_config.json
+DUDC V3/app_config.json
+user_default_settings.json
+DUDC V3/user_default_settings.json
 
 # Python build artifacts
 __pycache__/

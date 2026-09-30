@@ -1,7 +1,7 @@
 """
 Cadastral Survey Certificate System - Google Maps Satellite Capture Engine
 ==========================================================================
-Fetches satellite tiles from Google Maps Satellite (Google Maps Satellite.lyr),
+Fetches satellite tiles from Google Maps Satellite servers,
 stitches them seamlessly, projects parcel vertices to image coordinates,
 overlays the highlighted red parcel boundary, and crops to the Word table cell ratio.
 """

@@ -1,54 +1,110 @@
-﻿# 🏛️ Portable DUDC Cadastral Certificate Generator
-### التطبيق المكتبي المحمول لإنشاء شهادات الرفع المساحي التفاعلية (DUDC)
+# 🏛️ DUDC V3 - Cadastral Certificate Workflow Studio
+### استوديو ومنظومة إصدار شهادات الرفع المساحي المعتمدة والرقابة الرقمية
+**مركز معلومات شبكات المرافق - محافظة الدقهلية (Dakahlia Utility Data Center)**
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Executable](https://img.shields.io/badge/Executable-Portable%2064--bit-orange.svg)]()
-[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
-
----
-
-## 📖 Overview / نظرة عامة
-برنامج مكتبي محمول ومستقل (Portable Zero-Config Executable) يعمل على نظام ويندوز بدون الحاجة لتثبيت بايثون أو أي مكاتب خارجية، مخصص لمهندسي وفنيي المساحة بمركز معلومات شبكات المرافق بمحافظة الدقهلية (DUDC) لإنشاء شهادات إحداثيات معتمدة وفحص التفاوت القانوني للمساحة ورسم الكروكي الهندسي وجلب الصور الفضائية.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Platform Windows](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
+[![Architecture SPA](https://img.shields.io/badge/Architecture-SPA%20%2B%20REST%20API-teal.svg)]()
+[![Security Anti--Tamper](https://img.shields.io/badge/Security-210--bit%20DUDC%20Token-red.svg)]()
 
 ---
 
-## 🚀 Key Features / المميزات الرئيسية
-- **Zero Configuration & Portable**: Completely standalone 64-bit Windows executable (`Certificate_Generator.exe`).
-- **Flexible Survey Data Ingestion**:
-  - Instant drag-and-drop support for `.xls`, `.xlsx`, and `.csv` survey coordinate sheets.
-  - Automatic column detection for Eastings/Northings or Longitude/Latitude.
-- **Automated Geometry & Legal Validation**:
-  - Dynamic parcel polygon area calculation.
-  - Verifies surveyed area against registered area with official legal tolerance indicator ($\pm 2.0\text{ m}^2$).
-- **CAD Croquis & Satellite Map Generation**:
-  - Renders a clean CAD diagram with side dimensions, vertex tags, and a North arrow.
-  - Fetches calibrated satellite imagery centered directly on the parcel polygon.
-  - Allows surveyors to upload high-resolution drone/aerial imagery.
-- **Word Certificate Templating & Security**:
-  - Injects citizen data, parcel dimensions, neighbor descriptions, satellite photos, and CAD diagrams into the official template (`شهادة.docx`).
-  - Integrated certificate security plan and digital verification (`CERTIFICATE_SECURITY_PLAN.md`).
+## 📖 نظرة عامة / Overview
+منظومة تفاعلية متكاملة وشاملة صممت خصيصاً لمهندسي وفنيي المساحة بمركز معلومات شبكات المرافق بمحافظة الدقهلية لإدارة دورة عمل شهادات الصلاحية والرفع المساحي والتحقق الجيوديسي، وتوليد الخرائط والكروكيات الهندسية، مع تأمين المستندات رسمياً ومطابقتها بالتفاوت القانوني المعتمد وإصدار حزم المخرجات بصيغة PDF متجهة فائقة الجودة.
 
 ---
 
-## 🗂️ File Structure / هيكل الملفات
+## 🚀 دورة العمل التفاعلية (3 مراحل معمارية)
+
+### 1️⃣ المرحلة الأولى: الاستيراد والتدقيق المساحي والجيوديسي
+* **استيراد فوري للبيانات:** دعم مباشر لملفات الإحداثيات والرفع المساحي بصيغ (`.xlsx`, `.xls`, `.csv`).
+* **حساب المساحة والتفاوت القانوني:** حساب مساحة المضلع الجيوديسية بدقة وفحص مطابقتها للمساحة المذكورة في العقد مع مؤشر رسمي فوري للتفاوت القانوني ($\pm 2.0\text{ م}^2$).
+* **توليد الكروكي الهندسي (CAD Croquis):** رسم مضلع الأرض آلياً مع تفقيط أطوال الأضلاع، زوايا الانحراف، أسماء النقاط، وسهم اتجاه الشمال الجغرافي.
+* **جلب صور الأقمار الصناعية:** سحب تلقائي لبلاطات القمر الصناعي عالية الدقة المتمركزة بدقة حول إحداثيات قطعة الأرض.
+* **كود التأمين والرقابة السحابية (DUDC Token):** توليد وتوثيق كود رقمي مؤمن 210-bit لكل شهادة عبر واجهة سحابية مشفرة لمنع التلاعب والتزوير.
+
+### 2️⃣ المرحلة الثانية: استوديو التحرير والمراجعة البصرية
+* **مراجعة وتعديل بيانات المواطن والطلب:** الاسم، الرقم القومي، رقم الإيصال، المركز، القرية، وصف الموقع والتعامل.
+* **وصف الحدود والمجاورات:** إدخال الحدود الأربعة (البحري، القبلي، الشرقي، الغربي) مع تعبئة ذكية تمنع الخانات الفارغة.
+* **التحكم الهندسي في العرض:** خيارات تحجيم الخطوط، دوران سهم الشمال، وإعادة تموضع وقص الصور داخل كادر الشهادة.
+* **العلامة المائية الرسمية:** تحكم ديناميكي في إظهار أو إخفاء وشفافية العلامة المائية لشعار المحافظة والمركز.
+* **إدارة المسودات (Drafts):** حفظ واسترجاع ومتابعة مسودات الشهادات غير المكتملة بصيغة JSON بأي وقت.
+
+### 3️⃣ المرحلة الثالثة: التصدير وحزمة المواطن المتكاملة
+* **تصدير PDF متجه A4:** توليد ملف PDF بجودة متجهة فائقة جاهز للطباعة المباشرة عبر محرك Chromium / Edge المدمج بالويندوز بدون أي برمجيات خارجية.
+* **حزمة المواطن الموحدة:** تصدير حزمة منظمة ومسمّاة طبقاً للمعيار الرسمي `[اسم العميل]-[المركز]` تضم:
+  1. ملف الشهادة المعتمدة النهائي (`.pdf`).
+  2. ملف جلسة العمل الكامل للرجوع المستقبلي (`_session.json`).
+  3. الصور الأصلية عالية الجودة للكروكي والقمر الصناعي (`.png`, `.jpg`).
+  4. ملف الرفع المساحي الأصلي المرفوع.
+
+---
+
+## 🗂️ هيكل ملفات ومجلدات المشروع النظيف
+
 ```text
-├── admin_tools/                     # Security & administrative utilities (RSA keygen, validation)
-├── dudc V1/                         # Version 1 application release
-├── project_dudc_ V2/                # Version 2 application directory & assets
-├── src/                             # Core Python source code & templates
-│   ├── docx_builder.py              # Word document generator
-│   ├── geo_engine.py                # Geometry calculation engine
-│   ├── satellite_engine.py          # Satellite imagery fetcher
-│   └── index.html                   # Modern Arabic dark-themed UI
-├── CERTIFICATE_SECURITY_PLAN.md     # Official certificate anti-tamper & security architecture
-├── PROJECT_DUDC_LOG.txt             # Comprehensive development & version log
-└── project_dudc_V2_Portable.zip     # Portable distribution zip
+d:\Work\GIS_tools\project_dudc\
+│
+├── Run_DUDC_V3.bat                  # الاختصار الرئيسي لتشغيل المنظومة بنقرة واحدة
+├── Update_DUDC_V3.bat               # فحص وتحديث المنظومة التلقائي من GitHub بنقرة واحدة
+├── Install_Dependencies.bat          # مثبت المكتبات والتبعيات التلقائي
+├── requirements.txt                 # متطلبات بيئة بايثون الأساسية
+├── PROJECT_MAP.md                   # دليل المعمارية وخريطة الكود البرمجي
+├── README.md                        # هذا الملف التوثيقي
+│
+└── DUDC V3/                         # المجلد النشط والمستقل للنظام (Self-contained)
+    ├── Run_DUDC_V3.bat              # سكربت التشغيل المباشر وإدارة منفذ السيرفر (8765)
+    ├── Update_DUDC_V3.bat           # مشغل التحديث المباشر من مجلد النظام
+    ├── Install_Dependencies.bat     # فحص وتثبيت مكتبات بايثون المحلية
+    ├── requirements.txt             # مواصفات الحزم بالتفصيل والتعليقات
+    ├── PROJECT_MAP.md               # الخريطة المعمارية التفصيلية ودليل الصيانة
+    │
+    ├── app_server.py                # خادم التطبيق المحلي (HTTP/REST API) ومعالج تصدير الـ PDF
+    ├── index.html                   # واجهة المستخدم التفاعلية المتطورة (SPA)
+    │
+    ├── [Core Engines - المحركات الهندسية]:
+    │   ├── geo_engine.py            # قراءة الإحداثيات، حساب المساحات، والتحقق الجيوديسي
+    │   ├── croquis_engine.py        # رسم مضلع الكروكي الهندسي بأبعاده ونقاطه وسهم الشمال
+    │   ├── satellite_engine.py      # جلب بلاطات القمر الصناعي وتراكب حدود المضلع
+    │   ├── encoder_api.py           # كود التأمين الرقابي الرقمي (DUDC Token) السحابي
+    │   └── centers.py               # قاعدة بيانات مراكز محافظة الدقهلية الـ 18 ومعالجة النصوص
+    │
+    ├── [Templates & Configuration]:
+    │   ├── app_config.json          # مسار حفظ المخرجات الافتراضي على جهاز المهندس
+    │   └── ف.xls                    # العينة القياسية المعتمدة لاختبار الرفع المساحي
+    │
+    ├── [Assets & Storage]:
+    │   ├── assets/                  # الشعارات الرسمية المعتمدة (DUDC & ISO) والصور الافتراضية
+    │   ├── drafts/                  # مسودات الشهادات غير المكتملة
+    │   ├── temp_assets/             # ذاكرة التخزين المؤقتة للصور والكروكيات أثناء المعالجة
+    │   └── generated_certificates/  # مجلد حفظ الشهادات الافتراضي في حال عدم تحديد مسار آخر
 ```
 
 ---
 
-## ⚡ Quick Start / طريقة التشغيل
-1. افتح مجلد `project_dudc_ V2` أو `src`.
-2. شغّل الملف **`run_app.bat`** (أو **`Certificate_Generator.exe`**).
-3. سيفتح التطبيق تلقائياً في المتصفح على: `http://127.0.0.1:8000`.
-4. ارفع ملف الإحداثيات (`.xls`, `.xlsx`, `.csv`) وراجع الكروكي واضغط إصدار الشهادة.
+## ⚡ متطلبات التشغيل والبدء السريع
+
+### 1. المتطلبات الأساسية
+* نظام تشغيل **Windows 10 / 11** (64-bit).
+* بيئة بايثون **Python 3.10+** (أو بيئة بايثون المدمجة مع **ArcGIS Pro**).
+* متصفح **Microsoft Edge** أو **Google Chrome** (مثبت مسبقاً بنظام ويندوز لطباعة الـ PDF المتجه).
+
+### 2. طريقة التشغيل بنقرة واحدة
+1. اضغط نقراً مزدوجاً على ملف **`Run_DUDC_V3.bat`** في المجلد الرئيسي.
+2. سيقوم السكربت تلقائياً باكتشاف بايثون، فحص وتثبيت أي مكتبات ناقصة، وإطلاق الخادم المحلي على المنفذ `8765`.
+3. تفتح الواجهة التفاعلية تلقائياً في متصفحك على الرابط:  
+   `http://127.0.0.1:8765`
+
+### 3. تجربة النظام الفورية
+* من خلال الواجهة، اضغط على زر **`⚡ تجربة العينة المرفقة (ف.xls)`** لتحميل نموذج رفع مساحي حقيقي واستعراض تدقيق المساحة والكروكي والقمر الصناعي فوراً.
+
+### 4. التحديث التلقائي للمنظومة من GitHub
+* **من داخل الواجهة:** اضغط على زر **`🔄 تحديث المنظومة`** بالشريط العلوي للاطلاع على أحدث التحديثات وقراءة رسائل وملاحظات الكوميت المنشورة مع خيار السحب الفوري (Pull Now).
+* **أو بنقرة واحدة:** شغّل الملف **`Update_DUDC_V3.bat`** ليقوم بفحص مستودع GitHub وسرد تفاصيل التحديث وتطبيق الـ Pull تلقائياً.
+
+---
+
+## 🔒 الأمان والمحددات الصارمة
+1. **التحقق من التفاوت القانوني:** يتم تطبيق معادلة الدقة المساحية الصارمة ($\pm 2.0\text{ م}^2$) لمطابقة المساحة العقدية والمساحة الفعلية المقاسة بالجيوديسيا.
+2. **كود التأمين (DUDC Token):** يعمل عبر اتصال آمن بالسيرفر السحابي لتوثيق الشهادة ولا يمكن تزويره محلياً.
+3. **خصوصية البيانات:** يتم استثناء كافة ملفات الشهادات والمسودات من التتبع على Git لضمان سرية بيانات المواطنين.

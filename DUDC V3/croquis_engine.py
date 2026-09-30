@@ -31,12 +31,15 @@ except Exception:
     def shape_ar(text):
         return str(text) if text else ""
 
-AR_DIGITS_MAP = str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩')
+AR_TO_ENG_MAP = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
 
-def to_ar_num(val):
+def to_eng_num(val):
     if val is None:
         return ""
-    return str(val).translate(AR_DIGITS_MAP)
+    return str(val).translate(AR_TO_ENG_MAP)
+
+# Keep to_ar_num alias mapped to to_eng_num for backward compatibility
+to_ar_num = to_eng_num
 
 def get_edge_cardinal_direction(p1_lon, p1_lat, p2_lon, p2_lat, c_lon, c_lat):
     """

@@ -26,7 +26,6 @@ d:\Work\GIS_tools\project_dudc\DUDC V3\
 │
 ├── [Templates & Config]:
 │   ├── app_config.json      # ملف الإعدادات الدائمة (مسار حفظ المخرجات الافتراضي)
-│   ├── Google Maps Satellite.lyr # طبقة ArcGIS المرجعية للأقمار الصناعية
 │   └── ف.xls                # عينة اختبارية قياسية لبيانات الرفع المساحي
 │
 ├── [Assets & Runtime Caches]:
@@ -113,7 +112,7 @@ flowchart TD
 ### 3.4. `croquis_engine.py` (محرك رسم الكروكي الهندسي)
 - **المسؤولية:** إنشاء رسم كروكي مطابق للرسم المساحي الهندسي مع تسمية الأضلاع بأطوالها ونقاطها والاتجاهات الجغرافية.
 - **أهم الدوال:**
-  - `generate_croquis_image(parcel, output_path, ...)`: توليد صورة PNG للكروكي بأبعاد واضحة وألوان متناسقة، ودعم التشكيل العربي عبر `arabic_reshaper` و `bidi`.
+  - `generate_croquis_image(parcel, output_path, ...)`: توليد صورة PNG للكروكي بأبعاد واضحة وأرقام إنجليزية هندسية (English Numerals 0-9) مع دعم التشكيل العربي عبر `arabic_reshaper` و `bidi`.
 
 ### 3.5. `satellite_engine.py` (محرك الصور الفضائية)
 - **المسؤولية:** سحب وتوليد لقطة فضائية حقيقية للموقع الجغرافي من مصادر الأقمار الصناعية ورسم حدود القطعة فوقها.
@@ -154,6 +153,8 @@ flowchart TD
 | `/api/update-center` | POST (JSON) | `{"center_id": 1, "center_name": "..."}` | `{"security_token": "...", ...}` | تأمين القطعة وتوليد كود الحماية للمركز |
 | `/api/export-package` | POST (JSON) | بيانات الشهادة الكاملة + كود الـ HTML | `{"success": true, "folder_path": "...", "files": {...}}` | توليد حزمة المخرجات الكاملة (PDF, JSON, Images, Survey) وحذف المسودة آلياً |
 | `/api/open-folder` | POST (JSON) | `{"folder_path": "..."}` | `{"success": true}` | فتح مجلد المخرجات في مستكشف ويندوز Explorer |
+| `/api/check-update` | GET | لا يوجد | `{"success": true, "update_available": bool, "commits": [...]}` | فحص مستودع GitHub وجلب الـ Commits ورسائل التحديث |
+| `/api/perform-update` | POST | لا يوجد | `{"success": true, "commit": {...}}` | سحب أحدث كود وتطبيقه محلياً (git pull) |
 
 ---
 

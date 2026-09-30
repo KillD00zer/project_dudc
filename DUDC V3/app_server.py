@@ -41,11 +41,21 @@ from centers import resolve_center, get_center_name, list_all_centers
 
 ARABIC_DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 
+ARABIC_TO_ENG = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+
 def to_arabic_numerals(text):
+    """
+    Normalizes any Arabic numerals to English numerals (0-9)
+    as requested for official certificate formatting.
+    """
     if text is None:
         return ""
-    trans = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
-    return str(text).translate(trans)
+    return str(text).translate(ARABIC_TO_ENG)
+
+def to_english_numerals(text):
+    if text is None:
+        return ""
+    return str(text).translate(ARABIC_TO_ENG)
 
 def format_issue_date(issue_date_val=None):
     if isinstance(issue_date_val, str) and issue_date_val.strip():
@@ -60,7 +70,7 @@ def format_issue_date(issue_date_val=None):
     else:
         dt = datetime.now()
     day_name = ARABIC_DAYS[dt.weekday()]
-    date_str = to_arabic_numerals(f"{dt.year:04d}/{dt.month:02d}/{dt.day:02d}")
+    date_str = f"{dt.year:04d}/{dt.month:02d}/{dt.day:02d}"
     display_text = f"تحريراً في : {day_name} الموافق {date_str}"
     iso_date = f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
     return display_text, iso_date
@@ -90,6 +100,73 @@ def save_persistent_config(key, val):
     except Exception:
         pass
 
+def get_safe_default_output_dir():
+    """
+    Dynamically and reliably finds the Desktop path for the CURRENT logged-in user on ANY computer:
+    1. Checks OneDrive Desktop (common on modern Windows 10/11)
+    2. Checks standard User Home Desktop (C:\\Users\\<Current_User>\\Desktop)
+    3. Failsafe fallback: <APP_DIR>/generated_certificates (guaranteed writable)
+    """
+    try:
+        # Check OneDrive Desktop
+        for od_var in ("OneDrive", "OneDriveCommercial", "OneDriveConsumer"):
+            od_path = os.environ.get(od_var)
+            if od_path and os.path.isdir(od_path):
+                candidate = os.path.join(od_path, "Desktop")
+                if os.path.isdir(candidate):
+                    return os.path.normpath(candidate)
+        
+        # Check standard user Desktop
+        user_home = os.path.expanduser("~")
+        candidate = os.path.join(user_home, "Desktop")
+        if os.path.isdir(candidate):
+            return os.path.normpath(candidate)
+    except Exception:
+        pass
+
+    # Failsafe fallback inside project directory
+    fallback = os.path.join(APP_DIR, "generated_certificates")
+    try:
+        os.makedirs(fallback, exist_ok=True)
+    except Exception:
+        pass
+    return os.path.normpath(fallback)
+
+def validate_or_fallback_output_dir(raw_dir):
+    r"""
+    Validates if raw_dir is accessible and writable by the CURRENT user.
+    If not (e.g. it points to a foreign C:\Users\7AMOD on someone else's machine, or contains invalid '?' characters),
+    it safely returns the current user's actual Desktop.
+    """
+    if raw_dir and isinstance(raw_dir, str) and raw_dir.strip():
+        candidate = os.path.normpath(raw_dir.strip())
+        # Reject corrupt paths containing question marks from console codepage issues
+        if "?" in candidate:
+            print(f"[!] Notice: Output directory '{candidate}' contains invalid encoding characters (?). Falling back to safe Desktop.")
+            return get_safe_default_output_dir()
+        try:
+            # If path already exists, verify we have write permission
+            if os.path.isdir(candidate):
+                test_file = os.path.join(candidate, f".test_{os.getpid()}.tmp")
+                with open(test_file, "w") as f:
+                    f.write("1")
+                os.remove(test_file)
+                return candidate
+            
+            # If it doesn't exist, only attempt creation if its parent already exists
+            parent = os.path.dirname(candidate)
+            if parent and os.path.isdir(parent):
+                os.makedirs(candidate, exist_ok=True)
+                return candidate
+            else:
+                print(f"[!] Notice: Output directory '{candidate}' does not exist on this machine. Falling back to current user Desktop.")
+        except (PermissionError, OSError) as e:
+            print(f"[!] Notice: Access denied or path invalid for '{candidate}': {e}. Falling back to current user Desktop.")
+        except Exception as e:
+            print(f"[!] Notice: Error validating '{candidate}': {e}. Falling back to current user Desktop.")
+
+    return get_safe_default_output_dir()
+
 import threading as _threading
 import subprocess as _subprocess
 _folder_picker_lock = _threading.Lock()
@@ -97,8 +174,9 @@ _folder_picker_lock = _threading.Lock()
 def open_folder_picker(initial_dir=""):
     """
     Open Windows native folder picker via PowerShell only.
-    - No Tkinter (crashes from non-main thread)
-    - Threading lock prevents double-dialog if button clicked twice
+    - Bidirectional Base64 UTF-8 transfer guarantees full Arabic unicode support
+      and prevents Windows console codepage/mojibake issues.
+    - Threading lock prevents double-dialog if button clicked twice.
     """
     # Non-blocking acquire: if dialog already open, return immediately
     if not _folder_picker_lock.acquire(blocking=False):
@@ -107,42 +185,235 @@ def open_folder_picker(initial_dir=""):
         init_dir = (
             initial_dir
             if (initial_dir and os.path.exists(initial_dir))
-            else (OUTPUT_DIR if os.path.exists(OUTPUT_DIR) else os.getcwd())
+            else (OUTPUT_DIR if (OUTPUT_DIR and os.path.exists(OUTPUT_DIR)) else get_safe_default_output_dir())
         )
-        safe_dir = init_dir.replace("'", "''").replace('"', '')
+        init_b64 = base64.b64encode(init_dir.encode("utf-8")).decode("ascii")
 
-        # Modern Windows Vista+ FolderBrowserDialog via PowerShell
+        # Modern Windows Vista+ FolderBrowserDialog via PowerShell using UTF-8 Base64 output
         ps_script = (
             "Add-Type -AssemblyName System.Windows.Forms; "
             "$d = New-Object System.Windows.Forms.FolderBrowserDialog; "
             "$d.ShowNewFolderButton = $true; "
             "try { $d.UseDescriptionForTitle = $true } catch {}; "
             "$d.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
-            f"$d.SelectedPath = '{safe_dir}'; "
-            "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
-            "{ Write-Output $d.SelectedPath }"
+            f"$initBytes = [Convert]::FromBase64String('{init_b64}'); "
+            "$initPath = [System.Text.Encoding]::UTF8.GetString($initBytes); "
+            "if (Test-Path -Path $initPath) { $d.SelectedPath = $initPath }; "
+            "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { "
+            "  $outBytes = [System.Text.Encoding]::UTF8.GetBytes($d.SelectedPath); "
+            "  [Console]::WriteLine([Convert]::ToBase64String($outBytes)) "
+            "}"
         )
         res = _subprocess.run(
             ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
             capture_output=True, text=True, timeout=180
         )
-        out = res.stdout.strip()
-        if out:
-            return os.path.normpath(out)
+        raw_out = res.stdout.strip()
+        if raw_out:
+            try:
+                decoded_path = base64.b64decode(raw_out).decode("utf-8", errors="replace").strip()
+                if decoded_path and "?" not in decoded_path:
+                    return os.path.normpath(decoded_path)
+            except Exception as de:
+                print(f"[!] Error decoding folder picker output: {de}")
         return ""
-    except Exception:
+    except Exception as e:
+        print(f"[!] Folder picker exception: {e}")
         return ""
     finally:
         _folder_picker_lock.release()
 
+def get_git_repo_root():
+    parent_dir = os.path.dirname(APP_DIR)
+    if os.path.exists(os.path.join(parent_dir, ".git")):
+        return parent_dir
+    if os.path.exists(os.path.join(APP_DIR, ".git")):
+        return APP_DIR
+    return parent_dir
+
+def check_git_updates():
+    repo_root = get_git_repo_root()
+    git_bin = shutil.which("git")
+    if not git_bin:
+        return {
+            "success": False,
+            "error": "أداة Git غير مثبتة على هذا النظام أو غير مضافة لـ PATH."
+        }
+    
+    # 1. Fetch remote origin main with short 8s timeout
+    try:
+        fetch_res = _subprocess.run(
+            [git_bin, "fetch", "origin", "main"],
+            cwd=repo_root, capture_output=True, text=True, timeout=8
+        )
+        if fetch_res.returncode != 0:
+            return {
+                "success": False,
+                "error": f"تعذر الاتصال بـ GitHub: {fetch_res.stderr.strip() or fetch_res.stdout.strip()}"
+            }
+    except _subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "error": "انتهت مهلة الاتصال بخادم GitHub. يرجى التحقق من اتصال الإنترنت."
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"خطأ أثناء فحص GitHub: {str(e)}"
+        }
+
+    try:
+        local_hash = _subprocess.check_output(
+            [git_bin, "rev-parse", "--short", "HEAD"],
+            cwd=repo_root, text=True
+        ).strip()
+
+        remote_hash = _subprocess.check_output(
+            [git_bin, "rev-parse", "--short", "origin/main"],
+            cwd=repo_root, text=True
+        ).strip()
+
+        # Get local commit info
+        local_raw = _subprocess.check_output(
+            [git_bin, "log", "-1", "--pretty=format:%h|||%s|||%cr|||%an|||%b"],
+            cwd=repo_root, text=True, encoding='utf-8'
+        ).strip().split('|||')
+        current_commit = {
+            "hash": local_raw[0] if len(local_raw) > 0 else local_hash,
+            "subject": local_raw[1] if len(local_raw) > 1 else "",
+            "date": local_raw[2] if len(local_raw) > 2 else "",
+            "author": local_raw[3] if len(local_raw) > 3 else "",
+            "body": local_raw[4].strip() if len(local_raw) > 4 else ""
+        }
+
+        if local_hash == remote_hash:
+            return {
+                "success": True,
+                "update_available": False,
+                "current_commit": current_commit,
+                "message": "أنت تعمل على أحدث إصدار متوفر حالياً."
+            }
+
+        # Incoming commits between HEAD and origin/main
+        log_out = _subprocess.check_output(
+            [git_bin, "log", "HEAD..origin/main", "--pretty=format:%h|||%s|||%cr|||%an|||%b<<<ENTRY>>>"],
+            cwd=repo_root, text=True, encoding='utf-8'
+        )
+
+        incoming = []
+        for item in log_out.split("<<<ENTRY>>>"):
+            item = item.strip()
+            if not item:
+                continue
+            parts = item.split("|||")
+            incoming.append({
+                "hash": parts[0].strip() if len(parts) > 0 else "",
+                "subject": parts[1].strip() if len(parts) > 1 else "",
+                "date": parts[2].strip() if len(parts) > 2 else "",
+                "author": parts[3].strip() if len(parts) > 3 else "",
+                "body": parts[4].strip() if len(parts) > 4 else ""
+            })
+
+        return {
+            "success": True,
+            "update_available": True,
+            "count": len(incoming),
+            "commits": incoming,
+            "current_commit": current_commit,
+            "remote_hash": remote_hash,
+            "latest_subject": incoming[0]["subject"] if incoming else "",
+            "latest_body": incoming[0]["body"] if incoming else ""
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"فشل قراءة سجل التحديثات: {str(e)}"
+        }
+
+def perform_git_update():
+    repo_root = get_git_repo_root()
+    git_bin = shutil.which("git")
+    if not git_bin:
+        return {"success": False, "error": "أداة Git غير متوفرة على هذا النظام."}
+
+    try:
+        # First attempt: standard git pull
+        pull_res = _subprocess.run(
+            [git_bin, "pull", "origin", "main"],
+            cwd=repo_root, capture_output=True, text=True, timeout=30, encoding='utf-8'
+        )
+        if pull_res.returncode != 0:
+            err_msg = (pull_res.stderr or pull_res.stdout or "").strip()
+            # If blocked by uncommitted local modifications, automatically stash them and retry
+            if any(k in err_msg.lower() for k in ("overwritten by merge", "commit your changes", "stash", "local changes")):
+                _subprocess.run(
+                    [git_bin, "stash"],
+                    cwd=repo_root, capture_output=True, text=True, timeout=15, encoding='utf-8'
+                )
+                pull_res = _subprocess.run(
+                    [git_bin, "pull", "origin", "main"],
+                    cwd=repo_root, capture_output=True, text=True, timeout=30, encoding='utf-8'
+                )
+
+        if pull_res.returncode != 0:
+            # Second fallback: discard tracked file changes while leaving untracked files intact
+            _subprocess.run(
+                [git_bin, "checkout", "--", "."],
+                cwd=repo_root, capture_output=True, text=True, timeout=15, encoding='utf-8'
+            )
+            pull_res = _subprocess.run(
+                [git_bin, "pull", "origin", "main"],
+                cwd=repo_root, capture_output=True, text=True, timeout=30, encoding='utf-8'
+            )
+
+        if pull_res.returncode != 0:
+            return {
+                "success": False,
+                "error": f"فشل السحب من GitHub: {pull_res.stderr.strip() or pull_res.stdout.strip()}"
+            }
+
+        # Read the new HEAD commit details
+        new_raw = _subprocess.check_output(
+            [git_bin, "log", "-1", "--pretty=format:%h|||%s|||%cr|||%an|||%b"],
+            cwd=repo_root, text=True, encoding='utf-8'
+        ).strip().split('|||')
+        new_commit = {
+            "hash": new_raw[0] if len(new_raw) > 0 else "",
+            "subject": new_raw[1] if len(new_raw) > 1 else "",
+            "date": new_raw[2] if len(new_raw) > 2 else "",
+            "author": new_raw[3] if len(new_raw) > 3 else "",
+            "body": new_raw[4].strip() if len(new_raw) > 4 else ""
+        }
+
+        return {
+            "success": True,
+            "message": "تم تحديث المنظومة بنجاح إلى أحدث إصدار!",
+            "commit": new_commit,
+            "pull_output": pull_res.stdout.strip()
+        }
+    except _subprocess.TimeoutExpired:
+        return {"success": False, "error": "استغرق التحديث وقتاً طويلاً وتجاوز المهلة المحددة."}
+    except Exception as e:
+        return {"success": False, "error": f"حدث خطأ أثناء التحديث: {str(e)}"}
+
 
 _saved_cfg = load_saved_config()
-OUTPUT_DIR = _saved_cfg.get("output_dir") or os.path.join(APP_DIR, "generated_certificates")
+_raw_out = _saved_cfg.get("output_dir")
+OUTPUT_DIR = validate_or_fallback_output_dir(_raw_out)
+if _raw_out and _raw_out != OUTPUT_DIR:
+    save_persistent_config("output_dir", OUTPUT_DIR)
+
 TEMP_ASSETS_DIR = os.path.join(APP_DIR, "temp_assets")
 SAMPLE_FILE = os.path.join(APP_DIR, "ف.xls")
 INDEX_HTML = os.path.join(APP_DIR, "index.html")
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+try:
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+except Exception as _oe:
+    print(f"[!] Warning creating OUTPUT_DIR '{OUTPUT_DIR}': {_oe}")
+    OUTPUT_DIR = get_safe_default_output_dir()
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 os.makedirs(TEMP_ASSETS_DIR, exist_ok=True)
 
 CURRENT_PARCELS = []
@@ -399,7 +670,10 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             self._send_file(INDEX_HTML, 'text/html; charset=utf-8')
         elif path == '/api/health':
             self._send_json({"status": "online", "version": "3.5", "timestamp": time.time()})
+        elif path == '/api/check-update':
+            self._send_json(check_git_updates())
         elif path == '/api/get-output-dir':
+            OUTPUT_DIR = validate_or_fallback_output_dir(OUTPUT_DIR)
             self._send_json({"output_dir": OUTPUT_DIR})
         elif path == '/api/get-defaults':
             if os.path.exists(DEFAULTS_FILE):
@@ -689,12 +963,13 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
                 req_data = json.loads(body) if body else {}
                 init_dir = req_data.get('initial_dir') or OUTPUT_DIR
+                init_dir = validate_or_fallback_output_dir(init_dir)
                 folder = open_folder_picker(init_dir)
                 if folder:
+                    folder = validate_or_fallback_output_dir(folder)
                     OUTPUT_DIR = folder
-                    os.makedirs(OUTPUT_DIR, exist_ok=True)
                     save_persistent_config("output_dir", OUTPUT_DIR)
-                self._send_json({"folder_path": folder, "output_dir": OUTPUT_DIR})
+                self._send_json({"folder_path": folder or OUTPUT_DIR, "output_dir": OUTPUT_DIR})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
@@ -705,10 +980,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 req_data = json.loads(body) if length > 0 else {}
                 new_dir = req_data.get('output_dir', '').strip()
                 if not new_dir:
-                    self._send_json({"error": "No output directory specified"}, status=400)
-                    return
-                os.makedirs(new_dir, exist_ok=True)
-                OUTPUT_DIR = new_dir
+                    new_dir = get_safe_default_output_dir()
+                OUTPUT_DIR = validate_or_fallback_output_dir(new_dir)
                 save_persistent_config("output_dir", OUTPUT_DIR)
                 self._send_json({"success": True, "output_dir": OUTPUT_DIR})
             except Exception as e:
@@ -806,11 +1079,18 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 clean_dist = re.sub(r'[\\/*?:"<>|]', '_', district_name.strip())
 
                 # Standard filename pattern: [ClientName]-[Center]
+                OUTPUT_DIR = validate_or_fallback_output_dir(OUTPUT_DIR)
                 file_base_name = f"{clean_name}-{clean_dist}" if clean_dist else clean_name
 
                 # Dedicated citizen subfolder inside OUTPUT_DIR named [Client]-[Center]
                 citizen_dir = os.path.join(OUTPUT_DIR, file_base_name)
-                os.makedirs(citizen_dir, exist_ok=True)
+                try:
+                    os.makedirs(citizen_dir, exist_ok=True)
+                except Exception as _ce:
+                    print(f"[!] Warning creating citizen_dir '{citizen_dir}': {_ce}")
+                    OUTPUT_DIR = get_safe_default_output_dir()
+                    citizen_dir = os.path.join(OUTPUT_DIR, file_base_name)
+                    os.makedirs(citizen_dir, exist_ok=True)
 
                 # 1 & 2: Images (Croquis + Satellite)
                 croq_target_path = os.path.join(citizen_dir, f"croquis_{clean_name}.png")
@@ -875,9 +1155,10 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     try:
                         cid = parcel.get("district_id")
                         existing_token = generate_token_for_parcel(parcel, cid, system_officer=sys_officer, survey_technician=survey_tech)
+                        confirm_cloud_issuance(existing_token)
                     except Exception as te:
-                        print(f"[!] Warning: Token error during export (using fallback): {te}")
-                        existing_token = f"DUDC-{int(time.time())}"
+                        self._send_json({"error": f"فشل إصدار كود الأمان من سيرفر Modal السحابي: {te}. لا يمكن تصدير الشهادة بدون توثيق كود الأمان رسمياً بالسجل المركزي."}, status=500)
+                        return
 
                 if existing_token:
                     parcel["security_token"] = existing_token
@@ -970,10 +1251,10 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                 body = self.rfile.read(length).decode('utf-8') if length > 0 else "{}"
                 req_data = json.loads(body) if body else {}
                 target = req_data.get('folder_path') or OUTPUT_DIR
-                # Create the folder if it doesn't exist yet
+                target = validate_or_fallback_output_dir(target)
                 os.makedirs(target, exist_ok=True)
                 os.startfile(target)
-                self._send_json({"success": True})
+                self._send_json({"success": True, "opened_path": target})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 
@@ -1325,6 +1606,14 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     self._send_json({"success": True, "message": "المسودة غير موجودة بالفعل"})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
+
+        # 15. Perform Git Pull Update
+        elif path == '/api/perform-update':
+            try:
+                res = perform_git_update()
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"success": False, "error": str(e)}, status=500)
 
         else:
             self.send_error(404, "Not Found")

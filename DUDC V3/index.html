@@ -1572,6 +1572,11 @@
         <span>📑</span> مسودات اليوم
         <span id="draftsBadgeCount" style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
       </button>
+
+      <button class="btn btn-glass" id="btnCheckAppUpdate" title="فحص وتحديث المنظومة من GitHub" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; position: relative;" onclick="openUpdateModal()">
+        <span>🔄</span> تحديث المنظومة
+        <span id="updateAvailableBadge" style="display: none; background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">جديد!</span>
+      </button>
       <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
       <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'croquis')">
       <input type="file" id="inputUploadSatellite" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'satellite')">
@@ -2053,13 +2058,13 @@
               </div>
             </div>
 
-            <!-- 6. الملاحظات والاشتراطات الرسمية (مرقمة من ١ إلى ٥ تماماً) -->
+            <!-- 6. الملاحظات والاشتراطات الرسمية (مرقمة من 1 إلى 5) -->
             <div class="cert-notes">
-              <p data-text-id="note_1" contenteditable="true" spellcheck="false">١. بيانات الموقع على مسئولية مقدم الطلب .</p>
-              <p data-text-id="note_2" contenteditable="true" spellcheck="false">٢. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
-              <p data-text-id="note_3" contenteditable="true" spellcheck="false">٣. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
-              <p data-text-id="note_4" contenteditable="true" spellcheck="false">٤. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
-              <p data-text-id="note_5" contenteditable="true" spellcheck="false">٥. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
+              <p data-text-id="note_1" contenteditable="true" spellcheck="false">1. بيانات الموقع على مسئولية مقدم الطلب .</p>
+              <p data-text-id="note_2" contenteditable="true" spellcheck="false">2. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
+              <p data-text-id="note_3" contenteditable="true" spellcheck="false">3. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
+              <p data-text-id="note_4" contenteditable="true" spellcheck="false">4. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
+              <p data-text-id="note_5" contenteditable="true" spellcheck="false">5. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
             </div>
 
             <!-- تاريخ التحرير بالمنتصف -->
@@ -2278,6 +2283,107 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
         <span style="font-size: 11px; color: var(--text-muted);" id="draftsFooterNote">📁 التخزين: DUDC V3/drafts/</span>
         <button class="btn btn-glass" id="btnCloseDraftsModalBottom">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       نافذة فحص وتحديث المنظومة من GitHub (System Updater Modal)
+       ========================================================================== -->
+  <div class="image-modal-backdrop" id="updateModalBackdrop" style="display: none;">
+    <div class="image-modal" style="max-width: 680px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">🔄</span>
+          <span style="font-weight: 800; font-size: 16px; color: #38bdf8;">فحص وتحديث المنظومة من GitHub</span>
+          <span id="updateModalStatusBadge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">فحص الاتصال...</span>
+        </div>
+        <button class="btn btn-glass" id="btnCloseUpdateModal" style="padding: 2px 8px; font-size: 13px;" onclick="closeUpdateModal()">✕</button>
+      </div>
+
+      <!-- محتوى حالة التحديث -->
+      <div id="updateModalContent" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- شريط الإصدار الحالي -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+          <div>
+            <span style="color: var(--text-muted);">الإصدار الحالي المثبت:</span>
+            <strong id="currentCommitHash" style="font-family: monospace; color: #f8fafc; margin-right: 6px;">--</strong>
+            <span id="currentCommitDate" style="color: var(--text-muted); font-size: 11px;"></span>
+          </div>
+          <button class="btn btn-glass" id="btnRecheckUpdate" style="padding: 4px 10px; font-size: 11px;" onclick="fetchUpdateInfo(true)">
+            🔄 إعادة الفحص
+          </button>
+        </div>
+
+        <!-- حالة الفحص والرسائل -->
+        <div id="updateCheckingState" style="text-align: center; padding: 20px 10px;">
+          <div style="font-size: 28px; margin-bottom: 8px;">⏳</div>
+          <p style="font-size: 13px; color: var(--text-muted);">جارٍ فحص مستودع GitHub وجلب سجل التحديثات...</p>
+        </div>
+
+        <!-- عندما يكون النظام محدثاً بالفعل -->
+        <div id="updateUpToDateState" style="display: none; text-align: center; padding: 20px 10px;">
+          <div style="font-size: 36px; margin-bottom: 8px;">✨</div>
+          <h4 style="color: #34d399; font-weight: bold; margin-bottom: 6px;">المنظومة محدثة بالكامل!</h4>
+          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;" id="upToDateMsg">
+            أنت تعمل على أحدث كود منشور في المستودع الرسمي. لا توجد أي تحديثات جديدة حالياً.
+          </p>
+        </div>
+
+        <!-- عندما يتوفر تحديث جديد -->
+        <div id="updateAvailableState" style="display: none; flex-direction: column; gap: 10px;">
+          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">🚀</span>
+            <div>
+              <div style="font-weight: 800; font-size: 14px; color: #34d399;">يتوفر تحديث جديد للمنظومة على GitHub!</div>
+              <div style="font-size: 11px; color: #94a3b8;" id="updateIncomingCountNotice">يوجد تعديلات جاهزة للتحميل والتطبيق المباشر.</div>
+            </div>
+          </div>
+
+          <!-- تفاصيل ورسائل التحديث المكتوبة أثناء الـ push -->
+          <div style="font-size: 12px; font-weight: bold; color: #e2e8f0; margin-top: 4px;">
+            📝 رسائل وتفاصيل التحديث المنشور (Commit Notes & Comments):
+          </div>
+          <div id="updateCommitsList" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
+            <!-- يتم تعبئة الكوميتات مع الـ subject والـ body هنا -->
+          </div>
+        </div>
+
+        <!-- حالة خطأ في الفحص (انقطاع إنترنت أو غيره) -->
+        <div id="updateErrorState" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 6px;">⚠️</div>
+          <div style="font-weight: bold; color: #f87171; font-size: 13px;" id="updateErrorMsg">تعذر الاتصال بـ GitHub</div>
+        </div>
+
+        <!-- حالة جاري التحديث (Progress) -->
+        <div id="updateApplyingState" style="display: none; text-align: center; padding: 24px 10px;">
+          <div style="font-size: 32px; margin-bottom: 10px;">📥</div>
+          <h4 style="color: #38bdf8; font-weight: bold; margin-bottom: 6px;">جارٍ سحب وتطبيق التحديثات الآن (git pull)...</h4>
+          <p style="font-size: 12px; color: var(--text-muted);">يرجى الانتظار، لا تغلق المتصفح أو السيرفر...</p>
+        </div>
+
+        <!-- تم التحديث بنجاح -->
+        <div id="updateSuccessState" style="display: none; text-align: center; padding: 20px 10px;">
+          <div style="font-size: 36px; margin-bottom: 8px;">🎉</div>
+          <h4 style="color: #34d399; font-weight: bold; margin-bottom: 6px;">تم تحديث المنظومة بنجاح!</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;" id="updateSuccessDetail">
+            تم دمج أحدث التعديلات والملفات بنجاح. يرجى إعادة تحميل الصفحة لتفعيل كافة التحديثات.
+          </p>
+          <button class="btn btn-green" onclick="location.reload()" style="padding: 8px 20px; font-weight: bold;">
+            🔄 إعادة تحميل الصفحة الآن
+          </button>
+        </div>
+      </div>
+
+      <!-- أزرار أسفل المودال -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+        <span style="font-size: 11px; color: var(--text-muted);">🌐 مستودع المشروع: GitHub (KillD00zer/project_dudc)</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-glass" onclick="closeUpdateModal()">إغلاق</button>
+          <button class="btn btn-green" id="btnExecutePull" style="display: none; font-weight: bold;" onclick="applyAppUpdate()">
+            🚀 سحب وتطبيق التحديث (Pull)
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2582,7 +2688,7 @@
             address: data.address || parcelData.address || '',
             stated_area_m2: statedArea,
             calculated_area_m2: calcArea,
-            order_no: data.order_no || parcelData.order_no || '٢٦٠٥s',
+            order_no: data.order_no || parcelData.order_no || '2605s',
             deal_type: data.deal_type || parcelData.deal_type || 'انشاء',
             site_desc: data.site_desc || parcelData.site_desc || 'موقع عينة تجريبية',
             security_token: data.security_token || data.token || parcelData.security_token || null,
@@ -2875,8 +2981,7 @@
 
       function toArabicNumerals(val) {
         if (val === null || val === undefined) return '';
-        const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        return String(val).replace(/[0-9]/g, d => arabicDigits[+d]);
+        return toEnglishNumerals(val);
       }
 
       function toEnglishNumerals(val) {
@@ -3236,6 +3341,219 @@
 
       const btnQuickSaveDraft = document.getElementById('btnQuickSaveDraft');
       if (btnQuickSaveDraft) btnQuickSaveDraft.addEventListener('click', () => saveCurrentDraft(true));
+
+      // --------------------------------------------------------------------------
+      // نظام فحص وتحديث المنظومة التلقائي من GitHub (System Updater Logic)
+      // --------------------------------------------------------------------------
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      window.openUpdateModal = function() {
+        const modal = document.getElementById('updateModalBackdrop');
+        if (modal) modal.style.display = 'flex';
+        fetchUpdateInfo(false);
+      };
+
+      window.closeUpdateModal = function() {
+        const modal = document.getElementById('updateModalBackdrop');
+        if (modal) modal.style.display = 'none';
+      };
+
+      window.fetchUpdateInfo = function(forceRefresh = false) {
+        const checkingState = document.getElementById('updateCheckingState');
+        const upToDateState = document.getElementById('updateUpToDateState');
+        const availableState = document.getElementById('updateAvailableState');
+        const errorState = document.getElementById('updateErrorState');
+        const applyingState = document.getElementById('updateApplyingState');
+        const successState = document.getElementById('updateSuccessState');
+        const statusBadge = document.getElementById('updateModalStatusBadge');
+        const btnExecutePull = document.getElementById('btnExecutePull');
+        const updateBadge = document.getElementById('updateAvailableBadge');
+
+        // Reset state displays
+        if (checkingState) checkingState.style.display = 'block';
+        if (upToDateState) upToDateState.style.display = 'none';
+        if (availableState) availableState.style.display = 'none';
+        if (errorState) errorState.style.display = 'none';
+        if (applyingState) applyingState.style.display = 'none';
+        if (successState) successState.style.display = 'none';
+        if (btnExecutePull) btnExecutePull.style.display = 'none';
+
+        if (statusBadge) {
+          statusBadge.textContent = 'جارٍ الفحص...';
+          statusBadge.style.color = '#38bdf8';
+          statusBadge.style.borderColor = '#38bdf8';
+          statusBadge.style.background = 'rgba(56, 189, 248, 0.2)';
+        }
+
+        fetch('/api/check-update')
+          .then(res => res.json())
+          .then(data => {
+            if (checkingState) checkingState.style.display = 'none';
+
+            if (!data.success) {
+              if (errorState) errorState.style.display = 'block';
+              const errElem = document.getElementById('updateErrorMsg');
+              if (errElem) errElem.textContent = data.error || 'فشل الاتصال بـ GitHub';
+              if (statusBadge) {
+                statusBadge.textContent = 'تعذر الفحص';
+                statusBadge.style.color = '#f87171';
+                statusBadge.style.borderColor = '#f87171';
+                statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+              }
+              return;
+            }
+
+            // Update current installed commit display
+            if (data.current_commit) {
+              const hashElem = document.getElementById('currentCommitHash');
+              const dateElem = document.getElementById('currentCommitDate');
+              if (hashElem) hashElem.textContent = data.current_commit.hash || '--';
+              if (dateElem) dateElem.textContent = `(${data.current_commit.date || ''})`;
+            }
+
+            if (!data.update_available) {
+              if (upToDateState) upToDateState.style.display = 'block';
+              if (updateBadge) updateBadge.style.display = 'none';
+              if (statusBadge) {
+                statusBadge.textContent = 'محدث بالكامل ✔';
+                statusBadge.style.color = '#34d399';
+                statusBadge.style.borderColor = '#34d399';
+                statusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+              }
+            } else {
+              // Update available!
+              if (availableState) availableState.style.display = 'flex';
+              if (btnExecutePull) btnExecutePull.style.display = 'inline-flex';
+              if (updateBadge) updateBadge.style.display = 'inline-block';
+
+              if (statusBadge) {
+                statusBadge.textContent = `يتوفر ${data.count || 1} تحديث جديد 🚀`;
+                statusBadge.style.color = '#10b981';
+                statusBadge.style.borderColor = '#10b981';
+                statusBadge.style.background = 'rgba(16, 185, 129, 0.25)';
+              }
+
+              const countNotice = document.getElementById('updateIncomingCountNotice');
+              if (countNotice) {
+                countNotice.textContent = `يوجد ${data.count || 1} تعديل منشور على GitHub بانتظار السحب والتطبيق.`;
+              }
+
+              // Render incoming commits list with subjects and bodies
+              const listContainer = document.getElementById('updateCommitsList');
+              if (listContainer) {
+                listContainer.innerHTML = '';
+                const commits = data.commits || [];
+                commits.forEach((c) => {
+                  const item = document.createElement('div');
+                  item.style.cssText = 'background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;';
+                  
+                  const headerRow = document.createElement('div');
+                  headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #38bdf8;';
+                  headerRow.innerHTML = `<span>⚡ ${escapeHtml(c.subject || 'تحديث بدون عنوان')}</span> <span style="font-family: monospace; font-size: 11px; background: rgba(56, 189, 248, 0.15); padding: 1px 6px; border-radius: 4px; color: #bae6fd;">${escapeHtml(c.hash)}</span>`;
+                  
+                  const metaRow = document.createElement('div');
+                  metaRow.style.cssText = 'font-size: 11px; color: var(--text-muted); display: flex; gap: 12px;';
+                  metaRow.innerHTML = `<span>👤 ${escapeHtml(c.author || 'المطور')}</span> <span>🕒 ${escapeHtml(c.date || '')}</span>`;
+
+                  item.appendChild(headerRow);
+                  item.appendChild(metaRow);
+
+                  // Show comments/body if present
+                  if (c.body && c.body.trim()) {
+                    const bodyBox = document.createElement('div');
+                    bodyBox.style.cssText = 'font-size: 11.5px; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); border-right: 3px solid #38bdf8; padding: 6px 10px; margin-top: 4px; border-radius: 4px; white-space: pre-wrap; line-height: 1.5; direction: rtl;';
+                    bodyBox.textContent = c.body.trim();
+                    item.appendChild(bodyBox);
+                  }
+
+                  listContainer.appendChild(item);
+                });
+              }
+            }
+          })
+          .catch(err => {
+            if (checkingState) checkingState.style.display = 'none';
+            if (errorState) errorState.style.display = 'block';
+            const errElem = document.getElementById('updateErrorMsg');
+            if (errElem) errElem.textContent = 'خطأ بالاتصال: ' + err.message;
+          });
+      };
+
+      window.applyAppUpdate = function() {
+        const availableState = document.getElementById('updateAvailableState');
+        const applyingState = document.getElementById('updateApplyingState');
+        const successState = document.getElementById('updateSuccessState');
+        const errorState = document.getElementById('updateErrorState');
+        const btnExecutePull = document.getElementById('btnExecutePull');
+        const statusBadge = document.getElementById('updateModalStatusBadge');
+
+        if (availableState) availableState.style.display = 'none';
+        if (applyingState) applyingState.style.display = 'block';
+        if (btnExecutePull) btnExecutePull.style.display = 'none';
+
+        if (statusBadge) {
+          statusBadge.textContent = 'جارٍ التحديث...';
+          statusBadge.style.color = '#38bdf8';
+        }
+
+        fetch('/api/perform-update', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            if (applyingState) applyingState.style.display = 'none';
+            if (data.success) {
+              if (successState) successState.style.display = 'block';
+              if (statusBadge) {
+                statusBadge.textContent = 'اكتمل التحديث بنجاح ✔';
+                statusBadge.style.color = '#34d399';
+                statusBadge.style.borderColor = '#34d399';
+              }
+              const detail = document.getElementById('updateSuccessDetail');
+              if (detail && data.commit) {
+                detail.innerHTML = `تم سحب التحديث بنجاح: <strong>${escapeHtml(data.commit.subject || '')}</strong> (<span style="font-family: monospace;">${escapeHtml(data.commit.hash || '')}</span>).<br>يرجى النقر على الزر بالأسفل لإعادة تحميل الصفحة.`;
+              }
+              const updateBadge = document.getElementById('updateAvailableBadge');
+              if (updateBadge) updateBadge.style.display = 'none';
+            } else {
+              if (errorState) errorState.style.display = 'block';
+              const errElem = document.getElementById('updateErrorMsg');
+              if (errElem) errElem.textContent = data.error || 'تعذر استكمال التحديث.';
+              if (statusBadge) {
+                statusBadge.textContent = 'فشل التحديث';
+                statusBadge.style.color = '#f87171';
+              }
+            }
+          })
+          .catch(err => {
+            if (applyingState) applyingState.style.display = 'none';
+            if (errorState) errorState.style.display = 'block';
+            const errElem = document.getElementById('updateErrorMsg');
+            if (errElem) errElem.textContent = 'خطأ أثناء تطبيق التحديث: ' + err.message;
+          });
+      };
+
+      // فحص صامت في الخلفية بعد تحميل الصفحة بـ 3 ثوانٍ
+      setTimeout(() => {
+        fetch('/api/check-update')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.update_available) {
+              const badge = document.getElementById('updateAvailableBadge');
+              if (badge) {
+                badge.style.display = 'inline-block';
+                badge.title = `يتوفر تحديث: ${data.latest_subject || ''}`;
+              }
+            }
+          })
+          .catch(() => {});
+      }, 3000);
 
       // (قائمة المراكز الرسمية تم تعريفها بالأعلى)
 
@@ -4242,8 +4560,7 @@
          ========================================================================== */
       function toArabicNumerals(val) {
         if (val === null || val === undefined) return '';
-        const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        return String(val).replace(/[0-9]/g, d => arabicDigits[+d]);
+        return toEnglishNumerals(val);
       }
 
       function toEnglishNumerals(val) {
