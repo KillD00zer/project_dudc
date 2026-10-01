@@ -29,7 +29,7 @@ d:\Work\GIS_tools\project_dudc\DUDC V3\
 │   └── ف.xls                # عينة اختبارية قياسية لبيانات الرفع المساحي
 │
 ├── [Assets & Runtime Caches]:
-│   ├── assets/              # الشعارات المعتمدة (logo_dudc.jpg, logo_iso.jpg, sample images)
+│   ├── assets/              # أيقونة المنظومة الرسمية والشعارات (app_icon.ico/png, favicon.ico, logos)
 │   ├── temp_assets/         # كاش وقت التشغيل للكروكيات والصور الفضائية المولدة أو المرفوعة
 │   ├── drafts/              # صندوق مسودات الشهادات المؤقتة (JSON) مع استكمال وحذف آلي
 │   └── generated_certificates/ # المجلد الافتراضي لتخزين مخرجات الشهادات وحزم المشاريع

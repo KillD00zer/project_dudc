@@ -33,6 +33,7 @@ venv/
 Thumbs.db
 desktop.ini
 *.tmp
+*.lnk
 .vscode/
 .idea/
 DUDC V3.rar
