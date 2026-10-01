@@ -173,12 +173,11 @@ _folder_picker_lock = _threading.Lock()
 
 def open_folder_picker(initial_dir=""):
     """
-    Open Windows native folder picker via PowerShell only.
-    - Bidirectional Base64 UTF-8 transfer guarantees full Arabic unicode support
-      and prevents Windows console codepage/mojibake issues.
-    - Threading lock prevents double-dialog if button clicked twice.
+    Open Windows native folder picker with multi-tier fallbacks:
+    Tier 1: Tkinter native Windows folder dialog (in-process, fastest, foreground, no PowerShell dependency)
+    Tier 2: PowerShell STA FolderBrowserDialog (with -ExecutionPolicy Bypass and without -NonInteractive)
+    Tier 3: Shell.Application COM object via PowerShell
     """
-    # Non-blocking acquire: if dialog already open, return immediately
     if not _folder_picker_lock.acquire(blocking=False):
         return ""
     try:
@@ -187,38 +186,76 @@ def open_folder_picker(initial_dir=""):
             if (initial_dir and os.path.exists(initial_dir))
             else (OUTPUT_DIR if (OUTPUT_DIR and os.path.exists(OUTPUT_DIR)) else get_safe_default_output_dir())
         )
-        init_b64 = base64.b64encode(init_dir.encode("utf-8")).decode("ascii")
+        init_dir = os.path.abspath(init_dir)
 
-        # Modern Windows Vista+ FolderBrowserDialog via PowerShell using UTF-8 Base64 output
-        ps_script = (
-            "Add-Type -AssemblyName System.Windows.Forms; "
-            "$d = New-Object System.Windows.Forms.FolderBrowserDialog; "
-            "$d.ShowNewFolderButton = $true; "
-            "try { $d.UseDescriptionForTitle = $true } catch {}; "
-            "$d.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
-            f"$initBytes = [Convert]::FromBase64String('{init_b64}'); "
-            "$initPath = [System.Text.Encoding]::UTF8.GetString($initBytes); "
-            "if (Test-Path -Path $initPath) { $d.SelectedPath = $initPath }; "
-            "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { "
-            "  $outBytes = [System.Text.Encoding]::UTF8.GetBytes($d.SelectedPath); "
-            "  [Console]::WriteLine([Convert]::ToBase64String($outBytes)) "
-            "}"
-        )
-        res = _subprocess.run(
-            ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
-            capture_output=True, text=True, timeout=180
-        )
-        raw_out = res.stdout.strip()
-        if raw_out:
-            try:
+        # Tier 1: Tkinter native dialog (Native Win32 Shell IFileDialog, highly reliable)
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.wm_attributes("-topmost", 1)
+            selected = filedialog.askdirectory(
+                initialdir=init_dir,
+                title="اختر مجلد حفظ الشهادات المساحية"
+            )
+            root.destroy()
+            if selected and os.path.exists(selected):
+                return os.path.normpath(selected)
+        except Exception as te:
+            print(f"[!] Tkinter folder picker fallback to PowerShell: {te}")
+
+        # Tier 2: PowerShell STA FolderBrowserDialog
+        try:
+            init_b64 = base64.b64encode(init_dir.encode("utf-8")).decode("ascii")
+            ps_script = (
+                "Add-Type -AssemblyName System.Windows.Forms; "
+                "$d = New-Object System.Windows.Forms.FolderBrowserDialog; "
+                "$d.ShowNewFolderButton = $true; "
+                "try { $d.UseDescriptionForTitle = $true } catch {}; "
+                "$d.Description = 'اختر مجلد حفظ الشهادات المساحية'; "
+                f"$initBytes = [Convert]::FromBase64String('{init_b64}'); "
+                "$initPath = [System.Text.Encoding]::UTF8.GetString($initBytes); "
+                "if (Test-Path -Path $initPath) { $d.SelectedPath = $initPath }; "
+                "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { "
+                "  $outBytes = [System.Text.Encoding]::UTF8.GetBytes($d.SelectedPath); "
+                "  [Console]::WriteLine([Convert]::ToBase64String($outBytes)) "
+                "}"
+            )
+            res = _subprocess.run(
+                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-Command", ps_script],
+                capture_output=True, text=True, timeout=120
+            )
+            raw_out = res.stdout.strip()
+            if raw_out:
                 decoded_path = base64.b64decode(raw_out).decode("utf-8", errors="replace").strip()
-                if decoded_path and "?" not in decoded_path:
+                if decoded_path and "?" not in decoded_path and os.path.exists(decoded_path):
                     return os.path.normpath(decoded_path)
-            except Exception as de:
-                print(f"[!] Error decoding folder picker output: {de}")
+        except Exception as pe:
+            print(f"[!] PowerShell folder picker error: {pe}")
+
+        # Tier 3: Shell.Application COM object
+        try:
+            ps_script_com = (
+                "$app = New-Object -ComObject Shell.Application; "
+                "$f = $app.BrowseForFolder(0, 'اختر مجلد حفظ الشهادات المساحية', 0, 0); "
+                "if ($f) { [Console]::WriteLine([Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($f.Self.Path))) }"
+            )
+            res_com = _subprocess.run(
+                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-Command", ps_script_com],
+                capture_output=True, text=True, timeout=120
+            )
+            raw_out_com = res_com.stdout.strip()
+            if raw_out_com:
+                decoded_path = base64.b64decode(raw_out_com).decode("utf-8", errors="replace").strip()
+                if decoded_path and os.path.exists(decoded_path):
+                    return os.path.normpath(decoded_path)
+        except Exception as ce:
+            print(f"[!] Shell.Application folder picker error: {ce}")
+
         return ""
     except Exception as e:
-        print(f"[!] Folder picker exception: {e}")
+        print(f"[!] Folder picker general exception: {e}")
         return ""
     finally:
         _folder_picker_lock.release()
@@ -969,7 +1006,9 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
                     folder = validate_or_fallback_output_dir(folder)
                     OUTPUT_DIR = folder
                     save_persistent_config("output_dir", OUTPUT_DIR)
-                self._send_json({"folder_path": folder or OUTPUT_DIR, "output_dir": OUTPUT_DIR})
+                    self._send_json({"success": True, "folder_path": folder, "output_dir": OUTPUT_DIR})
+                else:
+                    self._send_json({"success": False, "folder_path": "", "cancelled": True, "output_dir": OUTPUT_DIR})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
 

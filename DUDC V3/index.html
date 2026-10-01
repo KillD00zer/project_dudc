@@ -2920,7 +2920,10 @@
         const statusEl = document.getElementById('outputDirStatus');
         const dirInput = document.getElementById('outputDirInput');
         const curDir = dirInput ? dirInput.value.trim() : '';
-        if (statusEl) statusEl.textContent = '⏳ جاري فتح نافذة اختيار المجلد...';
+        if (statusEl) {
+          statusEl.style.color = 'var(--accent-cyan)';
+          statusEl.textContent = '⏳ جاري فتح نافذة اختيار المجلد (أو تفقد شريط المهام بالأسفل)...';
+        }
 
         try {
           const res = await fetch('/api/browse-output-dir', {
@@ -2933,15 +2936,29 @@
             if (dirInput) dirInput.value = data.folder_path;
             outputDir = data.folder_path;
             if (statusEl) {
-              statusEl.textContent = '✔ تم تحديد وتحديث مجلد الحفظ بنجاح';
-              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+              statusEl.style.color = 'var(--accent-green-light)';
+              statusEl.textContent = '✔ تم تحديد وتحديث مجلد الحفظ بنجاح: ' + data.folder_path;
+              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 5000);
+            }
+          } else if (data.cancelled) {
+            if (statusEl) {
+              statusEl.style.color = 'var(--text-muted)';
+              statusEl.textContent = 'ℹ️ لم يتم تغيير المجلد. يمكنك أيضاً كتابة أو لصق المسار يدوياً في الخانة ثم الضغط على "💾 حفظ".';
+              setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 5000);
             }
           } else {
-            if (statusEl) statusEl.textContent = '';
+            if (statusEl) {
+              statusEl.style.color = '#fbbf24';
+              statusEl.textContent = '⚠️ تعذر فتح نافذة الاختيار، يمكنك نسخ مسار المجلد ولصقه في الخانة ثم الضغط على "💾 حفظ"';
+            }
+            if (dirInput) dirInput.focus();
           }
         } catch (err) {
-          alert('تعذر فتح نافذة اختيار المجلد: ' + err.message);
-          if (statusEl) statusEl.textContent = '';
+          if (statusEl) {
+            statusEl.style.color = '#fbbf24';
+            statusEl.textContent = '⚠️ تعذر فتح نافذة الاختيار: ' + err.message + ' - يمكنك كتابة مسار المجلد يدوياً والضغط على "💾 حفظ"';
+          }
+          if (dirInput) dirInput.focus();
         } finally {
           isBrowsingFolder = false;
           if (btn) btn.disabled = false;
