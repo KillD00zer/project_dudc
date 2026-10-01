@@ -15,23 +15,31 @@
        1. متغيرات التصميم والهوية البصرية (Glassmorphism & Color Tokens)
        ========================================================================== */
     :root {
-      --bg-dark: #070a11;
-      --glass-panel: rgba(15, 23, 42, 0.88);
-      --glass-card: rgba(26, 36, 56, 0.65);
+      --bg-dark: #080c14;
+      --bg-base: #0b0f19;
+      --glass-panel: rgba(14, 20, 34, 0.78);
+      --glass-card: rgba(18, 25, 42, 0.72);
+      --glass-card-hover: rgba(24, 34, 56, 0.85);
       --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-border-light: rgba(255, 255, 255, 0.16);
+      --glass-border-light: rgba(255, 255, 255, 0.14);
+      --glass-border-glow: rgba(16, 185, 129, 0.35);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
       
       --accent-green: #10b981;
       --accent-green-light: #34d399;
-      --accent-green-glow: rgba(16, 185, 129, 0.35);
+      --accent-green-glow: rgba(16, 185, 129, 0.4);
+      
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: #38bdf8;
+      --accent-blue: #0284c7;
       
       --accent-red: #ef4444;
       --accent-red-light: #f87171;
       --accent-red-glow: rgba(239, 68, 68, 0.35);
       
-      --accent-cyan: #06b6d4;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
       
       /* أبعاد صفحة A4 القياسية */
       --a4-width: 794px;
@@ -73,7 +81,12 @@
     }
 
     body {
-      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #070a11 100%);
+      background-color: #080c14;
+      background-image: 
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 88% 22%, rgba(2, 132, 199, 0.20) 0%, transparent 48%),
+        radial-gradient(circle at 50% 90%, rgba(15, 23, 42, 0.6) 0%, transparent 60%);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: 'Cairo', system-ui, sans-serif;
       height: 100vh;
@@ -87,7 +100,8 @@
        ========================================================================== */
     .workflow-header {
       background: var(--glass-panel);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--glass-border);
       padding: 8px 24px;
       display: flex;
@@ -96,7 +110,7 @@
       height: 64px;
       flex-shrink: 0;
       z-index: 100;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.45);
     }
 
     .brand-section {
@@ -106,14 +120,27 @@
     }
 
     .brand-logo-badge {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
-      border: 1px solid var(--accent-green);
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-weight: 900;
-      font-size: 14px;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-weight: 800;
+      font-size: 13px;
       color: var(--accent-green-light);
-      box-shadow: 0 0 12px var(--accent-green-glow);
+      box-shadow: 0 0 14px var(--accent-green-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-logo-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      display: inline-block;
     }
 
     .brand-title h1 {
@@ -121,6 +148,7 @@
       font-weight: 800;
       color: #ffffff;
       margin: 0;
+      letter-spacing: -0.2px;
     }
 
     .brand-title p {
@@ -133,10 +161,11 @@
     .stepper-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 4px 10px;
-      border-radius: 30px;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(14px);
+      padding: 4px 8px;
+      border-radius: 9999px;
       border: 1px solid var(--glass-border);
     }
 
@@ -144,19 +173,20 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 12px;
-      border-radius: 20px;
+      padding: 6px 14px;
+      border-radius: 9999px;
       font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .step-item.active {
       background: var(--accent-green);
       color: #000000;
-      box-shadow: 0 0 12px var(--accent-green-glow);
+      box-shadow: 0 0 16px var(--accent-green-glow);
+      font-weight: 800;
     }
 
     .step-item.completed {
@@ -178,46 +208,50 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 14px;
-      border-radius: 7px;
+      padding: 8px 16px;
+      border-radius: 10px;
       font-family: 'Cairo', sans-serif;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       border: 1px solid transparent;
       outline: none;
       text-decoration: none;
     }
 
     .btn-green {
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
-      box-shadow: 0 2px 10px var(--accent-green-glow);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .btn-green:hover {
-      background: linear-gradient(135deg, #34d399, #10b981);
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+      transform: translateY(-1.5px);
     }
 
     .btn-glass {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #e2e8f0;
-      border: 1px solid var(--glass-border-light);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .btn-glass:hover {
       background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.25);
       color: #ffffff;
+      transform: translateY(-1px);
     }
 
     .btn-star {
-      border-color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.4);
       color: #fbbf24;
-      background: rgba(245, 158, 11, 0.1);
+      background: rgba(245, 158, 11, 0.12);
     }
 
     /* ==========================================================================
@@ -313,13 +347,22 @@
     }
 
     .card {
-      background: var(--glass-panel);
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.12);
     }
 
     .card-title {
@@ -329,47 +372,50 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
     }
 
     .badge-pass {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid var(--accent-green);
-      color: var(--accent-green-light);
-      padding: 4px 10px;
-      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 4px 12px;
+      border-radius: 9999px;
       font-weight: 800;
       font-size: 11.5px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
     }
 
     .badge-fail {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--accent-red);
-      color: var(--accent-red-light);
-      padding: 4px 10px;
-      border-radius: 20px;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 4px 12px;
+      border-radius: 9999px;
       font-weight: 800;
       font-size: 11.5px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
     }
 
     .badge-pending {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.4);
       color: #fbbf24;
-      padding: 4px 10px;
-      border-radius: 20px;
+      padding: 4px 12px;
+      border-radius: 9999px;
       font-weight: 800;
       font-size: 11.5px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
       transition: all 0.3s ease;
     }
 
@@ -507,50 +553,204 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
-    /* شريط أدوات النصوص المنبثق العائم */
+    /* ==========================================================================
+       شريط تحرير النصوص العائم المثبت عمودياً يسار الشاشة (Vertical Frosted Editor)
+       ========================================================================== */
     .floating-text-toolbar {
-      position: absolute;
-      display: none;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--accent-green);
-      border-radius: 8px;
-      padding: 4px 8px;
-      gap: 6px;
+      position: fixed;
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%) translateX(-40px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 175px;
+      background: rgba(14, 20, 34, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 14px 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(16, 185, 129, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .floating-text-toolbar.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .flt-header {
+      display: flex;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px var(--accent-green-glow);
-      z-index: 999;
-      transform: translateX(-50%);
-      white-space: nowrap;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
     }
 
-    .floating-text-toolbar::after {
-      content: '';
-      position: absolute;
-      bottom: -6px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 6px 6px 0;
-      border-style: solid;
-      border-color: rgba(15, 23, 42, 0.95) transparent;
-      display: block;
-      width: 0;
-    }
-
-    .float-select, .float-btn {
-      background: #090d16;
-      color: #ffffff;
-      border: 1px solid var(--glass-border-light);
-      border-radius: 4px;
-      padding: 2px 6px;
+    .flt-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-size: 11px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .flt-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .flt-close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .flt-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .flt-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .float-select {
+      background: rgba(9, 13, 22, 0.85);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 11.5px;
       font-family: inherit;
       outline: none;
       cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
     }
 
-    .float-btn:hover { background: var(--accent-green); color: #000; }
-    .float-btn.active { background: var(--accent-green); color: #000; }
+    .float-select:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 2px var(--accent-green-glow);
+    }
+
+    .flt-size-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(9, 13, 22, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2px 4px;
+    }
+
+    .flt-size-display {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent-green-light);
+      min-width: 36px;
+      text-align: center;
+      font-family: monospace;
+    }
+
+    .flt-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .float-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .float-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .float-btn.active {
+      background: var(--accent-green);
+      color: #000000;
+      border-color: var(--accent-green-light);
+      box-shadow: 0 0 10px var(--accent-green-glow);
+    }
+
+    .flt-color-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      margin-left: 3px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* أشرطة التمرير العصرية الفاخرة (Modern Range Sliders) */
+    .slider-input {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.12);
+      height: 5px;
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .slider-input:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .slider-input::-webkit-slider-thumb:hover {
+      transform: scale(1.22);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+    }
 
     /* ==========================================================================
        4. ورقة الشهادة الرسمية A4 (مطابقة 100% للألوان والـ XML الأصلي)
@@ -2208,22 +2408,52 @@
   <!-- ==========================================================================
        5. النوافذ المنبثقة: استوديو قص الصور والشريط العائم
        ========================================================================== -->
+  <!-- شريط تحرير وتنسيق النصوص العائم المثبت يسار الشاشة عمودياً -->
   <div class="floating-text-toolbar" id="floatingToolbar">
-    <select class="float-select" id="fltFontFamily">
-      <option value="'Arial', sans-serif">Arial</option>
-      <option value="'Cairo', sans-serif">Cairo</option>
-      <option value="'Amiri', serif">Amiri</option>
-    </select>
-    <button class="float-btn" id="fltFontDec">-</button>
-    <span id="fltFontSizeVal" style="font-size: 11px; min-width: 28px; text-align: center; color: var(--accent-green-light); font-weight: bold;">10pt</span>
-    <button class="float-btn" id="fltFontInc">+</button>
-    <button class="float-btn" id="fltBold">B</button>
-    <button class="float-btn" id="fltColorBlue" style="color: #60a5fa;">A</button>
-    <button class="float-btn" id="fltColorBlack" style="color: #ffffff;">A</button>
-    <span style="color: var(--glass-border-light); font-size: 11px;">|</span>
-    <button class="float-btn" id="fltAlignRight" title="محاذاة النص لليمين">يمين ⇥</button>
-    <button class="float-btn" id="fltAlignCenter" title="توسيط النص">توسيط ↔</button>
-    <button class="float-btn" id="fltAlignLeft" title="محاذاة النص لليسار">⇤ يسار</button>
+    <div class="flt-header">
+      <span class="flt-pill-badge">✏️ تنسيق النص</span>
+      <button type="button" class="flt-close-btn" id="fltCloseToolbar" title="إغلاق الشريط">✕</button>
+    </div>
+
+    <!-- نوع الخط -->
+    <div class="flt-control-group">
+      <label class="flt-label">نوع الخط</label>
+      <select class="float-select" id="fltFontFamily">
+        <option value="'Arial', sans-serif">Arial (رسمي)</option>
+        <option value="'Cairo', sans-serif">Cairo (عصري)</option>
+        <option value="'Amiri', serif">Amiri (نسخ)</option>
+      </select>
+    </div>
+
+    <!-- حجم الخط -->
+    <div class="flt-control-group">
+      <label class="flt-label">حجم الخط</label>
+      <div class="flt-size-row">
+        <button type="button" class="float-btn" id="fltFontDec" style="width: 28px; padding: 2px 0;" title="تصغير الخط">−</button>
+        <span id="fltFontSizeVal" class="flt-size-display">12px</span>
+        <button type="button" class="float-btn" id="fltFontInc" style="width: 28px; padding: 2px 0;" title="تكبير الخط">+</button>
+      </div>
+    </div>
+
+    <!-- النمط واللون -->
+    <div class="flt-control-group">
+      <label class="flt-label">النمط واللون</label>
+      <div class="flt-btn-grid">
+        <button type="button" class="float-btn" id="fltBold" title="خط عريض (Bold)"><strong>B</strong></button>
+        <button type="button" class="float-btn" id="fltColorBlue" title="لون أزرق رسمي"><span class="flt-color-dot" style="background: #365F91;"></span>أزرق</button>
+        <button type="button" class="float-btn" id="fltColorBlack" title="لون أسود رسمي"><span class="flt-color-dot" style="background: #000000; border-color: #94a3b8;"></span>أسود</button>
+      </div>
+    </div>
+
+    <!-- المحاذاة -->
+    <div class="flt-control-group">
+      <label class="flt-label">المحاذاة</label>
+      <div class="flt-btn-grid">
+        <button type="button" class="float-btn" id="fltAlignRight" title="محاذاة لليمين">⇥</button>
+        <button type="button" class="float-btn" id="fltAlignCenter" title="توسيط">↔</button>
+        <button type="button" class="float-btn" id="fltAlignLeft" title="محاذاة لليسار">⇤</button>
+      </div>
+    </div>
   </div>
 
   <div class="image-modal-backdrop" id="imageModalBackdrop">
@@ -4901,7 +5131,7 @@
         el.addEventListener('input', renderWatermark);
       });
 
-      // الشريط العائم للنصوص
+      // شريط أدوات النصوص العائم المثبت عمودياً يسار الشاشة (Vertical Frosted Editor)
       const floatingToolbar = document.getElementById('floatingToolbar');
       const fltFontFamily = document.getElementById('fltFontFamily');
       const fltFontSizeVal = document.getElementById('fltFontSizeVal');
@@ -4913,53 +5143,158 @@
       const fltAlignRight = document.getElementById('fltAlignRight');
       const fltAlignCenter = document.getElementById('fltAlignCenter');
       const fltAlignLeft = document.getElementById('fltAlignLeft');
+      const fltCloseToolbar = document.getElementById('fltCloseToolbar');
       let activeEditableElement = null;
 
-      certPage.addEventListener('focusin', (e) => {
-        if (e.target && e.target.isContentEditable) {
-          activeEditableElement = e.target;
-          const rect = e.target.getBoundingClientRect();
-          const vRect = viewport.getBoundingClientRect();
-          floatingToolbar.style.top = `${(rect.top - vRect.top) + viewport.scrollTop - 44}px`;
-          floatingToolbar.style.left = `${(rect.left - vRect.left) + (rect.width / 2)}px`;
-          floatingToolbar.style.display = 'flex';
+      function showFloatingToolbar(el) {
+        if (!el) return;
+        activeEditableElement = el;
+        if (floatingToolbar) floatingToolbar.classList.add('active');
 
-          const comp = window.getComputedStyle(e.target);
-          fltFontSizeVal.textContent = `${parseInt(comp.fontSize) || 12}px`;
-          fltBold.classList.toggle('active', comp.fontWeight === 'bold' || parseInt(comp.fontWeight) >= 700);
+        const comp = window.getComputedStyle(el);
+        if (fltFontSizeVal) fltFontSizeVal.textContent = `${parseInt(comp.fontSize) || 12}px`;
+        if (fltBold) {
+          const isBold = comp.fontWeight === 'bold' || parseInt(comp.fontWeight) >= 700;
+          fltBold.classList.toggle('active', isBold);
+        }
+        if (fltFontFamily) {
+          const f = comp.fontFamily;
+          if (f.includes('Arial')) fltFontFamily.value = "'Arial', sans-serif";
+          else if (f.includes('Cairo')) fltFontFamily.value = "'Cairo', sans-serif";
+          else if (f.includes('Amiri')) fltFontFamily.value = "'Amiri', serif";
+        }
+      }
+
+      function hideFloatingToolbar() {
+        if (floatingToolbar) floatingToolbar.classList.remove('active');
+        activeEditableElement = null;
+      }
+
+      // منع فقدان التحديد عند النقر على أدوات الشريط العائم
+      if (floatingToolbar) {
+        floatingToolbar.addEventListener('mousedown', (e) => {
+          if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+            e.preventDefault();
+          }
+        });
+      }
+
+      // تفعيل الشريط العائم فور تحديد أي نص داخل صفحة الشهادة (Activation on Text Selection)
+      function checkSelectionAndActivate() {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
+          let node = sel.anchorNode;
+          if (node && node.nodeType === 3) node = node.parentElement;
+          if (node && certPage && certPage.contains(node)) {
+            const editable = node.isContentEditable ? node : (node.closest('[contenteditable="true"]') || node);
+            if (editable) {
+              showFloatingToolbar(editable);
+            }
+          }
+        }
+      }
+
+      certPage.addEventListener('mouseup', checkSelectionAndActivate);
+      certPage.addEventListener('keyup', checkSelectionAndActivate);
+      document.addEventListener('selectionchange', () => {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
+          let node = sel.anchorNode;
+          if (node && node.nodeType === 3) node = node.parentElement;
+          if (node && certPage && certPage.contains(node)) {
+            const editable = node.isContentEditable ? node : (node.closest('[contenteditable="true"]') || node);
+            if (editable) {
+              showFloatingToolbar(editable);
+            }
+          }
         }
       });
 
-      document.addEventListener('click', (e) => {
-        if (!e.target.isContentEditable && !floatingToolbar.contains(e.target)) {
-          floatingToolbar.style.display = 'none';
+      // زر إغلاق الشريط
+      if (fltCloseToolbar) {
+        fltCloseToolbar.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          hideFloatingToolbar();
+        });
+      }
+
+      // إخفاء الشريط عند النقر بالماوس خارج الشريط وخارج التحديد
+      document.addEventListener('mousedown', (e) => {
+        if (floatingToolbar && !floatingToolbar.contains(e.target)) {
+          setTimeout(() => {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed || sel.toString().trim().length === 0) {
+              hideFloatingToolbar();
+            }
+          }, 120);
         }
       });
 
-      fltFontFamily.addEventListener('change', () => { if (activeEditableElement) activeEditableElement.style.fontFamily = fltFontFamily.value; });
-      fltFontInc.addEventListener('click', () => {
-        if (activeEditableElement) {
-          const s = (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) + 1;
-          activeEditableElement.style.fontSize = `${s}px`;
-          fltFontSizeVal.textContent = `${s}px`;
+      // إخفاء الشريط بزر الهروب Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && floatingToolbar && floatingToolbar.classList.contains('active')) {
+          hideFloatingToolbar();
         }
       });
-      fltFontDec.addEventListener('click', () => {
-        if (activeEditableElement) {
-          const s = Math.max(8, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) - 1);
-          activeEditableElement.style.fontSize = `${s}px`;
-          fltFontSizeVal.textContent = `${s}px`;
+
+      if (fltFontFamily) {
+        fltFontFamily.addEventListener('change', () => {
+          if (activeEditableElement) activeEditableElement.style.fontFamily = fltFontFamily.value;
+        });
+      }
+      if (fltFontInc) {
+        fltFontInc.addEventListener('click', () => {
+          if (activeEditableElement) {
+            const s = Math.min(36, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) + 1);
+            activeEditableElement.style.fontSize = `${s}px`;
+            if (fltFontSizeVal) fltFontSizeVal.textContent = `${s}px`;
+          }
+        });
+      }
+      if (fltFontDec) {
+        fltFontDec.addEventListener('click', () => {
+          if (activeEditableElement) {
+            const s = Math.max(8, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) - 1);
+            activeEditableElement.style.fontSize = `${s}px`;
+            if (fltFontSizeVal) fltFontSizeVal.textContent = `${s}px`;
+          }
+        });
+      }
+      if (fltBold) {
+        fltBold.addEventListener('click', () => {
+          if (!activeEditableElement) return;
+          const sel = window.getSelection();
+          if (sel && !sel.isCollapsed && activeEditableElement.contains(sel.anchorNode)) {
+            document.execCommand('bold', false, null);
+            const isBold = document.queryCommandState('bold');
+            fltBold.classList.toggle('active', isBold);
+          } else {
+            const comp = window.getComputedStyle(activeEditableElement);
+            const isBold = activeEditableElement.style.fontWeight === 'bold' || comp.fontWeight === 'bold' || parseInt(comp.fontWeight) >= 700;
+            activeEditableElement.style.fontWeight = isBold ? 'normal' : 'bold';
+            fltBold.classList.toggle('active', !isBold);
+          }
+        });
+      }
+
+      function applyTextColor(color) {
+        if (!activeEditableElement) return;
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed && activeEditableElement.contains(sel.anchorNode)) {
+          document.execCommand('styleWithCSS', false, true);
+          document.execCommand('foreColor', false, color);
+        } else {
+          activeEditableElement.style.color = color;
         }
-      });
-      fltBold.addEventListener('click', () => {
-        if (activeEditableElement) {
-          const b = activeEditableElement.style.fontWeight === 'bold';
-          activeEditableElement.style.fontWeight = b ? 'normal' : 'bold';
-          fltBold.classList.toggle('active', !b);
-        }
-      });
-      fltColorBlue.addEventListener('click', () => { if (activeEditableElement) activeEditableElement.style.color = '#365F91'; });
-      fltColorBlack.addEventListener('click', () => { if (activeEditableElement) activeEditableElement.style.color = '#000000'; });
+      }
+
+      if (fltColorBlue) {
+        fltColorBlue.addEventListener('click', () => applyTextColor('#365F91'));
+      }
+      if (fltColorBlack) {
+        fltColorBlack.addEventListener('click', () => applyTextColor('#000000'));
+      }
 
       if (fltAlignRight) {
         fltAlignRight.addEventListener('click', () => {
