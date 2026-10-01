@@ -63,13 +63,14 @@ flowchart TD
 
     subgraph STAGE_3 ["المرحلة الثالثة: الإخراج والتسليم (Stage 3)"]
         Q[خيارات التسليم النهائي]
-        Q -->|طباعة فورية| R[window.print بخصائص @media print ترث العميل-المركز]
-        Q -->|تصدير حزمة المشروع| S[app_server: /api/export-package]
+        Q -->|حفظ وتصدير المشروع حصرأ| S[app_server: /api/export-package]
         S --> T[إنشاء مجلد العميل: OutputDir/العميل-المركز/]
         T --> U1[الشهادة الرسمية: العميل-المركز.pdf عبر Headless Edge]
         T --> U2[ملف الجلسة: العميل-المركز_session.json متضمناً الصور Base64]
         T --> U3[الصور الأصلية وشيت الرفع المساحي المرفوع]
         T --> V[/api/open-folder فتح مجلد العميل تلقائياً]
+        V --> W[نافذة منبثقة تفاعلية: هل ترغب في طباعة الشهادة الآن؟]
+        W -->|نعم طباعة| R[window.print بخصائص @media print ترث العميل-المركز]
     end
 
     STAGE_1 --> STAGE_2 --> STAGE_3

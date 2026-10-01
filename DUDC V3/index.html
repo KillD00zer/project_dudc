@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="only dark">
+  <meta name="theme-color" content="#080c14">
   <title>منظومة DUDC V3.5 | مسار إصدار شهادات الرفع المساحي</title>
   
   <!-- أيقونة المنظومة الرسمية (Favicon & App Icon) -->
@@ -21,6 +23,7 @@
        1. متغيرات التصميم والهوية البصرية (Glassmorphism & Color Tokens)
        ========================================================================== */
     :root {
+      color-scheme: only dark;
       --bg-dark: #080c14;
       --bg-base: #0b0f19;
       --glass-panel: rgba(14, 20, 34, 0.78);
@@ -79,14 +82,30 @@
       --wm-size: 13pt;
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      forced-color-adjust: none !important;
+      -webkit-forced-color-adjust: none !important;
+    }
+
+    html, body {
+      forced-color-adjust: none !important;
+      -webkit-forced-color-adjust: none !important;
+    }
+
+    @media (forced-colors: active) {
+      *, *::before, *::after, html, body {
+        forced-color-adjust: none !important;
+        -webkit-forced-color-adjust: none !important;
+      }
     }
 
     body {
+      color-scheme: only dark;
       background-color: #080c14;
       background-image: 
         radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
@@ -1380,9 +1399,10 @@
     }
 
     .delivery-actions-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 14px;
+      width: 100%;
     }
 
     .action-box {
@@ -1410,13 +1430,14 @@
     }
 
     .package-files-list {
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 12.5px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .file-item {
@@ -1424,6 +1445,28 @@
       align-items: center;
       gap: 8px;
       color: #e2e8f0;
+      background: transparent !important;
+    }
+
+    .file-item span {
+      background: transparent !important;
+    }
+
+    /* حماية إضافية تمنع أي مربعات تظليل مصطنعة (Readability Backplates) خلف النصوص */
+    .delivery-card span,
+    .delivery-card strong,
+    .delivery-card p,
+    .delivery-card div,
+    .file-item,
+    .file-item span,
+    .package-files-list span,
+    #postSavePrintModalBackdrop span,
+    #postSavePrintModalBackdrop strong,
+    #postSavePrintModalBackdrop p,
+    #postSavePrintModalBackdrop div {
+      -webkit-font-smoothing: antialiased;
+      forced-color-adjust: none !important;
+      -webkit-forced-color-adjust: none !important;
     }
 
     /* نافذة استوديو قص وتكبير الصور */
@@ -2377,19 +2420,27 @@
           </button>
         </div>
 
-        <!-- أزرار الإخراج الرئيسية (مقفولة حتى اعتماد الشهادة) -->
-        <div class="delivery-actions-grid" id="deliveryActionsGrid" style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease;">
-          <div class="action-box" id="btnActionPrintPdf">
-            <div class="action-icon">🖨️</div>
-            <strong style="font-size: 14px; color: #ffffff;">طباعة فورية / حفظ PDF</strong>
-            <p style="font-size: 11px; color: var(--text-muted);">تصدير مباشر بصيغة PDF فيكتور عالي الدقة مقفول A4</p>
+        <!-- زر الإخراج الموحد: حفظ وتصدير المشروع (الطباعة متاحة حصراً بعد إتمام الحفظ) -->
+        <div class="delivery-actions-grid" id="deliveryActionsGrid" style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease; width: 100%;">
+          
+          <div class="action-box action-box-primary" id="btnActionExportPackage" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.12)); border: 1.5px solid var(--accent-green); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); border-radius: 12px; padding: 18px 24px; cursor: pointer; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; text-align: right; transition: all 0.25s ease; width: 100%; box-sizing: border-box;">
+            <div style="display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0;">
+              <div class="action-icon" style="font-size: 38px; background: rgba(16, 185, 129, 0.2); width: 62px; height: 62px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.4); flex-shrink: 0;">💾</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap;">
+                  <strong style="font-size: 16.5px; color: #ffffff; white-space: nowrap;">حفظ وتصدير حزمة المشروع</strong>
+                  <span style="font-size: 11px; background: rgba(16, 185, 129, 0.25); color: #34d399; padding: 3px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 800; white-space: nowrap;">الخيار الوحيد المعتمد • شامل الطباعة</span>
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.6;">
+                  حفظ وتصدير مجلد العميل الرسمي (PDF + JSON + الصور + شيت الرفع) ثم سؤالك فوراً لطباعة الشهادة
+                </p>
+              </div>
+            </div>
+            <div style="background: var(--accent-green); color: #064e3b; font-weight: 800; font-size: 13.5px; padding: 12px 22px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+              <span>💾 حفظ وتصدير المشروع ➔</span>
+            </div>
           </div>
 
-          <div class="action-box" id="btnActionExportPackage" style="border-color: var(--accent-green);">
-            <div class="action-icon">📦</div>
-            <strong style="font-size: 14px; color: var(--accent-green-light);">تصدير حزمة المشروع الكاملة</strong>
-            <p style="font-size: 11px; color: var(--text-muted);">حفظ مجلد العميل (PDF + JSON + Images + Survey File)</p>
-          </div>
         </div>
 
         <!-- تفاصيل الحزمة -->
@@ -2521,6 +2572,70 @@
         <span style="font-size: 11px; color: var(--text-muted);" id="draftsFooterNote">📁 التخزين: DUDC V3/drafts/</span>
         <button class="btn btn-glass" id="btnCloseDraftsModalBottom">إغلاق</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       نافذة تأكيد حفظ المشروع وعرض خيار الطباعة الفورية (Post-Save & Print Modal)
+       ========================================================================== -->
+  <div class="image-modal-backdrop" id="postSavePrintModalBackdrop" style="display: none;">
+    <div class="image-modal" style="max-width: 580px; width: 92%; border-color: var(--accent-green); box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 30px rgba(16, 185, 129, 0.25);">
+      
+      <!-- رأس النافذة -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 1.5px solid var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #34d399; flex-shrink: 0;">
+            ✔
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 16px; color: #ffffff;">تم حفظ وتصدير المشروع بنجاح!</div>
+            <div style="font-size: 11.5px; color: var(--accent-green-light); margin-top: 2px;" id="postSaveCitizenInfo">--</div>
+          </div>
+        </div>
+        <button class="btn btn-glass" id="btnClosePostSaveModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
+      </div>
+
+      <!-- محتوى مسار الحفظ والملفات -->
+      <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; flex-wrap: wrap;">
+          <span style="color: var(--accent-cyan); font-weight: bold; white-space: nowrap;">📁 مجلد العميل:</span>
+          <span id="postSaveFolderPath" style="font-family: monospace; font-size: 11px; color: #94a3b8; direction: ltr; text-align: left; word-break: break-all;">--</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #cbd5e1; margin-top: 4px; border-top: 1px dashed var(--glass-border); padding-top: 8px;">
+          <div><span>📄</span> شهادة PDF معتمدة A4</div>
+          <div><span>⚙️</span> ملف الجلسة (.json)</div>
+          <div><span>🖼️</span> صورة الكروكي CAD</div>
+          <div><span>🛰️</span> صورة القمر الصناعي</div>
+        </div>
+      </div>
+
+      <!-- كارت السؤال عن الطباعة الفورية -->
+      <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.12)); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 16px; text-align: center;">
+        <div style="font-size: 26px; margin-bottom: 6px;">🖨️</div>
+        <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">
+          هل تريد طباعة الشهادة الورقية الرسمية الآن؟
+        </div>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          سيتم فتح شاشة الطباعة فوراً بأبعاد A4 القياسية بدون هوامش أو ترويسات متصفح.
+        </p>
+      </div>
+
+      <!-- أزرار الإجراءات -->
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap;">
+        <button class="btn btn-green" id="btnModalConfirmPrint" style="flex: 2; padding: 11px 18px; font-size: 13.5px; font-weight: 800; justify-content: center; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); white-space: nowrap;">
+          <span>🖨️</span> نعم، طباعة الشهادة الآن
+        </button>
+
+        <button class="btn btn-glass" id="btnModalOpenFolder" style="flex: 1; padding: 11px 14px; font-size: 12px; font-weight: bold; justify-content: center; color: var(--accent-cyan-light); border-color: rgba(6, 182, 212, 0.4); white-space: nowrap;">
+          <span>📁</span> فتح المجلد فقط
+        </button>
+
+        <button class="btn btn-glass" id="btnModalDismiss" style="padding: 11px 16px; font-size: 12px; color: var(--text-muted);">
+          إغلاق
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -2720,6 +2835,7 @@
       let outputDir = '';
       let isBrowsingFolder = false;
       let savedTextDefaults = null;
+      let hasSavedCurrentPackage = false; // يمنع الطباعة تماماً قبل إتمام حفظ وتصدير حزمة المشروع رسمياً
 
       // قائمة المراكز الرسمية الـ 18 لمحافظة الدقهلية
       const OFFICIAL_CENTERS_FALLBACK = [
@@ -5975,8 +6091,14 @@ ${clone.outerHTML}
         });
       });
 
-      // طباعة الـ PDF الفورية - ترث اسم العميل-المركز تلقائياً
+      // طباعة الـ PDF الرسمية - متاحة حصراً بعد إتمام حفظ وتصدير المشروع
       function triggerPdfPrint() {
+        if (!hasSavedCurrentPackage) {
+          alert('⚠️ غير مسموح بطباعة الشهادة قبل حفظ وتصدير حزمة المشروع رسمياً!\nيرجى حفظ وتصدير حزمة المشروع أولاً.');
+          switchStage(3);
+          return;
+        }
+
         switchStage(2);
         const citizenName = document.getElementById('valApplicantName').textContent.trim() || activeParcel?.applicant_name || 'مواطن';
         const center = document.getElementById('valCenter').textContent.trim() || activeParcel?.district || '';
@@ -5989,11 +6111,17 @@ ${clone.outerHTML}
         }, 150);
       }
 
-      document.getElementById('btnActionPrintPdf').addEventListener('click', triggerPdfPrint);
-      const btnPrintCertQuickEl = document.getElementById('btnPrintCertQuick');
-      if (btnPrintCertQuickEl) {
-        btnPrintCertQuickEl.addEventListener('click', triggerPdfPrint);
-      }
+      // اعتراض اختصار الطباعة المباشر من لوحة المفاتيح (Ctrl+P / Cmd+P)
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+          if (!hasSavedCurrentPackage) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            alert('⚠️ غير مسموح بالطباعة قبل حفظ وتصدير حزمة المشروع رسمياً!\nيرجى الانتقال للمرحلة الثالثة وحفظ وتصدير المشروع أولاً.');
+            switchStage(3);
+          }
+        }
+      });
 
       // تصدير حزمة المشروع الكاملة من الباك إند
       document.getElementById('btnActionExportPackage').addEventListener('click', () => {
@@ -6054,21 +6182,87 @@ ${clone.outerHTML}
         }).then(res => res.json()).then(data => {
           hideLoading();
           if (data.success) {
+            hasSavedCurrentPackage = true;
             currentActiveDraftId = null;
             refreshDraftsBadge();
-            alert(`✔ تم تصدير حزمة المشروع بنجاح داخل مجلد العميل:\n${data.folder_path}\nالملفات المُخرجة:\n• PDF: ${data.files.pdf || 'تم إنشاؤه'}\n• Session JSON: ${data.files.session_json}\n• Croquis & Satellite Images`);
-            // فتح المجلد تلقائياً
-            fetch('/api/open-folder', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ folder_path: data.folder_path })
-            });
+
+            // فتح مجلد العميل تلقائياً في Windows Explorer
+            if (data.folder_path) {
+              fetch('/api/open-folder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_path: data.folder_path })
+              });
+            }
+
+            // عرض نافذة تأكيد الحفظ والسؤال عن رغبة الطباعة الآن
+            openPostSavePrintModal(data, fileBase);
           } else {
             showLoadingError('خطأ في تصدير الحزمة', data.error || 'تعذر التصدير');
           }
         }).catch(err => {
           showLoadingError('خطأ في الاتصال أثناء التصدير', err.message);
         });
+      });
+
+      // =========================================================================
+      // نافذة ما بعد حفظ المشروع: السؤال عن الرغبة في الطباعة الفورية
+      // =========================================================================
+      let lastExportedData = null;
+      let lastExportedFileBase = '';
+
+      function openPostSavePrintModal(data, fileBase) {
+        lastExportedData = data;
+        lastExportedFileBase = fileBase;
+
+        const modal = document.getElementById('postSavePrintModalBackdrop');
+        if (!modal) return;
+
+        const infoEl = document.getElementById('postSaveCitizenInfo');
+        if (infoEl) {
+          infoEl.textContent = `المواطن: ${fileBase || 'العميل'}`;
+        }
+
+        const pathEl = document.getElementById('postSaveFolderPath');
+        if (pathEl) {
+          pathEl.textContent = data.folder_path || '--';
+        }
+
+        modal.style.display = 'flex';
+      }
+
+      function closePostSavePrintModal() {
+        const modal = document.getElementById('postSavePrintModalBackdrop');
+        if (modal) modal.style.display = 'none';
+      }
+
+      // زر الطباعة الفورية من داخل المودال
+      document.getElementById('btnModalConfirmPrint')?.addEventListener('click', () => {
+        closePostSavePrintModal();
+        triggerPdfPrint();
+      });
+
+      // زر فتح مجلد المشروع فقط من داخل المودال
+      document.getElementById('btnModalOpenFolder')?.addEventListener('click', () => {
+        if (lastExportedData && lastExportedData.folder_path) {
+          fetch('/api/open-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folder_path: lastExportedData.folder_path })
+          });
+        }
+        closePostSavePrintModal();
+      });
+
+      // زر إغلاق المودال
+      document.getElementById('btnModalDismiss')?.addEventListener('click', closePostSavePrintModal);
+      document.getElementById('btnClosePostSaveModal')?.addEventListener('click', closePostSavePrintModal);
+
+      // إغلاق عند النقر على الخلفية المعتمة
+      document.getElementById('postSavePrintModalBackdrop')?.addEventListener('click', (e) => {
+        if (e.target.id === 'postSavePrintModalBackdrop') {
+          closePostSavePrintModal();
+        }
       });
 
       document.getElementById('btnOpenOutputDir').addEventListener('click', () => {
