@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="only dark">
   <meta name="theme-color" content="#080c14">
   <title>منظومة DUDC V3.5 | مسار إصدار شهادات الرفع المساحي</title>
-  
+
   <!-- أيقونة المنظومة الرسمية (Favicon & App Icon) -->
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-  
+
   <!-- خطوط Google الرسمية والمعتمدة -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
 
   <!-- Modular Master Stylesheet -->
   <link rel="stylesheet" href="css/main.css">
 </head>
+
 <body>
 
   <!-- ==========================================================================
@@ -28,7 +32,8 @@
        ========================================================================== -->
   <header class="workflow-header">
     <div class="brand-section">
-      <img src="assets/app_icon.png" alt="DUDC Studio" class="brand-app-icon" style="width: 38px; height: 38px; border-radius: 9px; object-fit: cover; box-shadow: 0 0 16px rgba(16, 185, 129, 0.45); border: 1px solid rgba(16, 185, 129, 0.35);">
+      <img src="assets/app_icon.png" alt="DUDC Studio" class="brand-app-icon"
+        style="width: 38px; height: 38px; border-radius: 9px; object-fit: cover; box-shadow: 0 0 16px rgba(16, 185, 129, 0.45); border: 1px solid rgba(16, 185, 129, 0.35);">
       <div class="brand-logo-badge">DUDC V3.5</div>
       <div class="brand-title">
         <h1>منظومة إصدار شهادات الرفع المساحي</h1>
@@ -52,7 +57,8 @@
     </nav>
 
     <div class="header-actions">
-      <div class="connection-status-pill online" id="serverStatusPill" title="حالة الاتصال بسيرفر المنظومة المحلي (127.0.0.1:8765)">
+      <div class="connection-status-pill online" id="serverStatusPill"
+        title="حالة الاتصال بسيرفر المنظومة المحلي (127.0.0.1:8765)">
         <span class="status-dot"></span>
         <span id="serverStatusText">السيرفر متصل</span>
       </div>
@@ -69,18 +75,24 @@
         <span>📂</span> استيراد جلسة
       </button>
 
-      <button class="btn btn-glass" id="btnOpenDraftsBox" title="صندوق المسودات والشهادات المؤجلة" style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24; position: relative;">
+      <button class="btn btn-glass" id="btnOpenDraftsBox" title="صندوق المسودات والشهادات المؤجلة"
+        style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24; position: relative;">
         <span>📑</span> مسودات اليوم
-        <span id="draftsBadgeCount" style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
+        <span id="draftsBadgeCount"
+          style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
       </button>
 
-      <button class="btn btn-glass" id="btnCheckAppUpdate" title="فحص وتحديث المنظومة من GitHub" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; position: relative;" onclick="openUpdateModal()">
+      <button class="btn btn-glass" id="btnCheckAppUpdate" title="فحص وتحديث المنظومة من GitHub"
+        style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; position: relative;" onclick="openUpdateModal()">
         <span>🔄</span> تحديث المنظومة
-        <span id="updateAvailableBadge" style="display: none; background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">جديد!</span>
+        <span id="updateAvailableBadge"
+          style="display: none; background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">جديد!</span>
       </button>
       <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
-      <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'croquis')">
-      <input type="file" id="inputUploadSatellite" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this, 'satellite')">
+      <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;"
+        onchange="handleImageFileSelected(this, 'croquis')">
+      <input type="file" id="inputUploadSatellite" accept="image/*" style="display: none;"
+        onchange="handleImageFileSelected(this, 'satellite')">
     </div>
   </header>
 
@@ -91,22 +103,32 @@
     <div class="stage1-layout">
 
       <!-- شريط المجلد العلوي المطور (مدعوم بمستعرض ويب مدمج + وصول سريع بدون شل) -->
-      <div class="card" style="padding: 12px 16px; margin-bottom: 14px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+      <div class="card"
+        style="padding: 12px 16px; margin-bottom: 14px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px;">
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 320px;">
-            <label for="outputDirInput" style="font-size: 13px; font-weight: 800; color: #94a3b8; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+            <label for="outputDirInput"
+              style="font-size: 13px; font-weight: 800; color: #94a3b8; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
               <span style="font-size: 16px;">📂</span> مجلد حفظ المخرجات:
             </label>
-            <input type="text" id="outputDirInput" class="stage1-input" style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700; color: #34d399; background: #0b0f19; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 6px; padding: 7px 12px; flex: 1; direction: ltr; text-align: left;" placeholder="d:\Work\certi_processing\output" />
-            <button type="button" class="btn btn-glass" onclick="saveOutputDir()" style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap;" title="حفظ المسار المكتوب كافتراضي">
+            <input type="text" id="outputDirInput" class="stage1-input"
+              style="font-family: 'Consolas', monospace; font-size: 12px; font-weight: 700; color: #34d399; background: #0b0f19; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 6px; padding: 7px 12px; flex: 1; direction: ltr; text-align: left;"
+              placeholder="d:\Work\certi_processing\output" />
+            <button type="button" class="btn btn-glass" onclick="saveOutputDir()"
+              style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap;" title="حفظ المسار المكتوب كافتراضي">
               💾 حفظ
             </button>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-green" onclick="openFolderExplorerModal()" style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;" title="مستعرض مجلدات مرئي وسريع داخل الصفحة">
+            <button type="button" class="btn btn-green" onclick="openFolderExplorerModal()"
+              style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"
+              title="مستعرض مجلدات مرئي وسريع داخل الصفحة">
               <span>📂</span> تصفح المجلدات (مدمج)
             </button>
-            <button type="button" class="btn btn-glass" onclick="browseOutputDirNative()" style="padding: 7px 10px; font-size: 0.78rem; opacity: 0.75; white-space: nowrap;" title="استخدام مستعرض ملفات ويندوز التقليدي">
+            <button type="button" class="btn btn-glass" onclick="browseOutputDirNative()"
+              style="padding: 7px 10px; font-size: 0.78rem; opacity: 0.75; white-space: nowrap;"
+              title="استخدام مستعرض ملفات ويندوز التقليدي">
               🪟 ويندوز
             </button>
           </div>
@@ -115,21 +137,26 @@
         <!-- شريط الأماكن السريعة والأقراص (1-Click Quick Locations) -->
         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
           <span style="font-size: 11px; color: #64748b; font-weight: 600; margin-left: 4px;">🚀 وصول سريع:</span>
-          <div id="quickLocationPillsContainer" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <div id="quickLocationPillsContainer"
+            style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             <span style="font-size: 11px; color: #64748b;">جاري استدعاء الأماكن...</span>
           </div>
         </div>
 
         <!-- حالة التحقق من المسار والصلاحيات -->
-        <div id="outputDirStatus" style="font-size: 11.5px; color: var(--accent-green-light); margin-top: 6px; font-weight: bold; min-height: 18px;"></div>
+        <div id="outputDirStatus"
+          style="font-size: 11.5px; color: var(--accent-green-light); margin-top: 6px; font-weight: bold; min-height: 18px;">
+        </div>
       </div>
 
-            <!-- كارت اختيار مسؤولي المعاملة والاعتماد الرسمي (الخطوة 1 الإلزامية) -->
-      <div class="card" id="step1Card" style="border: 1px solid rgba(56, 189, 248, 0.35); background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); margin-bottom: 14px; transition: all 0.3s ease;">
+      <!-- كارت اختيار مسؤولي المعاملة والاعتماد الرسمي (الخطوة 1 الإلزامية) -->
+      <div class="card" id="step1Card"
+        style="border: 1px solid rgba(56, 189, 248, 0.35); background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); margin-bottom: 14px; transition: all 0.3s ease;">
         <div class="card-title" style="color: var(--accent-cyan); justify-content: space-between;">
           <span style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 18px;">👤</span>
-            <span style="font-size: 14px; font-weight: 800;">الخطوة 1: تحديد مسؤولي المعاملة والاعتماد (إلزامي لتفعيل رفع الملفات)</span>
+            <span style="font-size: 14px; font-weight: 800;">الخطوة 1: تحديد مسؤولي المعاملة والاعتماد (إلزامي لتفعيل
+              رفع الملفات)</span>
           </span>
           <span id="step1StatusBadge" class="badge-pending">
             ⏳ بانتظار تحديد المسؤولين
@@ -137,22 +164,27 @@
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;">
           <div>
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">
+            <label
+              style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">
               ① فني الرفع المساحي الميداني (اسمك):
             </label>
-            <select class="stage1-select" id="selSurveyTech" style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold; padding: 6px 10px;">
+            <select class="stage1-select" id="selSurveyTech"
+              style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold; padding: 6px 10px;">
               <option value="" disabled selected>-- اختر اسم فني الرفع المساحي --</option>
               <option value="محمد ابراهيم بدير">محمد ابراهيم بدير</option>
               <option value="محمد السيد بدير">محمد السيد بدير</option>
               <option value="وائل فاروق">وائل فاروق</option>
               <option value="محمد حبيب">محمد حبيب</option>
+              <option value="محمد حبيب">السيد جاد</option>
             </select>
           </div>
           <div>
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">
+            <label
+              style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: bold;">
               ② مسؤول النظم (المسؤول المعتمد In-Charge):
             </label>
-            <select class="stage1-select" id="selSysOfficer" style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold; padding: 6px 10px;">
+            <select class="stage1-select" id="selSysOfficer"
+              style="border-color: rgba(56, 189, 248, 0.4); background: #0f172a; color: #f8fafc; font-size: 13px; font-weight: bold; padding: 6px 10px;">
               <option value="" disabled selected>-- اختر اسم مسؤول النظم المعتمد --</option>
               <option value="شريف محمد">شريف محمد</option>
               <option value="مصطفي فراج">مصطفي فراج</option>
@@ -165,16 +197,18 @@
       <!-- بطاقة رفع الملف / التجربة السريعة (الخطوة 2: غير مفعلة حتى اكتمال الخطوة 1) -->
       <div class="dropzone-card locked" id="dropzone">
         <input type="file" id="surveyFileInput" accept=".xls,.xlsx,.csv" style="display: none;" disabled>
-        
+
         <div id="dropzoneLockedNotice" class="dropzone-lock-overlay">
           <span>🔒 الخطوة 2 مقفولة:</span>
           <span>يرجى اختيار فني المساحة ومسؤول النظم في الخطوة 1 أولاً لتفعيل رفع الملفات</span>
         </div>
 
         <div style="font-size: 40px; margin-bottom: 8px;">📥</div>
-        <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">الخطوة 2: اسحب وأفلت شيت الإحداثيات هنا (.xls, .xlsx, .csv)</h2>
+        <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">الخطوة 2: اسحب وأفلت شيت الإحداثيات هنا
+          (.xls, .xlsx, .csv)</h2>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">أو انقر لاختيار ملف من جهازك</p>
-        <button class="btn btn-green" id="btnLoadSample" disabled style="pointer-events: none;">⚡ تجربة العينة المرفقة (ف.xls)</button>
+        <button class="btn btn-green" id="btnLoadSample" disabled style="pointer-events: none;">⚡ تجربة العينة المرفقة
+          (ف.xls)</button>
       </div>
 
       <!-- نتائج المعالجة الهندسية والتحقق (الخطوة 3: تظهر فقط بعد تحميل ومعالجة الملف بنجاح) -->
@@ -187,8 +221,10 @@
             <span id="badgeTolerance" class="badge-pass">✔ متطابق قانونياً (فرق المساحة ضمن ±2.0 م²)</span>
           </div>
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px;">
-            <div><span style="color: var(--text-muted);">مقدم الطلب:</span> <strong id="resApplicantName">--</strong></div>
-            <div><span style="color: var(--text-muted);">الرقم القومي:</span> <strong id="resNationalId">--</strong></div>
+            <div><span style="color: var(--text-muted);">مقدم الطلب:</span> <strong id="resApplicantName">--</strong>
+            </div>
+            <div><span style="color: var(--text-muted);">الرقم القومي:</span> <strong id="resNationalId">--</strong>
+            </div>
             <div><span style="color: var(--text-muted);">رقم الإيصال:</span> <strong id="resReceiptNo">--</strong></div>
             <div style="display: flex; flex-direction: column; gap: 3px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -199,14 +235,19 @@
                 <option value="" disabled selected>-- فحص المركز بالقاموس --</option>
               </select>
             </div>
-            <div><span style="color: var(--text-muted);">المساحة المسجلة:</span> <strong id="resStatedArea">--</strong></div>
-            <div><span style="color: var(--text-muted);">المساحة المحسوبة:</span> <strong id="resCalcArea" style="color: var(--accent-green-light);">--</strong></div>
-            <div><span style="color: var(--text-muted);">فارق المساحة (Δ):</span> <strong id="resDeltaArea">--</strong></div>
+            <div><span style="color: var(--text-muted);">المساحة المسجلة:</span> <strong id="resStatedArea">--</strong>
+            </div>
+            <div><span style="color: var(--text-muted);">المساحة المحسوبة:</span> <strong id="resCalcArea"
+                style="color: var(--accent-green-light);">--</strong></div>
+            <div><span style="color: var(--text-muted);">فارق المساحة (Δ):</span> <strong id="resDeltaArea">--</strong>
+            </div>
             <div style="display: flex; flex-direction: column; gap: 3px;">
               <span style="color: var(--text-muted); font-size: 11px;">كود التأمين (DUDC Token):</span>
               <div style="min-height: 26px; display: flex; align-items: center; gap: 6px;">
-                <strong id="resSecurityToken" class="token-locked" style="font-family: monospace; font-size: 11px;">--</strong>
-                <button type="button" class="btn-copy-token" id="btnCopyToken" onclick="copySecurityToken()" title="نسخ كود التأمين للحافظة">📋 نسخ</button>
+                <strong id="resSecurityToken" class="token-locked"
+                  style="font-family: monospace; font-size: 11px;">--</strong>
+                <button type="button" class="btn-copy-token" id="btnCopyToken" onclick="copySecurityToken()"
+                  title="نسخ كود التأمين للحافظة">📋 نسخ</button>
               </div>
             </div>
           </div>
@@ -218,15 +259,18 @@
             <div class="card-title" style="justify-content: space-between; align-items: center;">
               <span>📐 كروكي الموقع (CAD Croquis)</span>
               <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('croquis')" title="رفع صورة كروكي مخصصة من جهازك">
+                <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('croquis')"
+                  title="رفع صورة كروكي مخصصة من جهازك">
                   📁 إضافة صورة من الجهاز
                 </button>
-                <button type="button" class="btn btn-glass" id="btnQuickRefreshCroquis" onclick="updateCroquisDiagram()" style="padding: 3px 8px; font-size: 11px; gap: 4px;" title="إعادة رسم الكروكي وتوليده تلقائياً">
+                <button type="button" class="btn btn-glass" id="btnQuickRefreshCroquis" onclick="updateCroquisDiagram()"
+                  style="padding: 3px 8px; font-size: 11px; gap: 4px;" title="إعادة رسم الكروكي وتوليده تلقائياً">
                   🔄 تحديث
                 </button>
               </div>
             </div>
-            <div id="dropZoneCroquis" class="stage1-dropzone" onclick="triggerImageUpload('croquis')" title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
+            <div id="dropZoneCroquis" class="stage1-dropzone" onclick="triggerImageUpload('croquis')"
+              title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
               <img id="stage1CroquisImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
               <div class="stage1-img-overlay">
                 <span>📁 انقر لرفع صورة من الجهاز</span>
@@ -236,11 +280,13 @@
           <div class="card">
             <div class="card-title" style="justify-content: space-between; align-items: center;">
               <span>🛰️ صورة فضائية (Google Satellite)</span>
-              <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('satellite')" title="رفع صورة فضائية مخصصة من جهازك">
+              <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('satellite')"
+                title="رفع صورة فضائية مخصصة من جهازك">
                 📁 إضافة صورة من الجهاز
               </button>
             </div>
-            <div id="dropZoneSat" class="stage1-dropzone" onclick="triggerImageUpload('satellite')" title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
+            <div id="dropZoneSat" class="stage1-dropzone" onclick="triggerImageUpload('satellite')"
+              title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
               <img id="stage1SatImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
               <div class="stage1-img-overlay">
                 <span>📁 انقر لرفع صورة من الجهاز</span>
@@ -251,7 +297,8 @@
 
         <!-- كارت بطاقات مجموع أطوال الحدود الأربعة -->
         <div class="card">
-          <div class="card-title" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div class="card-title"
+            style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span>🗺️ الحدود الأربعة وتفصيل أضلاع الكروكي</span>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <!-- 1. أرقام النقط -->
@@ -279,17 +326,33 @@
               </div>
 
               <!-- زر تحديث رسم الكروكي -->
-              <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateCroquisDiagram()" style="padding: 5px 12px; font-size: 11.5px; gap: 4px;">
+              <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateCroquisDiagram()"
+                style="padding: 5px 12px; font-size: 11.5px; gap: 4px;">
                 <span>🔄 تحديث رسم الكروكي</span>
               </button>
             </div>
           </div>
           <div class="sum-cards-grid">
-            <div class="sum-card"><div class="sum-card-title">🌊 الحد البحري</div><div class="sum-card-val" id="sumNorth">0.00 م</div></div>
-            <div class="sum-card"><div class="sum-card-title">🌅 الحد الشرقي</div><div class="sum-card-val" id="sumEast">0.00 م</div></div>
-            <div class="sum-card"><div class="sum-card-title">☀️ الحد القبلي</div><div class="sum-card-val" id="sumSouth">0.00 م</div></div>
-            <div class="sum-card"><div class="sum-card-title">🌇 الحد الغربي</div><div class="sum-card-val" id="sumWest">0.00 م</div></div>
-            <div class="sum-card" style="border-color: var(--accent-green);"><div class="sum-card-title">📏 إجمالي المحيط</div><div class="sum-card-val" id="sumPerimeter" style="color: #ffffff;">0.00 م</div></div>
+            <div class="sum-card">
+              <div class="sum-card-title">🌊 الحد البحري</div>
+              <div class="sum-card-val" id="sumNorth">0.00 م</div>
+            </div>
+            <div class="sum-card">
+              <div class="sum-card-title">🌅 الحد الشرقي</div>
+              <div class="sum-card-val" id="sumEast">0.00 م</div>
+            </div>
+            <div class="sum-card">
+              <div class="sum-card-title">☀️ الحد القبلي</div>
+              <div class="sum-card-val" id="sumSouth">0.00 م</div>
+            </div>
+            <div class="sum-card">
+              <div class="sum-card-title">🌇 الحد الغربي</div>
+              <div class="sum-card-val" id="sumWest">0.00 م</div>
+            </div>
+            <div class="sum-card" style="border-color: var(--accent-green);">
+              <div class="sum-card-title">📏 إجمالي المحيط</div>
+              <div class="sum-card-val" id="sumPerimeter" style="color: #ffffff;">0.00 م</div>
+            </div>
           </div>
 
           <!-- جدول الأضلاع التفصيلي مع القوائم المنسدلة للاتجاهات -->
@@ -332,26 +395,35 @@
       <aside class="studio-sidebar" id="sidebar">
 
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-          <button class="btn btn-glass" id="btnBackToStage1" style="flex: 1; font-size: 11px;">⬅ العودة للمطابقة</button>
+          <button class="btn btn-glass" id="btnBackToStage1" style="flex: 1; font-size: 11px;">⬅ العودة
+            للمطابقة</button>
           <button class="btn btn-green" id="btnGoToStage3" style="flex: 1; font-size: 11px;">الإخراج النهائي ➔</button>
         </div>
-        <button class="btn btn-glass" id="btnQuickSaveDraft" style="width: 100%; font-size: 11px; margin-bottom: 4px; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; justify-content: center;">
+        <button class="btn btn-glass" id="btnQuickSaveDraft"
+          style="width: 100%; font-size: 11px; margin-bottom: 4px; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; justify-content: center;">
           <span>💾</span> حفظ كمسودة مؤقتة
         </button>
-        <div id="draftAutoSaveStatus" style="font-size: 10px; color: #10b981; text-align: center; margin-bottom: 8px; display: none; line-height: 1.3;"></div>
+        <div id="draftAutoSaveStatus"
+          style="font-size: 10px; color: #10b981; text-align: center; margin-bottom: 8px; display: none; line-height: 1.3;">
+        </div>
 
         <!-- كارت 1: تحرير وضبط الصورتين (الارتفاع يبدأ من 200 إلى 320 px) -->
         <div class="card" style="padding: 12px;">
-          <span style="font-size: 12px; font-weight: bold; margin-bottom: 6px; color: var(--accent-green-light);">🖼️ ضبط وارتفاع الصورتين</span>
+          <span style="font-size: 12px; font-weight: bold; margin-bottom: 6px; color: var(--accent-green-light);">🖼️
+            ضبط وارتفاع الصورتين</span>
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-              <span>ارتفاع الصورتين (200 - 320 px)</span><span id="valImageHeight" style="color: var(--accent-green-light); font-weight: bold;">230 px</span>
+              <span>ارتفاع الصورتين (200 - 320 px)</span><span id="valImageHeight"
+                style="color: var(--accent-green-light); font-weight: bold;">230 px</span>
             </div>
-            <input type="range" class="slider-input" id="rngImageHeight" min="200" max="320" step="2" value="230" style="width: 100%;">
+            <input type="range" class="slider-input" id="rngImageHeight" min="200" max="320" step="2" value="230"
+              style="width: 100%;">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
-            <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">✂️ قص كروكي</button>
-            <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص قمر</button>
+            <button class="btn btn-glass" id="btnOpenCropCroquis" style="font-size: 11px; justify-content: center;">✂️
+              قص كروكي</button>
+            <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص
+              قمر</button>
           </div>
         </div>
 
@@ -359,85 +431,108 @@
         <div class="card" style="padding: 12px; border-color: rgba(239, 68, 68, 0.3);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="font-size: 12px; font-weight: bold; color: var(--accent-red-light);">🛡️ العلامة المائية</span>
-            <label style="font-size: 11px; cursor: pointer;"><input type="checkbox" id="chkWatermarkActive" checked> مفعلة</label>
+            <label style="font-size: 11px; cursor: pointer;"><input type="checkbox" id="chkWatermarkActive" checked>
+              مفعلة</label>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>الشفافية</span><span id="valWmOpacity" style="color: var(--accent-red-light); font-weight: bold;">10 %</span>
+                <span>الشفافية</span><span id="valWmOpacity"
+                  style="color: var(--accent-red-light); font-weight: bold;">10 %</span>
               </div>
-              <input type="range" class="slider-input" id="rngWmOpacity" min="0" max="40" step="1" value="10" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngWmOpacity" min="0" max="40" step="1" value="10"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>زاوية الميل</span><span id="valWmAngle" style="color: var(--accent-red-light); font-weight: bold;">-30°</span>
+                <span>زاوية الميل</span><span id="valWmAngle"
+                  style="color: var(--accent-red-light); font-weight: bold;">-30°</span>
               </div>
-              <input type="range" class="slider-input" id="rngWmAngle" min="-60" max="60" step="5" value="-30" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngWmAngle" min="-60" max="60" step="5" value="-30"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>حجم الخط</span><span id="valWmSize" style="color: var(--accent-red-light); font-weight: bold;">13 pt</span>
+                <span>حجم الخط</span><span id="valWmSize" style="color: var(--accent-red-light); font-weight: bold;">13
+                  pt</span>
               </div>
-              <input type="range" class="slider-input" id="rngWmSize" min="9" max="22" step="1" value="13" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngWmSize" min="9" max="22" step="1" value="13"
+                style="width: 100%;">
             </div>
           </div>
         </div>
 
         <!-- كارت 3: المسافات والتباعد المتقدمة (مخفية بزر قابل للطي لندرة الاستخدام) -->
         <div class="card" style="padding: 10px; border-color: rgba(255, 255, 255, 0.1);">
-          <button type="button" id="btnToggleSpacing" style="background: none; border: none; width: 100%; display: flex; justify-content: space-between; align-items: center; color: var(--accent-green-light); font-weight: bold; font-size: 12px; cursor: pointer; padding: 2px 0;">
+          <button type="button" id="btnToggleSpacing"
+            style="background: none; border: none; width: 100%; display: flex; justify-content: space-between; align-items: center; color: var(--accent-green-light); font-weight: bold; font-size: 12px; cursor: pointer; padding: 2px 0;">
             <span style="display: flex; align-items: center; gap: 6px;">📐 المسافات والتباعد (متقدم)</span>
-            <span id="spacingToggleIcon" style="font-size: 11px; background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 10px; color: #ffffff;">▼ إظهار التحكمات</span>
+            <span id="spacingToggleIcon"
+              style="font-size: 11px; background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 10px; color: #ffffff;">▼
+              إظهار التحكمات</span>
           </button>
 
           <div id="spacingControlsBody" style="display: none; margin-top: 10px; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: flex-end; margin-bottom: 2px;">
-              <button class="btn-glass" id="btnAutoFit" style="padding: 2px 8px; font-size: 10px; color: var(--accent-cyan);">⚡ قفل A4</button>
+              <button class="btn-glass" id="btnAutoFit"
+                style="padding: 2px 8px; font-size: 10px; color: var(--accent-cyan);">⚡ قفل A4</button>
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>هوامش الورقة</span><span id="valMargin" style="color: var(--accent-green-light); font-weight: bold;">7 mm</span>
+                <span>هوامش الورقة</span><span id="valMargin"
+                  style="color: var(--accent-green-light); font-weight: bold;">7 mm</span>
               </div>
-              <input type="range" class="slider-input" id="rngMargin" min="4" max="14" step="0.5" value="7" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngMargin" min="4" max="14" step="0.5" value="7"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>فراغ الترويسة</span><span id="valGapHeader" style="color: var(--accent-green-light); font-weight: bold;">0 px</span>
+                <span>فراغ الترويسة</span><span id="valGapHeader"
+                  style="color: var(--accent-green-light); font-weight: bold;">0 px</span>
               </div>
-              <input type="range" class="slider-input" id="rngGapHeader" min="0" max="15" step="1" value="0" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngGapHeader" min="0" max="15" step="1" value="0"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>فراغ جدول المواطن</span><span id="valGapApplicant" style="color: var(--accent-green-light); font-weight: bold;">8 px</span>
+                <span>فراغ جدول المواطن</span><span id="valGapApplicant"
+                  style="color: var(--accent-green-light); font-weight: bold;">8 px</span>
               </div>
-              <input type="range" class="slider-input" id="rngGapApplicant" min="0" max="15" step="1" value="8" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngGapApplicant" min="0" max="15" step="1" value="8"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>فراغ الإحداثيات</span><span id="valGapCoords" style="color: var(--accent-green-light); font-weight: bold;">8 px</span>
+                <span>فراغ الإحداثيات</span><span id="valGapCoords"
+                  style="color: var(--accent-green-light); font-weight: bold;">8 px</span>
               </div>
-              <input type="range" class="slider-input" id="rngGapCoords" min="0" max="15" step="1" value="8" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngGapCoords" min="0" max="15" step="1" value="8"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>فراغ الصورتين</span><span id="valGapImages" style="color: var(--accent-green-light); font-weight: bold;">5 px</span>
+                <span>فراغ الصورتين</span><span id="valGapImages"
+                  style="color: var(--accent-green-light); font-weight: bold;">5 px</span>
               </div>
-              <input type="range" class="slider-input" id="rngGapImages" min="0" max="15" step="1" value="5" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngGapImages" min="0" max="15" step="1" value="5"
+                style="width: 100%;">
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                <span>حشوة الخلايا</span><span id="valTablePad" style="color: var(--accent-green-light); font-weight: bold;">3.6 px</span>
+                <span>حشوة الخلايا</span><span id="valTablePad"
+                  style="color: var(--accent-green-light); font-weight: bold;">3.6 px</span>
               </div>
-              <input type="range" class="slider-input" id="rngTablePad" min="1" max="6" step="0.2" value="3.6" style="width: 100%;">
+              <input type="range" class="slider-input" id="rngTablePad" min="1" max="6" step="0.2" value="3.6"
+                style="width: 100%;">
             </div>
           </div>
         </div>
@@ -450,7 +545,8 @@
         <!-- شريط أدوات الرؤية والتنقل السريع -->
         <div class="viewport-toolbar">
           <button class="zoom-btn" id="btnZoomOut">🔍 -</button>
-          <span id="zoomLevel" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light); min-width: 38px; text-align: center;">100%</span>
+          <span id="zoomLevel"
+            style="font-size: 11px; font-weight: bold; color: var(--accent-green-light); min-width: 38px; text-align: center;">100%</span>
           <button class="zoom-btn" id="btnZoomIn">🔍 +</button>
           <span style="color: var(--glass-border-light);">|</span>
           <button class="zoom-btn" id="btnZoomReset">100%</button>
@@ -466,8 +562,10 @@
             <!-- 1. الترويسة والشعارات -->
             <header class="cert-header" id="secHeader">
               <div class="gov-titles">
-                <div class="line-gov" data-text-id="line_gov" contenteditable="true" spellcheck="false">محافظة الدقهلية</div>
-                <div class="line-center" data-text-id="line_center" contenteditable="true" spellcheck="false">مركز معلومات شبكات المرافق</div>
+                <div class="line-gov" data-text-id="line_gov" contenteditable="true" spellcheck="false">محافظة الدقهلية
+                </div>
+                <div class="line-center" data-text-id="line_center" contenteditable="true" spellcheck="false">مركز
+                  معلومات شبكات المرافق</div>
               </div>
 
               <div class="header-logos">
@@ -490,37 +588,56 @@
                 <col style="width: 35.5%;">
               </colgroup>
               <tr>
-                <th colspan="4" class="table-section-header" data-text-id="hdr_applicant_info" contenteditable="true" spellcheck="false">بيانات مقدم الطلب</th>
+                <th colspan="4" class="table-section-header" data-text-id="hdr_applicant_info" contenteditable="true"
+                  spellcheck="false">بيانات مقدم الطلب</th>
               </tr>
               <tr>
-                <td class="field-label" data-text-id="lbl_applicant_name" contenteditable="true" spellcheck="false">اسم مقدم الطلب</td>
-                <td class="field-val" id="valApplicantName" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" data-text-id="lbl_receipt_no" contenteditable="true" spellcheck="false">رقم إيصال السداد</td>
-                <td class="field-val" id="valReceiptNo" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_applicant_name" contenteditable="true" spellcheck="false">اسم
+                  مقدم الطلب</td>
+                <td class="field-val" id="valApplicantName" data-dynamic="true" contenteditable="true"
+                  spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_receipt_no" contenteditable="true" spellcheck="false">رقم
+                  إيصال السداد</td>
+                <td class="field-val" id="valReceiptNo" data-dynamic="true" contenteditable="true" spellcheck="false">--
+                </td>
               </tr>
               <tr>
-                <td class="field-label" data-text-id="lbl_national_id" contenteditable="true" spellcheck="false">الرقم القومي</td>
-                <td class="field-val" id="valNationalId" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" data-text-id="lbl_order_no" contenteditable="true" spellcheck="false">رقم الطلب</td>
-                <td class="field-val" id="valOrderNo" data-text-id="valOrderNo" style="text-align: center !important; font-size: 13pt; font-weight: bold;" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_national_id" contenteditable="true" spellcheck="false">الرقم
+                  القومي</td>
+                <td class="field-val" id="valNationalId" data-dynamic="true" contenteditable="true" spellcheck="false">
+                  --</td>
+                <td class="field-label" data-text-id="lbl_order_no" contenteditable="true" spellcheck="false">رقم الطلب
+                </td>
+                <td class="field-val" id="valOrderNo" data-text-id="valOrderNo"
+                  style="text-align: center !important; font-size: 13pt; font-weight: bold;" contenteditable="true"
+                  spellcheck="false">--</td>
               </tr>
               <tr>
                 <td class="field-label" data-text-id="lbl_center" contenteditable="true" spellcheck="false">المركز</td>
-                <td class="field-val" id="valCenter" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-val" id="valCenter" data-dynamic="true" contenteditable="true" spellcheck="false">--
+                </td>
                 <td class="field-label" data-text-id="lbl_village" contenteditable="true" spellcheck="false">القرية</td>
-                <td class="field-val" id="valVillage" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-val" id="valVillage" data-dynamic="true" contenteditable="true" spellcheck="false">--
+                </td>
               </tr>
               <tr>
-                <td class="field-label" data-text-id="lbl_address" contenteditable="true" spellcheck="false">العنوان</td>
-                <td class="field-val" id="valAddress" data-dynamic="true" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_address" contenteditable="true" spellcheck="false">العنوان
+                </td>
+                <td class="field-val" id="valAddress" data-dynamic="true" contenteditable="true" spellcheck="false">--
+                </td>
                 <td class="field-label" data-text-id="lbl_area" contenteditable="true" spellcheck="false">المساحة</td>
-                <td class="field-val" id="valArea" data-dynamic="true" contenteditable="true" spellcheck="false">-- م²</td>
+                <td class="field-val" id="valArea" data-dynamic="true" contenteditable="true" spellcheck="false">-- م²
+                </td>
               </tr>
               <tr>
-                <td class="field-label" data-text-id="lbl_deal_type" contenteditable="true" spellcheck="false">وصف التعامل</td>
-                <td class="field-val" id="valDealType" data-text-id="valDealType" contenteditable="true" spellcheck="false">--</td>
-                <td class="field-label" data-text-id="lbl_site_desc" contenteditable="true" spellcheck="false">وصف الموقع</td>
-                <td class="field-val" id="valSiteDesc" data-text-id="valSiteDesc" contenteditable="true" spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_deal_type" contenteditable="true" spellcheck="false">وصف
+                  التعامل</td>
+                <td class="field-val" id="valDealType" data-text-id="valDealType" contenteditable="true"
+                  spellcheck="false">--</td>
+                <td class="field-label" data-text-id="lbl_site_desc" contenteditable="true" spellcheck="false">وصف
+                  الموقع</td>
+                <td class="field-val" id="valSiteDesc" data-text-id="valSiteDesc" contenteditable="true"
+                  spellcheck="false">--</td>
               </tr>
             </table>
 
@@ -536,12 +653,16 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th rowspan="2" colspan="4" class="table-section-header" data-text-id="hdr_bounds_title" contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
-                  <th colspan="2" class="table-section-header" data-text-id="hdr_coords_title" contenteditable="true" spellcheck="false">إحداثيات الموقع</th>
+                  <th rowspan="2" colspan="4" class="table-section-header" data-text-id="hdr_bounds_title"
+                    contenteditable="true" spellcheck="false">الحدود والإبعاد على الطبيعه</th>
+                  <th colspan="2" class="table-section-header" data-text-id="hdr_coords_title" contenteditable="true"
+                    spellcheck="false">إحداثيات الموقع</th>
                 </tr>
                 <tr>
-                  <th class="table-section-header" data-text-id="hdr_lon_title" contenteditable="true" spellcheck="false">LONG(E)</th>
-                  <th class="table-section-header" data-text-id="hdr_lat_title" contenteditable="true" spellcheck="false">LAT(N)</th>
+                  <th class="table-section-header" data-text-id="hdr_lon_title" contenteditable="true"
+                    spellcheck="false">LONG(E)</th>
+                  <th class="table-section-header" data-text-id="hdr_lat_title" contenteditable="true"
+                    spellcheck="false">LAT(N)</th>
                 </tr>
               </thead>
 
@@ -554,7 +675,8 @@
             <!-- 5. قسم الصورتين -->
             <div class="images-grid" id="secImages">
               <div class="image-card">
-                <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى الموقع</div>
+                <div class="image-header" data-text-id="hdr_img_croquis" contenteditable="true" spellcheck="false">كروكى
+                  الموقع</div>
                 <div class="image-preview-wrapper" id="croquisWrapper">
                   <img src="assets/sample_croquis.png" alt="Croquis" id="imgCroquis">
                   <div class="img-action-overlay">
@@ -564,7 +686,8 @@
               </div>
 
               <div class="image-card">
-                <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة فضائية</div>
+                <div class="image-header" data-text-id="hdr_img_sat" contenteditable="true" spellcheck="false">صورة
+                  فضائية</div>
                 <div class="image-preview-wrapper" id="satWrapper">
                   <img src="assets/sample_satellite.jpg" alt="Satellite" id="imgSatellite">
                   <div class="img-action-overlay">
@@ -576,23 +699,30 @@
 
             <!-- 6. الملاحظات والاشتراطات الرسمية (مرقمة من 1 إلى 5) -->
             <div class="cert-notes">
-              <p data-text-id="note_1" contenteditable="true" spellcheck="false">1. بيانات الموقع على مسئولية مقدم الطلب .</p>
-              <p data-text-id="note_2" contenteditable="true" spellcheck="false">2. كافة البيانات الوصفية والجغرافية على مسئولية المختصين بالوحدة المحلية .</p>
-              <p data-text-id="note_3" contenteditable="true" spellcheck="false">3. هذا النموذج لا يعتد به إلا للغرض الذي حرر من أجله .</p>
-              <p data-text-id="note_4" contenteditable="true" spellcheck="false">4. الأعمال لم تختص بفحص الملكيات أو نظر سندات الملكية  </p>
-              <p data-text-id="note_5" contenteditable="true" spellcheck="false">5. هذه الأعمال تعبر عن الواقع وقت إعداده .....</p>
+              <p data-text-id="note_1" contenteditable="true" spellcheck="false">1. بيانات الموقع على مسئولية مقدم الطلب
+                .</p>
+              <p data-text-id="note_2" contenteditable="true" spellcheck="false">2. كافة البيانات الوصفية والجغرافية على
+                مسئولية المختصين بالوحدة المحلية .</p>
+              <p data-text-id="note_3" contenteditable="true" spellcheck="false">3. هذا النموذج لا يعتد به إلا للغرض
+                الذي حرر من أجله .</p>
+              <p data-text-id="note_4" contenteditable="true" spellcheck="false">4. الأعمال لم تختص بفحص الملكيات أو نظر
+                سندات الملكية </p>
+              <p data-text-id="note_5" contenteditable="true" spellcheck="false">5. هذه الأعمال تعبر عن الواقع وقت
+                إعداده .....</p>
             </div>
 
             <!-- تاريخ التحرير بالمنتصف -->
-            <div class="cert-date-center" id="certDateDisplay" data-text-id="certDateDisplay" contenteditable="true" spellcheck="false">
-              تم تحرير الشهادة في يوم          الموافق
+            <div class="cert-date-center" id="certDateDisplay" data-text-id="certDateDisplay" contenteditable="true"
+              spellcheck="false">
+              تم تحرير الشهادة في يوم الموافق
             </div>
 
             <!-- كود التأمين الرقابي الرسمي (مطبوع وغير قابل للتعديل) -->
             <div class="cert-security-token-print" id="certTokenPrint">
               <span>كود التأمين والرقابة السحابية (DUDC Token): </span>
               <span id="certTokenPrintVal">--</span>
-              <span id="certTrialBadge" class="badge-trial-tag no-print" style="display: none;"> (كود تجريبي لضبط الطباعة) </span>
+              <span id="certTrialBadge" class="badge-trial-tag no-print" style="display: none;"> (كود تجريبي لضبط
+                الطباعة) </span>
             </div>
 
             <!-- 7. التوقيعات: كلمة يعتمد في أقصى اليسار فوق مدير المركز -->
@@ -600,27 +730,36 @@
               <div class="sign-grid">
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" data-text-id="role_tech" contenteditable="true" spellcheck="false">فنى مساحة</div>
+                  <div class="sign-role" data-text-id="role_tech" contenteditable="true" spellcheck="false">فنى مساحة
+                  </div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigTech" data-dynamic="true" contenteditable="true" spellcheck="false">أ / محمد حبيب</div>
+                  <div class="sign-name" id="sigTech" data-dynamic="true" contenteditable="true" spellcheck="false">أ /
+                    محمد حبيب</div>
                 </div>
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" data-text-id="role_gis" contenteditable="true" spellcheck="false">مسئول النظم</div>
+                  <div class="sign-role" data-text-id="role_gis" contenteditable="true" spellcheck="false">مسئول النظم
+                  </div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigGis" data-dynamic="true" contenteditable="true" spellcheck="false">أ / علاء البنا</div>
+                  <div class="sign-name" id="sigGis" data-dynamic="true" contenteditable="true" spellcheck="false">أ /
+                    علاء البنا</div>
                 </div>
                 <div class="sign-col">
                   <div class="sign-top-spacer"></div>
-                  <div class="sign-role" data-text-id="role_head" contenteditable="true" spellcheck="false">رئيس قسم النظم</div>
+                  <div class="sign-role" data-text-id="role_head" contenteditable="true" spellcheck="false">رئيس قسم
+                    النظم</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name" id="sigHead" data-text-id="sigHead" contenteditable="true" spellcheck="false">أ / محمد مصطفى</div>
+                  <div class="sign-name" id="sigHead" data-text-id="sigHead" contenteditable="true" spellcheck="false">أ
+                    / محمد مصطفى</div>
                 </div>
                 <div class="sign-col director-column">
-                  <div class="ye3tamad-badge" data-text-id="badge_ye3tamad" contenteditable="true" spellcheck="false">يعتمد</div>
-                  <div class="sign-role director-role" data-text-id="role_director" contenteditable="true" spellcheck="false">مدير المركز</div>
+                  <div class="ye3tamad-badge" data-text-id="badge_ye3tamad" contenteditable="true" spellcheck="false">
+                    يعتمد</div>
+                  <div class="sign-role director-role" data-text-id="role_director" contenteditable="true"
+                    spellcheck="false">مدير المركز</div>
                   <div class="sign-space"></div>
-                  <div class="sign-name director-name" id="sigDirector" data-text-id="sigDirector" contenteditable="true" spellcheck="false">م/ السيد زين العابدين</div>
+                  <div class="sign-name director-name" id="sigDirector" data-text-id="sigDirector"
+                    contenteditable="true" spellcheck="false">م/ السيد زين العابدين</div>
                 </div>
               </div>
             </footer>
@@ -640,69 +779,88 @@
     <div class="stage3-layout">
 
       <div class="delivery-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
           <div>
             <h2 style="font-size: 18px; font-weight: 800; color: #ffffff;">🎉 اعتماد وتصدير الشهادة المساحية</h2>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">المعاملة جاهزة للطباعة والتصدير في حزمة متكاملة</p>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">المعاملة جاهزة للطباعة والتصدير في
+              حزمة متكاملة</p>
           </div>
           <span class="badge-pass">✔ جاهز للتصدير</span>
         </div>
 
         <!-- ملخص بيانات المواطن -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
-          <div><span style="color: var(--text-muted);">اسم المواطن:</span> <strong id="stage3CitizenName">--</strong></div>
+        <div
+          style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
+          <div><span style="color: var(--text-muted);">اسم المواطن:</span> <strong id="stage3CitizenName">--</strong>
+          </div>
           <div><span style="color: var(--text-muted);">المركز:</span> <strong id="stage3Center">--</strong></div>
           <div><span style="color: var(--text-muted);">المساحة:</span> <strong id="stage3Area">--</strong></div>
         </div>
 
         <!-- بطاقة التأكيد والاعتماد السحابي الرسمي للطباعة والتصدير -->
-        <div id="cardOfficialConfirmation" style="background: rgba(15, 23, 42, 0.75); border: 2px dashed #0284c7; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; transition: all 0.3s ease;">
+        <div id="cardOfficialConfirmation"
+          style="background: rgba(15, 23, 42, 0.75); border: 2px dashed #0284c7; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center; transition: all 0.3s ease;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
             <span style="font-size: 22px;">🔒</span>
-            <strong style="font-size: 15px; color: #38bdf8;">خطوة تأكيد واعتماد البيانات للطباعة والتصدير الرسمي</strong>
+            <strong style="font-size: 15px; color: #38bdf8;">خطوة تأكيد واعتماد البيانات للطباعة والتصدير
+              الرسمي</strong>
           </div>
           <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
             لتوثيق الشهادة وتثبيت بياناتها رسمياً في سجل الرقابة السحابي لمركز DUDC وتفعيل أزرار الطباعة والتصدير:
           </p>
-          <button id="btnConfirmIssuance" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; font-weight: bold; font-size: 14px; padding: 10px 24px; border-radius: 8px; cursor: pointer; border: none; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); display: inline-flex; align-items: center; gap: 8px;">
+          <button id="btnConfirmIssuance" class="btn"
+            style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; font-weight: bold; font-size: 14px; padding: 10px 24px; border-radius: 8px; cursor: pointer; border: none; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); display: inline-flex; align-items: center; gap: 8px;">
             <span id="confirmBtnIcon">🔒</span>
             <span id="confirmBtnText">تأكيد واعتماد البيانات للطباعة والتصدير الرسمي</span>
           </button>
-          <div id="confirmationStatusMsg" style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #10b981; display: none;"></div>
+          <div id="confirmationStatusMsg"
+            style="margin-top: 10px; font-size: 12px; font-weight: bold; color: #10b981; display: none;"></div>
         </div>
 
         <!-- كارت حفظ كمسودة للمتابعة لاحقاً (البيانات غير مكتملة) -->
-        <div style="background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        <div
+          style="background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
           <div>
-            <div style="font-weight: 800; font-size: 13.5px; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+            <div
+              style="font-weight: 800; font-size: 13.5px; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
               <span>💾</span> حفظ في صندوق المسودات (البيانات غير مكتملة)
             </div>
             <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
               يمكنك حفظ الشهادة كمسودة للرجوع إليها واستكمال بياناتها لاحقاً دون الحاجة لاعتماد كود الأمان الآن.
             </p>
           </div>
-          <button class="btn btn-glass" id="btnSaveToDrafts" style="border-color: #fbbf24; color: #fbbf24; font-weight: bold; padding: 7px 16px; white-space: nowrap; font-size: 12px;">
+          <button class="btn btn-glass" id="btnSaveToDrafts"
+            style="border-color: #fbbf24; color: #fbbf24; font-weight: bold; padding: 7px 16px; white-space: nowrap; font-size: 12px;">
             <span>📥</span> حفظ كمسودة
           </button>
         </div>
 
         <!-- زر الإخراج الموحد: حفظ وتصدير المشروع (الطباعة متاحة حصراً بعد إتمام الحفظ) -->
-        <div class="delivery-actions-grid" id="deliveryActionsGrid" style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease; width: 100%;">
-          
-          <div class="action-box action-box-primary" id="btnActionExportPackage" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.12)); border: 1.5px solid var(--accent-green); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); border-radius: 12px; padding: 18px 24px; cursor: pointer; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; text-align: right; transition: all 0.25s ease; width: 100%; box-sizing: border-box;">
+        <div class="delivery-actions-grid" id="deliveryActionsGrid"
+          style="opacity: 0.45; pointer-events: none; filter: grayscale(0.7); transition: all 0.4s ease; width: 100%;">
+
+          <div class="action-box action-box-primary" id="btnActionExportPackage"
+            style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.12)); border: 1.5px solid var(--accent-green); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); border-radius: 12px; padding: 18px 24px; cursor: pointer; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; text-align: right; transition: all 0.25s ease; width: 100%; box-sizing: border-box;">
             <div style="display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0;">
-              <div class="action-icon" style="font-size: 38px; background: rgba(16, 185, 129, 0.2); width: 62px; height: 62px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.4); flex-shrink: 0;">💾</div>
+              <div class="action-icon"
+                style="font-size: 38px; background: rgba(16, 185, 129, 0.2); width: 62px; height: 62px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.4); flex-shrink: 0;">
+                💾</div>
               <div style="flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap;">
-                  <strong style="font-size: 16.5px; color: #ffffff; white-space: nowrap;">حفظ وتصدير حزمة المشروع</strong>
-                  <span style="font-size: 11px; background: rgba(16, 185, 129, 0.25); color: #34d399; padding: 3px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 800; white-space: nowrap;">الخيار الوحيد المعتمد • شامل الطباعة</span>
+                  <strong style="font-size: 16.5px; color: #ffffff; white-space: nowrap;">حفظ وتصدير حزمة
+                    المشروع</strong>
+                  <span
+                    style="font-size: 11px; background: rgba(16, 185, 129, 0.25); color: #34d399; padding: 3px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 800; white-space: nowrap;">الخيار
+                    الوحيد المعتمد • شامل الطباعة</span>
                 </div>
                 <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.6;">
                   حفظ وتصدير مجلد العميل الرسمي (PDF + JSON + الصور + شيت الرفع) ثم سؤالك فوراً لطباعة الشهادة
                 </p>
               </div>
             </div>
-            <div style="background: var(--accent-green); color: #064e3b; font-weight: 800; font-size: 13.5px; padding: 12px 22px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <div
+              style="background: var(--accent-green); color: #064e3b; font-weight: 800; font-size: 13.5px; padding: 12px 22px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
               <span>💾 حفظ وتصدير المشروع ➔</span>
             </div>
           </div>
@@ -712,8 +870,10 @@
         <!-- تفاصيل الحزمة -->
         <div class="package-files-list">
           <span style="font-weight: bold; color: var(--accent-cyan);">📁 محتويات مجلد العميل عند التصدير:</span>
-          <div class="file-item"><span>📄</span> <span id="lblFilePdf">الشهادة الرسمية بصيغة PDF (مقفولة A4)</span></div>
-          <div class="file-item"><span>⚙️</span> <span id="lblFileJson">ملف الجلسة الكاملة (.json) لإعادة الفتح والتعديل</span></div>
+          <div class="file-item"><span>📄</span> <span id="lblFilePdf">الشهادة الرسمية بصيغة PDF (مقفولة A4)</span>
+          </div>
+          <div class="file-item"><span>⚙️</span> <span id="lblFileJson">ملف الجلسة الكاملة (.json) لإعادة الفتح
+              والتعديل</span></div>
           <div class="file-item"><span>🖼️</span> <span>صورة الكروكي الهندسي عالي الدقة (300 DPI)</span></div>
           <div class="file-item"><span>🛰️</span> <span>صورة القمر الصناعي مدمج بها مضلع الأرض</span></div>
           <div class="file-item"><span>📊</span> <span>شيت الإحداثيات الأصلي المرفوع للأرشيف</span></div>
@@ -721,7 +881,8 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
           <button class="btn btn-glass" id="btnBackToStage2">⬅ العودة إلى الاستوديو</button>
-          <button class="btn btn-glass" id="btnOpenOutputDir" style="color: var(--accent-green-light);">📁 فتح مجلد الشهادات في Windows Explorer</button>
+          <button class="btn btn-glass" id="btnOpenOutputDir" style="color: var(--accent-green-light);">📁 فتح مجلد
+            الشهادات في Windows Explorer</button>
           <button class="btn btn-green" id="btnStartNewWorkflow">↺ بدء معاملة جديدة</button>
         </div>
       </div>
@@ -753,9 +914,11 @@
     <div class="flt-control-group">
       <label class="flt-label">حجم الخط</label>
       <div class="flt-size-row">
-        <button type="button" class="float-btn" id="fltFontDec" style="width: 28px; padding: 2px 0;" title="تصغير الخط">−</button>
+        <button type="button" class="float-btn" id="fltFontDec" style="width: 28px; padding: 2px 0;"
+          title="تصغير الخط">−</button>
         <span id="fltFontSizeVal" class="flt-size-display">12px</span>
-        <button type="button" class="float-btn" id="fltFontInc" style="width: 28px; padding: 2px 0;" title="تكبير الخط">+</button>
+        <button type="button" class="float-btn" id="fltFontInc" style="width: 28px; padding: 2px 0;"
+          title="تكبير الخط">+</button>
       </div>
     </div>
 
@@ -764,8 +927,10 @@
       <label class="flt-label">النمط واللون</label>
       <div class="flt-btn-grid">
         <button type="button" class="float-btn" id="fltBold" title="خط عريض (Bold)"><strong>B</strong></button>
-        <button type="button" class="float-btn" id="fltColorBlue" title="لون أزرق رسمي"><span class="flt-color-dot" style="background: #365F91;"></span>أزرق</button>
-        <button type="button" class="float-btn" id="fltColorBlack" title="لون أسود رسمي"><span class="flt-color-dot" style="background: #000000; border-color: #94a3b8;"></span>أسود</button>
+        <button type="button" class="float-btn" id="fltColorBlue" title="لون أزرق رسمي"><span class="flt-color-dot"
+            style="background: #365F91;"></span>أزرق</button>
+        <button type="button" class="float-btn" id="fltColorBlack" title="لون أسود رسمي"><span class="flt-color-dot"
+            style="background: #000000; border-color: #94a3b8;"></span>أسود</button>
       </div>
     </div>
 
@@ -782,8 +947,10 @@
 
   <div class="image-modal-backdrop" id="imageModalBackdrop">
     <div class="image-modal">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
-        <span style="font-weight: 800; font-size: 14px; color: var(--accent-green-light);" id="modalImageTitle">✂️ استوديو قص وتكبير الصورة</span>
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
+        <span style="font-weight: 800; font-size: 14px; color: var(--accent-green-light);" id="modalImageTitle">✂️
+          استوديو قص وتكبير الصورة</span>
         <button class="btn-glass" id="btnCloseModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
       </div>
 
@@ -792,11 +959,14 @@
         <div class="crop-frame-guide" id="cropFrameGuide"></div>
       </div>
 
-      <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 11px; color: var(--text-muted);">تكبير:</span>
-          <input type="range" class="slider-input" id="rngModalZoom" min="1.0" max="3.5" step="0.05" value="1.0" style="width: 140px;">
-          <span id="txtModalZoom" style="font-size: 11px; font-weight: bold; color: var(--accent-green-light);">100%</span>
+          <input type="range" class="slider-input" id="rngModalZoom" min="1.0" max="3.5" step="0.05" value="1.0"
+            style="width: 140px;">
+          <span id="txtModalZoom"
+            style="font-size: 11px; font-weight: bold; color: var(--accent-green-light);">100%</span>
         </div>
         <div style="display: flex; gap: 6px;">
           <button class="btn btn-glass" id="btnModalRotate" style="font-size: 11px; padding: 4px 8px;">🔄 تدوير</button>
@@ -816,26 +986,33 @@
        ========================================================================== -->
   <div class="image-modal-backdrop" id="draftsModalBackdrop" style="display: none;">
     <div class="image-modal" style="max-width: 680px; width: 92%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 12px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 20px;">📑</span>
           <span style="font-weight: 800; font-size: 16px; color: #fbbf24;">صندوق المسودات والشهادات المؤجلة</span>
-          <span id="draftsModalBadge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0 مسودات</span>
+          <span id="draftsModalBadge"
+            style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0
+            مسودات</span>
         </div>
         <button class="btn btn-glass" id="btnCloseDraftsModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
       </div>
 
       <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-        الشهادات التي تم حفظها كمسودات خلال اليوم ولم تُعتمد وتُصدّر بعد. عند استكمال أي شهادة وتصدير حزمة المشروع النهائية، تُحذف تلقائياً من هذا الصندوق.
+        الشهادات التي تم حفظها كمسودات خلال اليوم ولم تُعتمد وتُصدّر بعد. عند استكمال أي شهادة وتصدير حزمة المشروع
+        النهائية، تُحذف تلقائياً من هذا الصندوق.
       </div>
 
       <!-- قائمة المسودات -->
-      <div id="draftsListContainer" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
+      <div id="draftsListContainer"
+        style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
         <!-- يتم ملؤها ديناميكياً -->
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
-        <span style="font-size: 11px; color: var(--text-muted);" id="draftsFooterNote">📁 التخزين: DUDC V3/drafts/</span>
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+        <span style="font-size: 11px; color: var(--text-muted);" id="draftsFooterNote">📁 التخزين: DUDC
+          V3/drafts/</span>
         <button class="btn btn-glass" id="btnCloseDraftsModalBottom">إغلاق</button>
       </div>
     </div>
@@ -845,30 +1022,37 @@
        نافذة تأكيد حفظ المشروع وعرض خيار الطباعة الفورية (Post-Save & Print Modal)
        ========================================================================== -->
   <div class="image-modal-backdrop" id="postSavePrintModalBackdrop" style="display: none;">
-    <div class="image-modal" style="max-width: 580px; width: 92%; border-color: var(--accent-green); box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 30px rgba(16, 185, 129, 0.25);">
-      
+    <div class="image-modal"
+      style="max-width: 580px; width: 92%; border-color: var(--accent-green); box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 30px rgba(16, 185, 129, 0.25);">
+
       <!-- رأس النافذة -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 1.5px solid var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #34d399; flex-shrink: 0;">
+          <div
+            style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 1.5px solid var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #34d399; flex-shrink: 0;">
             ✔
           </div>
           <div>
             <div style="font-weight: 800; font-size: 16px; color: #ffffff;">تم حفظ وتصدير المشروع بنجاح!</div>
-            <div style="font-size: 11.5px; color: var(--accent-green-light); margin-top: 2px;" id="postSaveCitizenInfo">--</div>
+            <div style="font-size: 11.5px; color: var(--accent-green-light); margin-top: 2px;" id="postSaveCitizenInfo">
+              --</div>
           </div>
         </div>
         <button class="btn btn-glass" id="btnClosePostSaveModal" style="padding: 2px 8px; font-size: 13px;">✕</button>
       </div>
 
       <!-- محتوى مسار الحفظ والملفات -->
-      <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+      <div
+        style="background: rgba(0, 0, 0, 0.35); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; flex-wrap: wrap;">
           <span style="color: var(--accent-cyan); font-weight: bold; white-space: nowrap;">📁 مجلد العميل:</span>
-          <span id="postSaveFolderPath" style="font-family: monospace; font-size: 11px; color: #94a3b8; direction: ltr; text-align: left; word-break: break-all;">--</span>
+          <span id="postSaveFolderPath"
+            style="font-family: monospace; font-size: 11px; color: #94a3b8; direction: ltr; text-align: left; word-break: break-all;">--</span>
         </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #cbd5e1; margin-top: 4px; border-top: 1px dashed var(--glass-border); padding-top: 8px;">
+
+        <div
+          style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #cbd5e1; margin-top: 4px; border-top: 1px dashed var(--glass-border); padding-top: 8px;">
           <div><span>📄</span> شهادة PDF معتمدة A4</div>
           <div><span>⚙️</span> ملف الجلسة (.json)</div>
           <div><span>🖼️</span> صورة الكروكي CAD</div>
@@ -877,7 +1061,8 @@
       </div>
 
       <!-- كارت السؤال عن الطباعة الفورية -->
-      <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.12)); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 16px; text-align: center;">
+      <div
+        style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.12)); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 16px; text-align: center;">
         <div style="font-size: 26px; margin-bottom: 6px;">🖨️</div>
         <div style="font-size: 15px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">
           هل تريد طباعة الشهادة الورقية الرسمية الآن؟
@@ -888,16 +1073,20 @@
       </div>
 
       <!-- أزرار الإجراءات -->
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap;">
-        <button class="btn btn-green" id="btnModalConfirmPrint" style="flex: 2; padding: 11px 18px; font-size: 13.5px; font-weight: 800; justify-content: center; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); white-space: nowrap;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap;">
+        <button class="btn btn-green" id="btnModalConfirmPrint"
+          style="flex: 2; padding: 11px 18px; font-size: 13.5px; font-weight: 800; justify-content: center; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); white-space: nowrap;">
           <span>🖨️</span> نعم، طباعة الشهادة الآن
         </button>
 
-        <button class="btn btn-glass" id="btnModalOpenFolder" style="flex: 1; padding: 11px 14px; font-size: 12px; font-weight: bold; justify-content: center; color: var(--accent-cyan-light); border-color: rgba(6, 182, 212, 0.4); white-space: nowrap;">
+        <button class="btn btn-glass" id="btnModalOpenFolder"
+          style="flex: 1; padding: 11px 14px; font-size: 12px; font-weight: bold; justify-content: center; color: var(--accent-cyan-light); border-color: rgba(6, 182, 212, 0.4); white-space: nowrap;">
           <span>📁</span> فتح المجلد فقط
         </button>
 
-        <button class="btn btn-glass" id="btnModalDismiss" style="padding: 11px 16px; font-size: 12px; color: var(--text-muted);">
+        <button class="btn btn-glass" id="btnModalDismiss"
+          style="padding: 11px 16px; font-size: 12px; color: var(--text-muted);">
           إغلاق
         </button>
       </div>
@@ -910,25 +1099,32 @@
        ========================================================================== -->
   <div class="image-modal-backdrop" id="updateModalBackdrop" style="display: none;">
     <div class="image-modal" style="max-width: 680px; width: 92%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 14px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 14px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 20px;">🔄</span>
           <span style="font-weight: 800; font-size: 16px; color: #38bdf8;">فحص وتحديث المنظومة من GitHub</span>
-          <span id="updateModalStatusBadge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">فحص الاتصال...</span>
+          <span id="updateModalStatusBadge"
+            style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">فحص
+            الاتصال...</span>
         </div>
-        <button class="btn btn-glass" id="btnCloseUpdateModal" style="padding: 2px 8px; font-size: 13px;" onclick="closeUpdateModal()">✕</button>
+        <button class="btn btn-glass" id="btnCloseUpdateModal" style="padding: 2px 8px; font-size: 13px;"
+          onclick="closeUpdateModal()">✕</button>
       </div>
 
       <!-- محتوى حالة التحديث -->
       <div id="updateModalContent" style="display: flex; flex-direction: column; gap: 12px;">
         <!-- شريط الإصدار الحالي -->
-        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+        <div
+          style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
           <div>
             <span style="color: var(--text-muted);">الإصدار الحالي المثبت:</span>
-            <strong id="currentCommitHash" style="font-family: monospace; color: #f8fafc; margin-right: 6px;">--</strong>
+            <strong id="currentCommitHash"
+              style="font-family: monospace; color: #f8fafc; margin-right: 6px;">--</strong>
             <span id="currentCommitDate" style="color: var(--text-muted); font-size: 11px;"></span>
           </div>
-          <button class="btn btn-glass" id="btnRecheckUpdate" style="padding: 4px 10px; font-size: 11px;" onclick="fetchUpdateInfo(true)">
+          <button class="btn btn-glass" id="btnRecheckUpdate" style="padding: 4px 10px; font-size: 11px;"
+            onclick="fetchUpdateInfo(true)">
             🔄 إعادة الفحص
           </button>
         </div>
@@ -950,11 +1146,14 @@
 
         <!-- عندما يتوفر تحديث جديد -->
         <div id="updateAvailableState" style="display: none; flex-direction: column; gap: 10px;">
-          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+          <div
+            style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 24px;">🚀</span>
             <div>
-              <div style="font-weight: 800; font-size: 14px; color: #34d399;">يتوفر تحديث جديد للمنظومة على GitHub!</div>
-              <div style="font-size: 11px; color: #94a3b8;" id="updateIncomingCountNotice">يوجد تعديلات جاهزة للتحميل والتطبيق المباشر.</div>
+              <div style="font-weight: 800; font-size: 14px; color: #34d399;">يتوفر تحديث جديد للمنظومة على GitHub!
+              </div>
+              <div style="font-size: 11px; color: #94a3b8;" id="updateIncomingCountNotice">يوجد تعديلات جاهزة للتحميل
+                والتطبيق المباشر.</div>
             </div>
           </div>
 
@@ -962,21 +1161,25 @@
           <div style="font-size: 12px; font-weight: bold; color: #e2e8f0; margin-top: 4px;">
             📝 رسائل وتفاصيل التحديث المنشور (Commit Notes & Comments):
           </div>
-          <div id="updateCommitsList" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
+          <div id="updateCommitsList"
+            style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
             <!-- يتم تعبئة الكوميتات مع الـ subject والـ body هنا -->
           </div>
         </div>
 
         <!-- حالة خطأ في الفحص (انقطاع إنترنت أو غيره) -->
-        <div id="updateErrorState" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; text-align: center;">
+        <div id="updateErrorState"
+          style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; text-align: center;">
           <div style="font-size: 24px; margin-bottom: 6px;">⚠️</div>
-          <div style="font-weight: bold; color: #f87171; font-size: 13px;" id="updateErrorMsg">تعذر الاتصال بـ GitHub</div>
+          <div style="font-weight: bold; color: #f87171; font-size: 13px;" id="updateErrorMsg">تعذر الاتصال بـ GitHub
+          </div>
         </div>
 
         <!-- حالة جاري التحديث (Progress) -->
         <div id="updateApplyingState" style="display: none; text-align: center; padding: 24px 10px;">
           <div style="font-size: 32px; margin-bottom: 10px;">📥</div>
-          <h4 style="color: #38bdf8; font-weight: bold; margin-bottom: 6px;">جارٍ سحب وتطبيق التحديثات الآن (git pull)...</h4>
+          <h4 style="color: #38bdf8; font-weight: bold; margin-bottom: 6px;">جارٍ سحب وتطبيق التحديثات الآن (git
+            pull)...</h4>
           <p style="font-size: 12px; color: var(--text-muted);">يرجى الانتظار، لا تغلق المتصفح أو السيرفر...</p>
         </div>
 
@@ -994,11 +1197,14 @@
       </div>
 
       <!-- أزرار أسفل المودال -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
-        <span style="font-size: 11px; color: var(--text-muted);">🌐 مستودع المشروع: GitHub (KillD00zer/project_dudc)</span>
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+        <span style="font-size: 11px; color: var(--text-muted);">🌐 مستودع المشروع: GitHub
+          (KillD00zer/project_dudc)</span>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-glass" onclick="closeUpdateModal()">إغلاق</button>
-          <button class="btn btn-green" id="btnExecutePull" style="display: none; font-weight: bold;" onclick="applyAppUpdate()">
+          <button class="btn btn-green" id="btnExecutePull" style="display: none; font-weight: bold;"
+            onclick="applyAppUpdate()">
             🚀 سحب وتطبيق التحديث (Pull)
           </button>
         </div>
@@ -1016,14 +1222,15 @@
        ========================================================================== -->
   <div class="loading-overlay" id="appLoadingOverlay" style="display: none;">
     <div class="loading-modal-card">
-      
+
       <!-- شريط حالة الاتصال العلوي -->
       <div class="loading-header-bar">
         <div class="server-badge" id="loadingServerBadge">
           <span class="status-dot"></span>
           <span id="loadingServerBadgeText">متصل بالسيرفر المحلي (127.0.0.1:8765)</span>
         </div>
-        <button type="button" class="btn-close-loading" id="btnCloseLoading" title="إغلاق النافذة" style="display: none;">✕</button>
+        <button type="button" class="btn-close-loading" id="btnCloseLoading" title="إغلاق النافذة"
+          style="display: none;">✕</button>
       </div>
 
       <!-- محتوى التحميل النشط (Active Loading State) -->
@@ -1068,8 +1275,10 @@
       <!-- حالة الخطأ أو انقطاع الاتصال (Error State - Hidden by default) -->
       <div id="loadingErrorState" style="display: none; text-align: center; padding: 10px 0;">
         <div style="font-size: 42px; margin-bottom: 10px;">⚠️</div>
-        <h3 style="color: #ef4444; font-size: 16px; margin-bottom: 8px;" id="loadingErrorTitle">تعذر الاتصال بسيرفر المنظومة</h3>
-        <p style="color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 18px;" id="loadingErrorMessage">
+        <h3 style="color: #ef4444; font-size: 16px; margin-bottom: 8px;" id="loadingErrorTitle">تعذر الاتصال بسيرفر
+          المنظومة</h3>
+        <p style="color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 18px;"
+          id="loadingErrorMessage">
           السيرفر المحلي (127.0.0.1:8765) غير متاح حالياً. يرجى التأكد من تشغيل ملف Run_DUDC_V3.bat
         </p>
         <div style="display: flex; gap: 8px; justify-content: center;">
@@ -1085,39 +1294,52 @@
        نافذة مستعرض المجلدات المرئي المدمج (In-App Visual Folder Explorer Modal)
        100% Web-Native - Zero Shell / Zero PowerShell
        ========================================================================== -->
-  <div id="folderExplorerModalBackdrop" class="modal-backdrop" style="display: none; align-items: center; justify-content: center; z-index: 10000; position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px);">
-    <div class="modal-card" style="width: 92%; max-width: 680px; max-height: 88vh; display: flex; flex-direction: column; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden; padding: 0;">
-      
+  <div id="folderExplorerModalBackdrop" class="modal-backdrop"
+    style="display: none; align-items: center; justify-content: center; z-index: 10000; position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px);">
+    <div class="modal-card"
+      style="width: 92%; max-width: 680px; max-height: 88vh; display: flex; flex-direction: column; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden; padding: 0;">
+
       <!-- هيدر المودال -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(30, 41, 59, 0.6);">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(30, 41, 59, 0.6);">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 22px;">📂</span>
           <div>
             <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #f8fafc;">مستعرض المجلدات المدمج</h3>
-            <p style="margin: 0; font-size: 11px; color: #94a3b8;">اختر مجلد الحفظ المباشر بدون الاعتماد على ويندوز شل</p>
+            <p style="margin: 0; font-size: 11px; color: #94a3b8;">اختر مجلد الحفظ المباشر بدون الاعتماد على ويندوز شل
+            </p>
           </div>
         </div>
-        <button type="button" onclick="closeFolderExplorerModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;" title="إغلاق">&times;</button>
+        <button type="button" onclick="closeFolderExplorerModal()"
+          style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;"
+          title="إغلاق">&times;</button>
       </div>
 
       <!-- كبسولات الوصول السريع والأقراص داخل المودال -->
-      <div style="padding: 10px 18px; background: rgba(15, 23, 42, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+      <div
+        style="padding: 10px 18px; background: rgba(15, 23, 42, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
         <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">الأماكن:</span>
-        <div id="modalQuickLocationPills" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;"></div>
+        <div id="modalQuickLocationPills" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+        </div>
       </div>
 
       <!-- شريط المسار الحالي والتنقل للأعلى -->
-      <div style="padding: 12px 18px; display: flex; align-items: center; gap: 8px; background: rgba(11, 15, 25, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
-        <button type="button" id="btnExplorerUp" class="btn btn-glass" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="المجلد الأعلى">
+      <div
+        style="padding: 12px 18px; display: flex; align-items: center; gap: 8px; background: rgba(11, 15, 25, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+        <button type="button" id="btnExplorerUp" class="btn btn-glass"
+          style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px;"
+          title="المجلد الأعلى">
           <span>⬆</span> لأعلى
         </button>
-        <input type="text" id="explorerCurrentPathInput" readonly style="flex: 1; background: #030712; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 6px; padding: 6px 12px; font-family: 'Consolas', monospace; font-size: 12px; color: #38bdf8; direction: ltr; text-align: left;" />
+        <input type="text" id="explorerCurrentPathInput" readonly
+          style="flex: 1; background: #030712; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 6px; padding: 6px 12px; font-family: 'Consolas', monospace; font-size: 12px; color: #38bdf8; direction: ltr; text-align: left;" />
         <span id="explorerPermBadge" class="perm-badge perm-badge-ok">✔ صالح</span>
       </div>
 
       <!-- قائمة المجلدات الفرعية شبكة (Folders Grid) -->
       <div style="flex: 1; padding: 14px 18px; overflow-y: auto; min-height: 240px; max-height: 360px;">
-        <div id="explorerLoadingStatus" style="display: none; text-align: center; padding: 10px; font-size: 12px; color: #38bdf8;">
+        <div id="explorerLoadingStatus"
+          style="display: none; text-align: center; padding: 10px; font-size: 12px; color: #38bdf8;">
           ⏳ جاري التحديث...
         </div>
         <div id="explorerFoldersGrid" class="explorer-folders-grid">
@@ -1126,17 +1348,21 @@
       </div>
 
       <!-- فوتر المودال (أزرار التأكيد، إنشاء مجلد جديد، الإلغاء) -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(30, 41, 59, 0.6); gap: 10px; flex-wrap: wrap;">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(30, 41, 59, 0.6); gap: 10px; flex-wrap: wrap;">
         <div>
-          <button type="button" class="btn btn-glass" onclick="promptCreateNewFolder()" style="font-size: 12px; padding: 7px 14px; display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="btn btn-glass" onclick="promptCreateNewFolder()"
+            style="font-size: 12px; padding: 7px 14px; display: flex; align-items: center; gap: 6px;">
             <span>➕</span> مجلد جديد
           </button>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" class="btn btn-glass" onclick="closeFolderExplorerModal()" style="font-size: 12px; padding: 7px 14px;">
+          <button type="button" class="btn btn-glass" onclick="closeFolderExplorerModal()"
+            style="font-size: 12px; padding: 7px 14px;">
             إلغاء
           </button>
-          <button type="button" class="btn btn-green" onclick="confirmExplorerSelection()" style="font-size: 12px; padding: 7px 18px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="btn btn-green" onclick="confirmExplorerSelection()"
+            style="font-size: 12px; padding: 7px 18px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
             <span>✔</span> اختيار هذا المجلد
           </button>
         </div>
@@ -1158,4 +1384,5 @@
   <script src="js/stage3.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
