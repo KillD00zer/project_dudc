@@ -145,6 +145,20 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
     parsed = urllib.parse.urlparse(path)
     clean_path = parsed.path
 
+    # 0. Clear Session & Temp Cache (called before every new import)
+    if clean_path == '/api/clear-session':
+        try:
+            result = SESSION_MANAGER.clear_session_cache(temp_assets_dir=TEMP_ASSETS_DIR)
+            req_handler._send_json({
+                "success": True,
+                "message": "تم مسح كاش الجلسة السابقة بنجاح",
+                "cleared_files": result["cleared_files"],
+                "count": result["count"]
+            })
+        except Exception as e:
+            req_handler._send_json({"success": False, "error": str(e)}, status=500)
+        return True
+
     # 1. Load Sample File (ف.xls)
     if clean_path == '/api/load-sample':
         try:

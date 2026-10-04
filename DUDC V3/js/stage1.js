@@ -134,6 +134,46 @@
         });
       }
 
+      // =========================================================================
+      // مسح الجلسة السابقة بالكامل (كاش الصور + حالة الشهادة + الكاش الخادم)
+      // يُستدعى قبل كل استيراد جديد لمنع خلط بيانات المواطنين
+      // =========================================================================
+      async function clearClientSession() {
+        // 1. مسح متغيرات الحالة العالمية
+        activeParcel = null;
+        currentSegments = [];
+        hasSavedCurrentPackage = false;
+
+        // 2. مسح الصور المرفوعة يدوياً (custom uploads)
+        if (typeof customUploadedImages !== 'undefined') {
+          customUploadedImages.croquis = null;
+          customUploadedImages.satellite = null;
+        }
+
+        // 3. إعادة تعيين عروض الصور في المراحل 1 و 2
+        const imgPlaceholder = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+        ['stage1CroquisImg', 'imgCroquis'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.src = imgPlaceholder; el.removeAttribute('src'); }
+        });
+        ['stage1SatImg', 'imgSatellite'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.src = imgPlaceholder; el.removeAttribute('src'); }
+        });
+
+        // 4. إعادة ضبط حالة تأكيد الشهادة والرمز الأمني
+        if (typeof resetConfirmationState === 'function') resetConfirmationState();
+
+        // 5. إخفاء قسم نتائج الرفع حتى تكتمل المعالجة
+        const resultsSec = document.getElementById('surveyResultsSection');
+        if (resultsSec) resultsSec.style.display = 'none';
+
+        // 6. إبلاغ السيرفر بمسح الملفات المؤقتة (fire & forget - لا يوقف التحميل)
+        try {
+          await fetch('/api/clear-session', { method: 'POST' });
+        } catch (_) { /* يُتجاهل الخطأ ولا يمنع الاستيراد */ }
+      }
+
       // تحميل عينة ف.xls مع شاشة التحميل الذكية
       function triggerLoadSample() {
         if (!isStep1Complete()) {
@@ -142,6 +182,9 @@
         }
         const techVal = document.getElementById('selSurveyTech').value;
         const officerVal = document.getElementById('selSysOfficer').value;
+
+        // مسح الجلسة السابقة قبل البدء
+        clearClientSession().then(() => {
 
         showLoading(
           'تحميل العينة التجريبية (ف.xls)',
@@ -180,6 +223,7 @@
               triggerLoadSample
             );
           });
+        }); // end clearClientSession().then
       }
 
       document.getElementById('btnLoadSample').addEventListener('click', (e) => {
@@ -261,43 +305,48 @@
         const techVal = document.getElementById('selSurveyTech').value;
         const officerVal = document.getElementById('selSysOfficer').value;
 
-        showLoading(
-          `رفع ومعالجة شيت الإحداثيات (${file.name})`,
-          `الحجم: ${(file.size / 1024).toFixed(1)} KB • المسؤول: ${officerVal}`,
-          () => uploadFile(file)
-        );
+        // مسح أي جلسة أو كاش سابق أولاً ثم البدء بالتحميل
+        clearClientSession().then(() => {
 
-        setLoadingStep(1, 'active');
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('survey_technician', techVal);
-        formData.append('system_officer', officerVal);
+          showLoading(
+            `رفع ومعالجة شيت الإحداثيات (${file.name})`,
+            `الحجم: ${(file.size / 1024).toFixed(1)} KB • المسؤول: ${officerVal}`,
+            () => uploadFile(file)
+          );
 
-        fetch('/api/upload', { method: 'POST', body: formData })
-          .then(res => {
-            if (!res.ok) throw new Error(`كود الاستجابة من السيرفر: ${res.status}`);
-            return res.json();
-          })
-          .then(data => {
-            if (data.success && data.parcels && data.parcels.length > 0) {
-              setLoadingStep(1, 'done');
-              setLoadingStep(2, 'active');
-              if (data.official_centers) officialCentersList = data.official_centers;
-              loadParcelData(data.parcels[0], () => {
-                setLoadingStep(4, 'done');
-                hideLoading();
-              });
-            } else {
-              showLoadingError('خطأ في معالجة ملف الإحداثيات', data.error || 'تأكد من صحة الملف وأعمدة الإحداثيات', () => uploadFile(file));
-            }
-          })
-          .catch(err => {
-            showLoadingError(
-              'تعذر الاتصال بالسيرفر أثناء رفع الملف',
-              `تفاصيل الخطأ: ${err.message}. يرجى التحقق من تشغيل السيرفر على 8765`,
-              () => uploadFile(file)
-            );
-          });
+          setLoadingStep(1, 'active');
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('survey_technician', techVal);
+          formData.append('system_officer', officerVal);
+
+          fetch('/api/upload', { method: 'POST', body: formData })
+            .then(res => {
+              if (!res.ok) throw new Error(`كود الاستجابة من السيرفر: ${res.status}`);
+              return res.json();
+            })
+            .then(data => {
+              if (data.success && data.parcels && data.parcels.length > 0) {
+                setLoadingStep(1, 'done');
+                setLoadingStep(2, 'active');
+                if (data.official_centers) officialCentersList = data.official_centers;
+                loadParcelData(data.parcels[0], () => {
+                  setLoadingStep(4, 'done');
+                  hideLoading();
+                });
+              } else {
+                showLoadingError('خطأ في معالجة ملف الإحداثيات', data.error || 'تأكد من صحة الملف وأعمدة الإحداثيات', () => uploadFile(file));
+              }
+            })
+            .catch(err => {
+              showLoadingError(
+                'تعذر الاتصال بالسيرفر أثناء رفع الملف',
+                `تفاصيل الخطأ: ${err.message}. يرجى التحقق من تشغيل السيرفر على 8765`,
+                () => uploadFile(file)
+              );
+            });
+
+        }); // end clearClientSession().then
       }
 
       // التحديث اللحظي لحالة الخطوة 1 عند تغيير الفني أو المسؤول

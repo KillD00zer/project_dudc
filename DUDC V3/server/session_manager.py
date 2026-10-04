@@ -173,4 +173,38 @@ class SessionManager:
         )
 
 
+    def clear_session_cache(self, temp_assets_dir: str = "") -> dict:
+        """
+        Clears in-memory parcel state and optionally purges stale temp image files
+        (croquis_*.png, satellite_*.jpg) from temp_assets_dir so that the next
+        import starts from a completely clean slate with no stale cached images.
+        """
+        import glob
+        import os
+
+        deleted = []
+        with self._lock:
+            self.current_parcels = []
+            self.current_survey_file_path = None
+            self.current_survey_filename = None
+
+        if temp_assets_dir and os.path.isdir(temp_assets_dir):
+            patterns = [
+                os.path.join(temp_assets_dir, "croquis_*.png"),
+                os.path.join(temp_assets_dir, "satellite_*.jpg"),
+                os.path.join(temp_assets_dir, "satellite_*.jpeg"),
+                os.path.join(temp_assets_dir, "cropped_*.png"),
+                os.path.join(temp_assets_dir, "cropped_*.jpg"),
+            ]
+            for pattern in patterns:
+                for f in glob.glob(pattern):
+                    try:
+                        os.remove(f)
+                        deleted.append(os.path.basename(f))
+                    except OSError:
+                        pass
+
+        return {"cleared_files": deleted, "count": len(deleted)}
+
+
 SESSION_MANAGER = SessionManager()
