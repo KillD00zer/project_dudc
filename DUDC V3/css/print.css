@@ -1,0 +1,23 @@
+/* Strict Print Media Rules */
+    /* وسائط الطباعة الصارمة */
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+      .workflow-header, .studio-sidebar, .viewport-toolbar, .floating-text-toolbar,
+      .image-modal-backdrop, .img-action-overlay, .save-toast, .loading-overlay, #stage1View, #stage3View,
+      .no-print {
+        display: none !important;
+      }
+      #stage2View { display: block !important; height: auto !important; }
+      .stage2-workspace { display: block !important; height: auto !important; overflow: visible !important; }
+      .studio-viewport { background: none !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+      .certificate-page-container { transform: none !important; }
+      .certificate-page {
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        padding: var(--cert-margin) !important;
+        page-break-after: avoid !important;
+      }
+    }

@@ -1,0 +1,436 @@
+/* Official A4 Certificate Styles */
+    /* ==========================================================================
+       4. ورقة الشهادة الرسمية A4 (مطابقة 100% للألوان والـ XML الأصلي)
+       ========================================================================== */
+    .certificate-page-container {
+      transition: transform 0.15s ease-out;
+      transform-origin: top center;
+    }
+
+    .certificate-page {
+      width: var(--a4-width);
+      min-height: var(--a4-height);
+      max-height: var(--a4-height);
+      background: #ffffff;
+      color: #000000;
+      font-family: var(--cert-font);
+      padding: var(--cert-margin);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+
+    .watermark-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      opacity: var(--wm-opacity);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      transition: opacity 0.2s;
+    }
+
+    .watermark-row {
+      display: flex;
+      justify-content: space-around;
+      transform: rotate(var(--wm-angle));
+      white-space: nowrap;
+      font-family: 'Arial', sans-serif;
+      font-size: var(--wm-size);
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+
+    /* ترويسة الشهادة بالألوان الرسمية المستخرجة من Word XML */
+    .cert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--sec-gap-header);
+      position: relative;
+    }
+
+    .gov-titles {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gov-titles .line-gov {
+      font-size: 14pt;
+      font-weight: bold;
+      line-height: 1.2;
+      color: #000000;
+    }
+    
+    /* مركز معلومات شبكات المرافق باللون الأحمر القرمزي الرسمي من document.xml وبدون خلفية */
+    .gov-titles .line-center {
+      font-size: 18pt;
+      font-weight: bold;
+      line-height: 1.2;
+      color: #C0504D; /* اللون الأحمر القرمزي الرسمي من document.xml */
+      background: none;
+      padding: 0;
+      margin-top: 2px;
+    }
+
+    .header-logos {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logos img {
+      height: 66px;
+      object-fit: contain;
+    }
+
+    /* عنوان "شهادة إحداثيات" بالأزرق الكحلي المسطر */
+    .cert-main-title {
+      text-align: center;
+      font-size: var(--font-size-title);
+      font-weight: bold;
+      margin: 1px 0 4px 0;
+      color: #365F91; /* اللون الأزرق الرسمي من document.xml */
+      text-decoration: underline;
+      letter-spacing: 0.5px;
+    }
+
+    /* الجداول بالحدود الزرقاء الرسمية (#4F81BD) والتظليل السماوي الخفيف (#D3DFEE) */
+    .cert-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #4F81BD; /* إطار أزرق رسمي مطابق للـ Word */
+      font-size: var(--font-size-table);
+      table-layout: fixed;
+    }
+
+    .cert-table th, .cert-table td {
+      border: 1px solid #4F81BD; /* خطوط داخلية زرقاء */
+      padding: var(--table-padding-y) var(--table-padding-x);
+      text-align: center; /* توسيط كافة الخلايا كما بالشهادة القديمة تماماً */
+      vertical-align: middle;
+      line-height: 1.2;
+    }
+
+    .table-section-header {
+      background-color: #D3DFEE; /* التظليل السماوي الرسمي مطابق للـ Word والشهادة القديمة */
+      font-weight: bold;
+      font-size: 12pt;
+      color: #000000;
+    }
+
+    .field-label {
+      font-weight: bold;
+      background-color: #ffffff;
+      text-align: center !important;
+      color: #000000;
+    }
+
+    .field-val {
+      text-align: center !important;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .coords-table th {
+      background-color: #D3DFEE;
+      font-weight: bold;
+      font-size: 11pt;
+      color: #000000;
+    }
+
+    .coord-num {
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    /* قسم الصورتين بإطار أزرق */
+    .images-grid {
+      display: grid;
+      grid-template-columns: 48.4% 51.6%;
+      gap: var(--image-gap);
+      margin-top: var(--sec-gap-images);
+      margin-bottom: var(--sec-gap-notes);
+    }
+
+    .image-card {
+      border: 1.5px solid #4F81BD;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .image-header {
+      background: #D3DFEE;
+      border-bottom: 1px solid #4F81BD;
+      text-align: center;
+      font-weight: bold;
+      font-size: 11pt;
+      padding: 2.5px;
+      color: #000000;
+    }
+
+
+
+    .btn-stage1-upload {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #34d399;
+      font-family: 'Cairo', sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-stage1-upload:hover {
+      background: #10b981;
+      color: #0b0f19;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .stage1-dropzone {
+      height: 220px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      border: 2px dashed transparent;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .stage1-dropzone.drag-over,
+    .image-preview-wrapper.drag-over {
+      border: 2px dashed #10b981 !important;
+      background: rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .stage1-img-overlay {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .stage1-dropzone:hover .stage1-img-overlay {
+      opacity: 1;
+    }
+
+    .image-preview-wrapper {
+      height: var(--image-height);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+    }
+
+    .img-action-overlay {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+      z-index: 25;
+    }
+
+    .image-preview-wrapper:hover .img-action-overlay {
+      display: flex;
+    }
+
+    .img-tool-btn {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid var(--accent-green);
+      color: #ffffff;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .img-tool-btn:hover { background: var(--accent-green); color: #000; }
+
+    /* الملاحظات المرقمة من 1 إلى 5 مطابقة تماماً للصورة والـ Word */
+    .cert-notes {
+      font-size: var(--font-size-notes);
+      font-weight: bold;
+      line-height: 1.35;
+      margin-top: 6px;
+      margin-bottom: var(--sec-gap-notes);
+      color: #000000;
+    }
+
+    .cert-notes p {
+      margin-bottom: 2px;
+      font-weight: bold;
+    }
+
+    .cert-date-center {
+      text-align: center;
+      font-size: 11pt;
+      font-weight: bold;
+      margin: 4px 0 2px 0;
+      color: #000000;
+    }
+
+    /* كود التأمين الرقابي الرسمي تحت التاريخ مطبوع وغير قابل للتعديل */
+    .cert-security-token-print {
+      text-align: center;
+      font-size: 8.5pt;
+      font-weight: bold;
+      font-family: monospace;
+      color: #334155;
+      margin: 1px 0 6px 0;
+      direction: ltr;
+      letter-spacing: 0.5px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* التوقيعات: يعتمد فوق مدير المركز في أقصى اليسار بتناسق هندسي كامل */
+    .signatures-block {
+      margin-top: auto;
+      padding-top: 6px;
+      position: relative;
+    }
+
+    .sign-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      text-align: center;
+      font-size: var(--font-size-sign);
+      gap: 8px;
+      align-items: start;
+    }
+
+    .sign-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .sign-top-spacer {
+      height: 24px;
+      margin-bottom: 4px;
+      visibility: hidden;
+    }
+
+    .ye3tamad-badge {
+      height: 24px;
+      line-height: 24px;
+      margin-bottom: 4px;
+      font-size: 14pt;
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .sign-role {
+      font-size: var(--font-size-sign);
+      font-weight: bold;
+      color: #000000;
+      line-height: 1.25;
+    }
+
+    .sign-space {
+      height: 36px; /* مسافة كافية ومريحة للامضاء والختم */
+      width: 100%;
+    }
+
+    .sign-name {
+      font-size: var(--font-size-sign);
+      font-weight: bold;
+      color: #000000;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    /* تمييز وتفخيم قسم مدير المركز ليكون عريضاً (Bold) ومميزاً بوضوح */
+    .director-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .director-column .ye3tamad-badge {
+      font-size: 14.5pt;
+      font-weight: 900;
+      color: #000000;
+    }
+
+    .director-column .sign-role,
+    .director-role {
+      font-size: 12pt;
+      font-weight: 900 !important;
+      color: #000000;
+      letter-spacing: 0.2px;
+    }
+
+    .director-column .sign-name,
+    .director-name {
+      font-size: 12.5pt;
+      font-weight: 900 !important;
+      color: #000000;
+      letter-spacing: 0.2px;
+    }
+
+    /* تمييز كافة العناصر القابلة للتحرير بالماوس */
+    [contenteditable="true"] {
+      outline: none;
+      transition: background-color 0.15s;
+      border-radius: 2px;
+      cursor: text;
+    }
+
+    [contenteditable="true"]:hover { background-color: rgba(16, 185, 129, 0.12); }
+    [contenteditable="true"]:focus {
+      background-color: rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 0 1px var(--accent-green);
+    }
+

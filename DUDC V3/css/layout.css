@@ -1,0 +1,459 @@
+/* Workflow Layout & Stages */
+    /* ==========================================================================
+       2. الترويسة وشريط تقدم مسار العمل (Workflow Stepper Header)
+       ========================================================================== */
+    .workflow-header {
+      background: var(--glass-panel);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-badge {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--accent-green-light);
+      box-shadow: 0 0 14px var(--accent-green-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-logo-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      display: inline-block;
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* شريط خطوات العمل (Stepper) */
+    .stepper-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(14px);
+      padding: 4px 8px;
+      border-radius: 9999px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .step-item.active {
+      background: var(--accent-green);
+      color: #000000;
+      box-shadow: 0 0 16px var(--accent-green-glow);
+      font-weight: 800;
+    }
+
+    .step-item.completed {
+      color: var(--accent-green-light);
+    }
+
+    .step-divider {
+      color: var(--glass-border-light);
+      font-size: 12px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-green:hover {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+      transform: translateY(-1.5px);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-star {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    /* ==========================================================================
+       3. حاويات المراحل الثلاث (Workflow Stages Containers)
+       ========================================================================== */
+    .stage-container {
+      display: none;
+      flex: 1;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    .stage-container.active {
+      display: flex;
+    }
+
+    /* --------------------------------------------------------------------------
+       المرحلة 1: الرفع المساحي والمطابقة (Stage 1 Layout)
+       -------------------------------------------------------------------------- */
+    .stage1-layout {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px 36px 60px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .stage1-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 18px;
+    }
+
+    .dropzone-card {
+      border: 2px dashed rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.03);
+      border-radius: 14px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .dropzone-card:hover, .dropzone-card.dragover {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 25px var(--accent-green-glow);
+    }
+
+    .dropzone-card.dragover * {
+      pointer-events: none;
+    }
+
+    .dropzone-card.locked {
+      opacity: 0.45;
+      filter: grayscale(0.85);
+      cursor: not-allowed;
+      border-color: rgba(148, 163, 184, 0.25) !important;
+      background: rgba(15, 23, 42, 0.45) !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .dropzone-lock-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px dashed #f59e0b;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: #fbbf24;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-fail {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    #surveyResultsSection {
+      display: none;
+      flex-direction: column !important;
+      gap: 16px;
+      width: 100%;
+      animation: fadeInResults 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInResults {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sum-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .sum-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+
+    .sum-card-title {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .sum-card-val {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent-green-light);
+    }
+
+    /* جدول أضلاع الرفع المساحي في المرحلة 1 */
+    .stage1-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .stage1-table th, .stage1-table td {
+      border: 1px solid var(--glass-border);
+      padding: 6px 8px;
+    }
+
+    .stage1-table th {
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text-muted);
+    }
+
+    .stage1-input, .stage1-select {
+      background: #090d16;
+      border: 1px solid var(--glass-border-light);
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+    }
+
+    .stage1-input:focus, .stage1-select:focus {
+      border-color: var(--accent-green);
+    }
+
+    /* --------------------------------------------------------------------------
+       المرحلة 2: استوديو التحرير التفاعلي (Stage 2 Layout)
+       -------------------------------------------------------------------------- */
+    .stage2-workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .studio-sidebar {
+      background: var(--glass-panel);
+      backdrop-filter: blur(22px);
+      border-left: 1px solid var(--glass-border);
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: 100%;
+    }
+
+    .studio-viewport {
+      background: #060910;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
+        radial-gradient(rgba(16, 185, 129, 0.04) 2px, transparent 0);
+      background-size: 24px 24px, 48px 48px;
+      overflow-y: scroll;
+      overflow-x: auto;
+      padding: 20px 30px 60px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      position: relative;
+    }
+
+    .viewport-toolbar {
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-light);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+

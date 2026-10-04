@@ -1,0 +1,102 @@
+/* Tokens & Reset */
+    /* ==========================================================================
+       1. متغيرات التصميم والهوية البصرية (Glassmorphism & Color Tokens)
+       ========================================================================== */
+    :root {
+      color-scheme: only dark;
+      --bg-dark: #080c14;
+      --bg-base: #0b0f19;
+      --glass-panel: rgba(14, 20, 34, 0.78);
+      --glass-card: rgba(18, 25, 42, 0.72);
+      --glass-card-hover: rgba(24, 34, 56, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-light: rgba(255, 255, 255, 0.14);
+      --glass-border-glow: rgba(16, 185, 129, 0.35);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      
+      --accent-green: #10b981;
+      --accent-green-light: #34d399;
+      --accent-green-glow: rgba(16, 185, 129, 0.4);
+      
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: #38bdf8;
+      --accent-blue: #0284c7;
+      
+      --accent-red: #ef4444;
+      --accent-red-light: #f87171;
+      --accent-red-glow: rgba(239, 68, 68, 0.35);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      /* أبعاد صفحة A4 القياسية */
+      --a4-width: 794px;
+      --a4-height: 1123px;
+      
+      /* متغيرات التباعد الافتراضية للشهادة المطابقة تماماً للأصل */
+      --cert-margin: 7mm;
+      --sec-gap-header: 0px;
+      --sec-gap-applicant: 8px;
+      --sec-gap-coords: 8px;
+      --sec-gap-images: 5px;
+      --sec-gap-notes: 6px;
+      --sec-gap-sign: 8px;
+      
+      --table-padding-y: 3.6px;
+      --table-padding-x: 5px;
+      
+      --image-height: 230px;
+      --image-gap: 8px;
+      
+      /* متغيرات الخطوط الرسمية المكبرة */
+      --cert-font: 'Arial', sans-serif;
+      --font-size-title: 14pt;
+      --font-size-table: 11pt;
+      --font-size-notes: 11.5pt;
+      --font-size-sign: 11.5pt;
+      
+      /* متغيرات العلامة المائية */
+      --wm-opacity: 0.10;
+      --wm-angle: -30deg;
+      --wm-size: 13pt;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      forced-color-adjust: none !important;
+      -webkit-forced-color-adjust: none !important;
+    }
+
+    html, body {
+      forced-color-adjust: none !important;
+      -webkit-forced-color-adjust: none !important;
+    }
+
+    @media (forced-colors: active) {
+      *, *::before, *::after, html, body {
+        forced-color-adjust: none !important;
+        -webkit-forced-color-adjust: none !important;
+      }
+    }
+
+    body {
+      color-scheme: only dark;
+      background-color: #080c14;
+      background-image: 
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 88% 22%, rgba(2, 132, 199, 0.20) 0%, transparent 48%),
+        radial-gradient(circle at 50% 90%, rgba(15, 23, 42, 0.6) 0%, transparent 60%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: 'Cairo', system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
