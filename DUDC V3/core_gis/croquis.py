@@ -22,19 +22,32 @@ matplotlib.use('Agg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.patches import Polygon as MplPolygon
+import matplotlib.ft2font as _mpl_ft
+
+# Detect whether Matplotlib has native BiDi / complex text layout (Matplotlib 3.11+ via libraqm)
+HAS_NATIVE_BIDI = bool(getattr(_mpl_ft, '__libraqm_version__', None))
+CROQUIS_FONT_FAMILIES = ['Arial', 'Tahoma', 'Segoe UI', 'DejaVu Sans', 'sans-serif']
 
 try:
     import arabic_reshaper
-    from bidi.algorithm import get_display
+    try:
+        from bidi.algorithm import get_display
+    except ImportError:
+        from bidi import get_display
 
     def shape_ar(text: Any) -> str:
         if not text:
             return ""
-        reshaped = arabic_reshaper.reshape(str(text))
+        s = str(text).strip()
+        # In Matplotlib 3.11+ (with native libraqm BiDi support), manual reshaping/reordering
+        # results in a double-reversal. Only reshape on older engines without native BiDi.
+        if HAS_NATIVE_BIDI:
+            return s
+        reshaped = arabic_reshaper.reshape(s)
         return get_display(reshaped)
 except Exception:
     def shape_ar(text: Any) -> str:
-        return str(text) if text else ""
+        return str(text).strip() if text else ""
 
 AR_TO_ENG_MAP = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
 
@@ -130,7 +143,7 @@ def generate_croquis_image(
         v_idx = verts[i].get("point_index", i + 1) if isinstance(verts[i], dict) else (i + 1)
         ax.text(label_x, label_y, to_ar_num(v_idx),
                 color='#3E2723', fontsize=int(font_size_pts), fontweight='bold',
-                fontfamily='Arial', ha='center', va='center', zorder=5)
+                fontfamily=CROQUIS_FONT_FAMILIES, ha='center', va='center', zorder=5)
 
     # Map edges to cardinal directions
     side_longest_edge = {}
@@ -179,11 +192,11 @@ def generate_croquis_image(
         len_y = mid_y + in_ny * len_offset
 
         length_m = segments[i].get("length_m", edge_len) if (i < len(segments) and isinstance(segments[i], dict)) else edge_len
-        len_str = f"م {to_ar_num(f'{length_m:.2f}')}"
+        len_str = shape_ar(f"م {to_ar_num(f'{length_m:.2f}')}")
 
         ax.text(len_x, len_y, len_str,
                 color='#D32F2F', fontsize=int(font_size_dims), fontweight='bold',
-                fontfamily='Arial', rotation=angle_deg, rotation_mode='anchor',
+                fontfamily=CROQUIS_FONT_FAMILIES, rotation=angle_deg, rotation_mode='anchor',
                 ha='center', va='center', zorder=5)
 
         side = segments[i].get("direction") if (i < len(segments) and isinstance(segments[i], dict)) else None
@@ -203,7 +216,7 @@ def generate_croquis_image(
 
             ax.text(neigh_x, neigh_y, shape_ar(to_ar_num(str(neighbor_text).strip())),
                     color='#0284C7', fontsize=int(font_size_text), fontweight='bold',
-                    fontfamily='Arial', rotation=angle_deg, rotation_mode='anchor',
+                    fontfamily=CROQUIS_FONT_FAMILIES, rotation=angle_deg, rotation_mode='anchor',
                     ha='center', va='center', zorder=5)
 
     # 4. North Arrow at Upper-Left corner
@@ -213,7 +226,7 @@ def generate_croquis_image(
         zorder=6
     )
     ax.text(0.06, 0.96, 'N', transform=ax.transAxes,
-            color='black', fontsize=13, fontweight='bold', fontfamily='Arial', ha='center', va='bottom', alpha=0.45, zorder=6)
+            color='black', fontsize=13, fontweight='bold', fontfamily=CROQUIS_FONT_FAMILIES, ha='center', va='bottom', alpha=0.45, zorder=6)
 
     ax.set_xlim(min_x - pad_x, max_x + pad_x)
     ax.set_ylim(min_y - pad_y, max_y + pad_y)
