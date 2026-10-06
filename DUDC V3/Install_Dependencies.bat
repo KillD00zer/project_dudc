@@ -9,8 +9,19 @@ echo   DUDC V3 - Dependencies Installer
 echo ======================================================================
 echo.
 
-REM Detect Python
+REM Detect Python (1. Check Portable Runtime first)
 set "PY_CMD="
+
+if exist "%~dp0runtime\python.exe" (
+    echo ======================================================================
+    echo   [INFO] Pre-bundled Portable 32-bit Runtime detected!
+    echo   All dependencies are already bundled and verified.
+    echo ======================================================================
+    echo.
+    set /p LAUNCH="Do you want to launch DUDC V3 now? (Y/N, default Y): "
+    if /i not "%LAUNCH%"=="N" call "%~dp0Run_DUDC_V3.bat"
+    exit /b 0
+)
 
 if exist "C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe" (
     set "PY_CMD=C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe"

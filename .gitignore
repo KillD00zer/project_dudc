@@ -8,6 +8,8 @@
 # Generated outputs & packages
 generated_certificates/
 temp_assets/
+runtime/
+DUDC V3/runtime/
 drafts/*
 DUDC V3/drafts/*
 !DUDC V3/drafts/.gitkeep

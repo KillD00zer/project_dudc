@@ -8,6 +8,11 @@ Refactored Modular Application Server.
 import sys
 import os
 
+# Ensure the application root is always in sys.path (required for portable/embedded runtimes)
+_app_dir = os.path.dirname(os.path.abspath(__file__))
+if _app_dir not in sys.path:
+    sys.path.insert(0, _app_dir)
+
 try:
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')

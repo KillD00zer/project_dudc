@@ -28,8 +28,20 @@ if %ERRORLEVEL% neq 0 (
     if exist "%LOCALAPPDATA%\Programs\Git\cmd\git.exe" set "PATH=%LOCALAPPDATA%\Programs\Git\cmd;%PATH%"
 )
 
-REM Detect Python
+REM Detect Python (1. Top Priority: Pre-bundled Portable 32-bit Runtime)
 set "PY_CMD="
+set "IS_PORTABLE="
+
+if exist "%~dp0runtime\python.exe" (
+    set "PY_CMD=%~dp0runtime\python.exe"
+    set "IS_PORTABLE=1"
+    goto py_found
+)
+if exist "%~dp0..\runtime\python.exe" (
+    set "PY_CMD=%~dp0..\runtime\python.exe"
+    set "IS_PORTABLE=1"
+    goto py_found
+)
 
 if exist "C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe" (
     set "PY_CMD=C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe"
@@ -85,22 +97,24 @@ exit /b 1
 :py_found
 echo [INFO] Using Python: %PY_CMD%
 
-REM Check dependencies
-"%PY_CMD%" -c "import pandas, openpyxl, xlrd, pyproj, shapely, PIL, numpy, matplotlib, arabic_reshaper, bidi" >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo ======================================================================
-    echo [NOTICE] Required libraries are missing. Installing now...
-    echo ======================================================================
-    echo.
-    "%PY_CMD%" -m pip install -r "%~dp0requirements.txt"
+REM Check dependencies (skip for pre-verified portable runtime)
+if not defined IS_PORTABLE (
+    "%PY_CMD%" -c "import pandas, openpyxl, xlrd, pyproj, shapely, PIL, numpy, matplotlib, arabic_reshaper, bidi" >nul 2>&1
     if %ERRORLEVEL% neq 0 (
         echo.
-        echo [ERROR] Failed to install dependencies automatically.
-        echo Please run Install_Dependencies.bat or check your internet connection.
+        echo ======================================================================
+        echo [NOTICE] Required libraries are missing. Installing now...
+        echo ======================================================================
         echo.
-        pause
-        exit /b 1
+        "%PY_CMD%" -m pip install -r "%~dp0requirements.txt"
+        if %ERRORLEVEL% neq 0 (
+            echo.
+            echo [ERROR] Failed to install dependencies automatically.
+            echo Please run Install_Dependencies.bat or check your internet connection.
+            echo.
+            pause
+            exit /b 1
+        )
     )
 )
 
