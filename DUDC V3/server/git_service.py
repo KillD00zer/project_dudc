@@ -7,8 +7,24 @@ Checks remote repository for updates and executes git pull safely.
 import os
 import shutil
 import subprocess
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from .config import APP_DIR
+
+
+def get_git_binary() -> Optional[str]:
+    """Finds git executable from PATH or common Windows installation directories."""
+    git_bin = shutil.which("git")
+    if git_bin:
+        return git_bin
+    for cand in [
+        r"C:\Program Files\Git\cmd\git.exe",
+        r"C:\Program Files\Git\bin\git.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Programs\Git\cmd\git.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Git\cmd\git.exe"),
+    ]:
+        if os.path.isfile(cand):
+            return cand
+    return None
 
 
 def get_git_repo_root() -> str:
@@ -22,7 +38,7 @@ def get_git_repo_root() -> str:
 
 def check_git_updates() -> Dict[str, Any]:
     repo_root = get_git_repo_root()
-    git_bin = shutil.which("git")
+    git_bin = get_git_binary()
     if not git_bin:
         return {
             "success": False,
@@ -119,7 +135,7 @@ def check_git_updates() -> Dict[str, Any]:
 
 def perform_git_update() -> Dict[str, Any]:
     repo_root = get_git_repo_root()
-    git_bin = shutil.which("git")
+    git_bin = get_git_binary()
     if not git_bin:
         return {"success": False, "error": "أداة Git غير متوفرة على هذا النظام."}
 

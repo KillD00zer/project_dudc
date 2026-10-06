@@ -20,6 +20,14 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr "127.0.0.1:8765" ^| findstr "
 )
 ping -n 2 127.0.0.1 > nul
 
+REM Ensure Git is available in PATH if installed in standard locations
+where git >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    if exist "C:\Program Files\Git\cmd\git.exe" set "PATH=C:\Program Files\Git\cmd;%PATH%"
+    if exist "%ProgramFiles%\Git\cmd\git.exe" set "PATH=%ProgramFiles%\Git\cmd;%PATH%"
+    if exist "%LOCALAPPDATA%\Programs\Git\cmd\git.exe" set "PATH=%LOCALAPPDATA%\Programs\Git\cmd;%PATH%"
+)
+
 REM Detect Python
 set "PY_CMD="
 
