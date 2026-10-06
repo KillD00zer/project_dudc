@@ -1,12 +1,12 @@
 @echo off
 setlocal EnableExtensions
 chcp 65001 > nul
-title DUDC V3 - System Updater (GitHub)
+title DUDC V4.0 - System Updater (GitHub)
 cls
 cd /d "%~dp0"
 
 echo ======================================================================
-echo   DUDC V3 - GitHub System Updater
+echo   DUDC V4.0 - GitHub System Updater
 echo ======================================================================
 echo.
 

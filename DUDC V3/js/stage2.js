@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Stage 2: Studio Live Preview, Typography & Watermark (stage2.js)
+ * DUDC V4.0 - Stage 2: Studio Live Preview, Typography & Watermark (stage2.js)
  */
 
       /* ==========================================================================

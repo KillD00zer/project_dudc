@@ -57,7 +57,7 @@ def handle_get(req_handler, path: str) -> bool:
         return True
 
     elif clean_path == '/api/health':
-        req_handler._send_json({"status": "online", "version": "3.5", "timestamp": time.time()})
+        req_handler._send_json({"status": "online", "version": "4.0", "timestamp": time.time()})
         return True
 
     elif clean_path == '/api/check-update':

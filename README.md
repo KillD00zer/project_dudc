@@ -1,12 +1,28 @@
-# 🏛️ DUDC V3 - Cadastral Certificate Workflow Studio
-### استوديو ومنظومة إصدار شهادات الرفع المساحي المعتمدة والرقابة الرقمية (الهندسة المعيارية | Modular Architecture)
+# 🏛️ DUDC V4.0 - Cadastral Certificate Workflow Studio (Portable Edition)
+### استوديو ومنظومة إصدار شهادات الرفع المساحي المعتمدة والرقابة الرقمية (الإصدار الرابع 4.0 - النسخة المحمولة المستقلة)
 **مركز معلومات شبكات المرافق - محافظة الدقهلية (Dakahlia Utility Data Center)**
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Platform Windows](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
-[![Architecture Modular](https://img.shields.io/badge/Architecture-Modular%20Core%20%2B%20Decoupled%20API-teal.svg)]()
+[![Release V4.0](https://img.shields.io/badge/Release-V4.0%20Portable-success.svg)]()
+[![Python 3.11 Portable](https://img.shields.io/badge/Python-3.11%20Embedded%20(32--bit%20%2F%2064--bit)-blue.svg)](https://www.python.org/)
+[![Platform Windows](https://img.shields.io/badge/Platform-Windows%207%2F10%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
+[![Architecture Standalone](https://img.shields.io/badge/Architecture-Zero--Install%20%7C%20Zero--Internet-teal.svg)]()
 [![Security Anti--Tamper](https://img.shields.io/badge/Security-210--bit%20DUDC%20Token-red.svg)]()
 [![Tests Unit Tests](https://img.shields.io/badge/Tests-Passing%20(16%2F16)-brightgreen.svg)]()
+
+---
+
+## 🚀 ما الجديد في الإصدار الرابع DUDC V4.0؟ (Release Highlights)
+1. **البيئة المحمولة المستقلة بالكامل (Zero-Install & Zero-Internet Portable Runtime):**
+   - تم تزويد المنظومة ببيئة بايثون مدمجة مستقلة 32-بت (`runtime\`) مهيأة بجميع الحزم الرياضية والجيوديسية مسبقة الترجمة (`numpy`, `pandas`, `shapely`, `pyproj`, `matplotlib`, `pillow`, `arabic-reshaper`, `python-bidi`).
+   - تشغيل فوري بدون أي تثبيت أو تنزيل من الإنترنت.
+   - تعمل بكفاءة تامة على الأجهزة القديمة ومحدودة الموارد (Windows 32-bit وذاكرة 4GB RAM) وكذلك الأجهزة الحديثة 64-bit.
+2. **المعالجة الجذرية لمحرك النصوص العربية بالكروكي (RTL & Bidi Engine):**
+   - فحص تلقائي وتوافق ذكي مع مكتبات Matplotlib و HarfBuzz لمنع انعكاس الحروف العربية على مختلف أنظمة ويندوز.
+   - مصفوفة خطوط احتياطية (`CROQUIS_FONT_FAMILIES`) لضمان وضوح الأبعاد وأسماء الواجهات والحدود.
+3. **تصدير الـ PDF المتجهي وحفظ التظليلات الرسمية:**
+   - ضبط قواعد وسائط الطباعة ومحرك Chromium/Edge لإجبار طباعة التظليلات الرسمية اللبنية (`#D3DFEE`) لعناوين الأقسام والجداول.
+4. **تحديث الكوادر الفنية:**
+   - إدراج الفني المساحي "السيد جاد" في قوالب الشهادات وتوقيعات الاستخراج الرسمية.
 
 ---
 

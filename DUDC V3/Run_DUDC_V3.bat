@@ -1,17 +1,17 @@
 @echo off
 setlocal EnableExtensions
-title DUDC V3 - Cadastral Certificate Workflow Studio
+title DUDC V4.0 - Cadastral Certificate Workflow Studio
 cls
 cd /d "%~dp0"
 
 echo ======================================================================
-echo   DUDC V3 - Cadastral Certificate Workflow Studio
+echo   DUDC V4.0 - Cadastral Certificate Workflow Studio (Portable Edition)
 echo ======================================================================
 echo.
 
 REM Ensure app shortcut exists with custom icon
-if not exist "DUDC V3 Studio.lnk" (
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut((Join-Path (Get-Location).Path 'DUDC V3 Studio.lnk'));$s.TargetPath=(Join-Path (Get-Location).Path 'Run_DUDC_V3.bat');$s.WorkingDirectory=(Get-Location).Path;$s.IconLocation=(Join-Path (Get-Location).Path 'assets\app_icon.ico,0');$s.Description='DUDC V3 - Cadastral Certificate Workflow Studio';$s.Save()" >nul 2>&1
+if not exist "DUDC V4 Studio.lnk" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut((Join-Path (Get-Location).Path 'DUDC V4 Studio.lnk'));$s.TargetPath=(Join-Path (Get-Location).Path 'Run_DUDC_V3.bat');$s.WorkingDirectory=(Get-Location).Path;$s.IconLocation=(Join-Path (Get-Location).Path 'assets\app_icon.ico,0');$s.Description='DUDC V4.0 - Cadastral Certificate Workflow Studio';$s.Save()" >nul 2>&1
 )
 
 REM Kill any stale server on port 8765

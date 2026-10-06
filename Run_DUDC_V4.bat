@@ -9,4 +9,3 @@ if not exist "DUDC V4 Studio.lnk" (
 
 cd /d "%~dp0DUDC V3"
 call "Run_DUDC_V3.bat"
-

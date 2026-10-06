@@ -2,7 +2,17 @@
     /* وسائط الطباعة الصارمة */
     @media print {
       @page { size: A4 portrait; margin: 0; }
-      body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
       .workflow-header, .studio-sidebar, .viewport-toolbar, .floating-text-toolbar,
       .image-modal-backdrop, .img-action-overlay, .save-toast, .loading-overlay, #stage1View, #stage3View,
       .no-print {
@@ -19,5 +29,10 @@
         max-height: 297mm !important;
         padding: var(--cert-margin) !important;
         page-break-after: avoid !important;
+      }
+      .table-section-header, .coords-table th, .image-header {
+        background-color: #D3DFEE !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }

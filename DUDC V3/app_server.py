@@ -1,5 +1,5 @@
 """
-DUDC V3.5 - Next-Generation Cadastral Certificate Workflow Server
+DUDC V4.0 - Next-Generation Cadastral Certificate Workflow Server
 ================================================================
 Dakahlia Utility Data Center (مركز معلومات شبكات المرافق)
 Refactored Modular Application Server.
@@ -149,7 +149,7 @@ def start_server(port: int = 8765):
         try:
             server = ServerClass(('127.0.0.1', p), DUDCV3RequestHandler)
             print(f"==================================================")
-            print(f"  🏛️ DUDC V3.5 Cadastral Studio Server Running")
+            print(f"  🏛️ DUDC V4.0 Cadastral Studio Server Running")
             print(f"  URL: http://127.0.0.1:{p}")
             print(f"==================================================")
             return server, p
@@ -171,5 +171,5 @@ if __name__ == '__main__':
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nStopping DUDC V3.5 Server...")
+        print("\nStopping DUDC V4.0 Server...")
         server.server_close()

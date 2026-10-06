@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Global State & Workflow Navigation (state.js)
+ * DUDC V4.0 - Global State & Workflow Navigation (state.js)
  */
 
 if (window.location.hostname === 'localhost') {

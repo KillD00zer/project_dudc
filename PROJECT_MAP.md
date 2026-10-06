@@ -1,5 +1,5 @@
 # خريطة المشروع وهيكل الكود المرجعي (الهندسة المعيارية)
-# DUDC V3.5 Portal - Modular Architecture & Code Map
+# DUDC V4.0 Portal - Modular Architecture & Code Map (Portable Edition)
 
 > **الغرض:** دليل هندسي شامل ومركّز يوضح مسار البيانات، الترابط بين الواجهة والباك إند، ووظائف كل ملف بدقة بعد تطبيق المعيارية (Modularity) لتسهيل الصيانة وإعادة الاستخدام.
 

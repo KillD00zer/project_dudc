@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Stage 3: Official Verification & PDF Export (stage3.js)
+ * DUDC V4.0 - Stage 3: Official Verification & PDF Export (stage3.js)
  */
 
       /* ==========================================================================
@@ -59,8 +59,10 @@ ${cssLink}
 <style>
 ${styles}
 @page { size: A4 portrait; margin: 0; }
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 .certificate-page { width: 100% !important; min-height: 297mm !important; max-height: 297mm !important; box-shadow: none !important; margin: 0 auto !important; border-radius: 0 !important; page-break-inside: avoid !important; }
+.table-section-header, .coords-table th, .image-header { background-color: #D3DFEE !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 </style>
 </head>
 <body style="background: #ffffff; margin: 0; padding: 0;">

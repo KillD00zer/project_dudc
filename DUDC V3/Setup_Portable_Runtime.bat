@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions
-title DUDC V3 - Portable 32-bit Runtime Setup
+title DUDC V4.0 - Portable Runtime Setup
 cls
 cd /d "%~dp0"
 
 echo ======================================================================
-echo   DUDC V3 - Standalone Portable 32-bit Runtime Setup
+echo   DUDC V4.0 - Standalone Portable Runtime Setup
 echo ======================================================================
 echo.
 

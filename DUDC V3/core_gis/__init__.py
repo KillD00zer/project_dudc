@@ -19,7 +19,7 @@ from .jurisdictions import (
     DAKAHLIA_CENTERS,
 )
 
-__version__ = "3.5.0"
+__version__ = "4.0.0"
 
 __all__ = [
     "CadastralParcel",

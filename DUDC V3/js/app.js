@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Application Bootstrap & Event Wiring (app.js)
+ * DUDC V4.0 - Application Bootstrap & Event Wiring (app.js)
  */
 
       // =========================================================================

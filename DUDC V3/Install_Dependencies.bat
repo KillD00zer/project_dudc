@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions
-title DUDC V3 - Dependencies Installer
+title DUDC V4.0 - Dependencies Installer
 cls
 cd /d "%~dp0"
 
 echo ======================================================================
-echo   DUDC V3 - Dependencies Installer
+echo   DUDC V4.0 - Dependencies Installer
 echo ======================================================================
 echo.
 

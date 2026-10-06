@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Drafts & Session Management (drafts.js)
+ * DUDC V4.0 - Drafts & Session Management (drafts.js)
  */
 
       // ==========================================================================

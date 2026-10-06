@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Visual In-App Folder Explorer & Directory Manager (folder_explorer.js)
+ * DUDC V4.0 - Visual In-App Folder Explorer & Directory Manager (folder_explorer.js)
  * ===================================================================================
  * 100% Web-Native, Zero-Shell, Zero-PowerShell folder navigation.
  * Solves all freeze, AppLocker, antivirus, and background-window issues on all machines.

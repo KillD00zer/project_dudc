@@ -1,5 +1,5 @@
 /**
- * DUDC V3.5 - Stage 1: Survey Ingestion & Coordinate Validation (stage1.js)
+ * DUDC V4.0 - Stage 1: Survey Ingestion & Coordinate Validation (stage1.js)
  */
 
       // ==========================================================================

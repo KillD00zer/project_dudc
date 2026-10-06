@@ -125,7 +125,9 @@
     }
 
     .table-section-header {
-      background-color: #D3DFEE; /* التظليل السماوي الرسمي مطابق للـ Word والشهادة القديمة */
+      background-color: #D3DFEE !important; /* التظليل السماوي الرسمي مطابق للـ Word والشهادة القديمة */
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
       font-weight: bold;
       font-size: 12pt;
       color: #000000;
@@ -145,7 +147,9 @@
     }
 
     .coords-table th {
-      background-color: #D3DFEE;
+      background-color: #D3DFEE !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
       font-weight: bold;
       font-size: 11pt;
       color: #000000;
@@ -175,7 +179,9 @@
     }
 
     .image-header {
-      background: #D3DFEE;
+      background: #D3DFEE !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
       border-bottom: 1px solid #4F81BD;
       text-align: center;
       font-weight: bold;
