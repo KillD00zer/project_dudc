@@ -150,4 +150,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadOutputDir();
   checkServerHealth();
+
+  // زر ريسيت وتفريغ مساحة العمل لبدء معاملة جديدة
+  document.getElementById('btnNewSessionReset')?.addEventListener('click', () => {
+    if (typeof window.resetFullWorkspace === 'function') {
+      window.resetFullWorkspace(true);
+    }
+  });
 });

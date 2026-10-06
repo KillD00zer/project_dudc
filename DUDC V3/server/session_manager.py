@@ -190,11 +190,16 @@ class SessionManager:
 
         if temp_assets_dir and os.path.isdir(temp_assets_dir):
             patterns = [
+                os.path.join(temp_assets_dir, "croq_*.png"),
+                os.path.join(temp_assets_dir, "sat_*.jpg"),
+                os.path.join(temp_assets_dir, "sat_*.jpeg"),
                 os.path.join(temp_assets_dir, "croquis_*.png"),
                 os.path.join(temp_assets_dir, "satellite_*.jpg"),
                 os.path.join(temp_assets_dir, "satellite_*.jpeg"),
                 os.path.join(temp_assets_dir, "cropped_*.png"),
                 os.path.join(temp_assets_dir, "cropped_*.jpg"),
+                os.path.join(temp_assets_dir, "temp_print_*.html"),
+                os.path.join(temp_assets_dir, "tmp_*.*"),
             ]
             for pattern in patterns:
                 for f in glob.glob(pattern):

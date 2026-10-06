@@ -185,7 +185,7 @@
           }
 
           // 8. المزامنة إلى استوديو التحرير (Stage 2)
-          syncStage1ToStage2();
+          syncStage1ToStage2(true);
 
           if (data.deal_type) document.getElementById('valDealType').textContent = data.deal_type;
           if (data.site_desc) document.getElementById('valSiteDesc').textContent = data.site_desc;

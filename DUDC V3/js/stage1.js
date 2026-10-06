@@ -139,10 +139,13 @@
       // يُستدعى قبل كل استيراد جديد لمنع خلط بيانات المواطنين
       // =========================================================================
       async function clearClientSession() {
-        // 1. مسح متغيرات الحالة العالمية
+        // 1. مسح متغيرات الحالة العالمية ومعرف المسودة
         activeParcel = null;
         currentSegments = [];
         hasSavedCurrentPackage = false;
+        if (typeof currentActiveDraftId !== 'undefined') {
+          currentActiveDraftId = null;
+        }
 
         // 2. مسح الصور المرفوعة يدوياً (custom uploads)
         if (typeof customUploadedImages !== 'undefined') {
@@ -161,18 +164,81 @@
           if (el) { el.src = imgPlaceholder; el.removeAttribute('src'); }
         });
 
-        // 4. إعادة ضبط حالة تأكيد الشهادة والرمز الأمني
+        // 4. تصفير عناصر المرحلة 2 (الشهادة) بالكامل لمنع تسريب بيانات المعاملة السابقة
+        const certFields = [
+          ['valApplicantName', '--'],
+          ['valReceiptNo', '--'],
+          ['valNationalId', '--'],
+          ['valCenter', '--'],
+          ['valVillage', '--'],
+          ['valAddress', '--'],
+          ['valArea', '-- م²'],
+          ['valOrderNo', '--'],
+          ['valDealType', '--'],
+          ['valSiteDesc', '--']
+        ];
+        certFields.forEach(([id, defaultVal]) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = defaultVal;
+        });
+
+        // 5. تصفير جداول الحدود والإحداثيات
+        const coordsTbody = document.getElementById('certCoordsTbody');
+        if (coordsTbody) coordsTbody.innerHTML = '';
+        const segTbody = document.getElementById('stage1SegmentsTbody');
+        if (segTbody) segTbody.innerHTML = '';
+
+        // 6. تصفير عناصر المرحلة 1
+        const s1Fields = [
+          ['resApplicantName', '--'],
+          ['resNationalId', '--'],
+          ['resReceiptNo', '--'],
+          ['resStatedArea', '-- م²'],
+          ['resCalcArea', '-- م²'],
+          ['resDeltaArea', '-- م²']
+        ];
+        s1Fields.forEach(([id, defaultVal]) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = defaultVal;
+        });
+
+        // 7. تصفير عناصر المرحلة 3
+        const s3Name = document.getElementById('stage3CitizenName');
+        if (s3Name) s3Name.textContent = '--';
+        const s3Center = document.getElementById('stage3Center');
+        if (s3Center) s3Center.textContent = '--';
+
+        // 8. تنظيف مدخل ملف الرفع لتمكين إعادة اختيار نفس الملف
+        const fileInp = document.getElementById('surveyFileInput');
+        if (fileInp) fileInp.value = '';
+
+        // 9. إعادة ضبط حالة تأكيد الشهادة والرمز الأمني
         if (typeof resetConfirmationState === 'function') resetConfirmationState();
 
-        // 5. إخفاء قسم نتائج الرفع حتى تكتمل المعالجة
+        // 10. إخفاء قسم نتائج الرفع حتى تكتمل المعالجة
         const resultsSec = document.getElementById('surveyResultsSection');
         if (resultsSec) resultsSec.style.display = 'none';
 
-        // 6. إبلاغ السيرفر بمسح الملفات المؤقتة (fire & forget - لا يوقف التحميل)
+        // 11. إبلاغ السيرفر بمسح الملفات المؤقتة
         try {
           await fetch('/api/clear-session', { method: 'POST' });
         } catch (_) { /* يُتجاهل الخطأ ولا يمنع الاستيراد */ }
       }
+
+      // وظيفة الريسيت الشامل اليدوي
+      window.resetFullWorkspace = async function(confirmWithUser = true) {
+        if (confirmWithUser) {
+          const ok = confirm('هل تريد تفريغ المعاملة الحالية وبدء معاملة مساحية جديدة؟\n\n(سيتم مسح كاش الجلسة والبيانات الحالية للبدء من الصفر)');
+          if (!ok) return;
+        }
+
+        await clearClientSession();
+        if (typeof switchStage === 'function') switchStage(1);
+
+        if (typeof showSaveToast === 'function') {
+          showSaveToast('✔ تم تفريغ مساحة العمل وبدء جلسة جديدة نظيفة');
+        }
+      };
 
       // تحميل عينة ف.xls مع شاشة التحميل الذكية
       function triggerLoadSample() {
@@ -537,6 +603,11 @@
         // بناء جدول الأضلاع
         buildSegmentsTable(parcel.segments || []);
 
+        // مزامنة فورية ونظيفة للمرحلة 2 لبناء جدول الإحداثيات وتحديث النصوص دون أي كاش قديم
+        if (typeof syncStage1ToStage2 === 'function') {
+          syncStage1ToStage2(true);
+        }
+
         setLoadingStep(2, 'done');
         setLoadingStep(3, 'active');
         setLoadingStep(4, 'active');
@@ -594,8 +665,9 @@
           body: JSON.stringify({ parcel_index: 0 })
         }).then(res => res.json()).then(data => {
           if (data.image_url) {
-            document.getElementById('stage1SatImg').src = data.image_url;
-            document.getElementById('imgSatellite').src = data.image_url;
+            const bustUrl = data.image_url + (data.image_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
+            document.getElementById('stage1SatImg').src = bustUrl;
+            document.getElementById('imgSatellite').src = bustUrl;
           }
           return data;
         });

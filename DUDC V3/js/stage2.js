@@ -20,9 +20,12 @@
       function syncStage1ToStage2(force = false) {
         if (!activeParcel) return;
 
-        // Sync any current DOM edits into activeParcel first
+        // Sync any current DOM edits into activeParcel only when NOT forced AND when DOM has valid user data
         if (!force && typeof syncDomToActiveParcel === 'function') {
-          syncDomToActiveParcel();
+          const nameEl = document.getElementById('valApplicantName');
+          if (nameEl && nameEl.textContent.trim() && nameEl.textContent.trim() !== '--' && nameEl.textContent.trim() !== 'لا يوجد بيانات متاحة') {
+            syncDomToActiveParcel();
+          }
         }
 
         // Only overwrite elements if forced OR if currently blank/placeholder

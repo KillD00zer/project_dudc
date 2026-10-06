@@ -162,6 +162,7 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
     # 1. Load Sample File (ف.xls)
     if clean_path == '/api/load-sample':
         try:
+            SESSION_MANAGER.clear_session_cache(temp_assets_dir=TEMP_ASSETS_DIR)
             if not os.path.exists(SAMPLE_FILE):
                 req_handler._send_json({"error": "Sample file ف.xls not found"}, status=404)
                 return True
@@ -186,6 +187,7 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
     # 2. Upload Custom Survey File (.xls, .xlsx, .csv)
     elif clean_path == '/api/upload':
         try:
+            SESSION_MANAGER.clear_session_cache(temp_assets_dir=TEMP_ASSETS_DIR)
             content_type = req_handler.headers.get('Content-Type', '')
 
             if 'multipart/form-data' in content_type:
