@@ -59,7 +59,8 @@
             system_officer: data.system_officer || parcelData.system_officer || 'شريف محمد',
             segments: data.segments || parcelData.segments || [],
             boundaries: data.boundaries || parcelData.boundaries || {},
-            vertices: data.vertices || parcelData.vertices || []
+            vertices: data.vertices || parcelData.vertices || [],
+            line_width: data.line_width || parcelData.line_width || 3.0
           };
 
           // 1. استعادة مسؤولي الخطوة 1
@@ -182,6 +183,15 @@
           if (data.text_customs) {
             savedTextDefaults = data.text_customs;
             applySavedTextDefaults(data.text_customs);
+          }
+
+          if (typeof croqFontSizes !== 'undefined') {
+            const lw = data.line_width || parcelData.line_width;
+            if (lw) {
+              croqFontSizes.line = Number(lw);
+              const elLine = document.getElementById('croqLineWidthVal');
+              if (elLine) elLine.textContent = croqFontSizes.line;
+            }
           }
 
           // 8. المزامنة إلى استوديو التحرير (Stage 2)
@@ -309,6 +319,7 @@
           applicant_name: citizenName,
           district: centerName,
           area: areaVal,
+          line_width: (typeof croqFontSizes !== 'undefined' && croqFontSizes.line) ? croqFontSizes.line : (activeParcel.line_width || 3.0),
           parcel: activeParcel,
           croquis_base64: croqSrc,
           satellite_base64: satSrc,

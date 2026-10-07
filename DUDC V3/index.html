@@ -330,6 +330,14 @@
                 <button type="button" class="btn-step" onclick="adjustCroqFont('dim', 1)">+</button>
               </div>
 
+              <!-- 4. سماكة خط الرسم -->
+              <div class="croq-font-pill" title="سماكة خط حدود المضلع في الكروكي (1 إلى 8 pt)">
+                <span>✏️ سمك الخط:</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('line', -0.5)">−</button>
+                <span id="croqLineWidthVal" class="croq-step-val">3</span>
+                <button type="button" class="btn-step" onclick="adjustCroqFont('line', 0.5)">+</button>
+              </div>
+
               <!-- زر تحديث رسم الكروكي -->
               <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateCroquisDiagram()"
                 style="padding: 5px 12px; font-size: 11.5px; gap: 4px;">

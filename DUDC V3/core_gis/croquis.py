@@ -83,7 +83,8 @@ def generate_croquis_image(
     security_token: Optional[str] = None,
     font_size_pts: int = 16,
     font_size_dims: int = 16,
-    font_size_text: int = 16
+    font_size_text: int = 16,
+    line_width: float = 3.0
 ) -> str:
     verts = parcel["vertices"]
     segments = parcel.get("segments", [])
@@ -119,7 +120,7 @@ def generate_croquis_image(
     ax.set_facecolor('white')
 
     # 1. Draw parcel polygon outline
-    poly_patch = MplPolygon(pts_2d, closed=True, facecolor='none', edgecolor='black', linewidth=3.0, zorder=2)
+    poly_patch = MplPolygon(pts_2d, closed=True, facecolor='none', edgecolor='black', linewidth=float(line_width), zorder=2)
     ax.add_patch(poly_patch)
 
     signed_area = 0.5 * sum(xs[i] * ys[(i + 1) % n_pts] - xs[(i + 1) % n_pts] * ys[i] for i in range(n_pts))

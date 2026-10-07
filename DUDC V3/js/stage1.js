@@ -143,6 +143,7 @@
         activeParcel = null;
         currentSegments = [];
         hasSavedCurrentPackage = false;
+        stage1IsModified = false;
         if (typeof currentActiveDraftId !== 'undefined') {
           currentActiveDraftId = null;
         }
@@ -523,6 +524,7 @@
 
             resetConfirmationState();
             renderWatermark();
+            stage1IsModified = true;
 
             // مزامنة الاستوديو في المرحلة 2
             const valCenterElem = document.getElementById('valCenter');
@@ -593,12 +595,15 @@
         croqFontSizes.pts = parcel.font_size_pts ? Number(parcel.font_size_pts) : 16;
         croqFontSizes.dim = parcel.font_size_dims ? Number(parcel.font_size_dims) : 16;
         croqFontSizes.text = parcel.font_size_text ? Number(parcel.font_size_text) : 16;
+        croqFontSizes.line = parcel.line_width ? Number(parcel.line_width) : 3.0;
         const elPts = document.getElementById('croqFontPtsVal');
         const elText = document.getElementById('croqFontTextVal');
         const elDim = document.getElementById('croqFontDimVal');
+        const elLine = document.getElementById('croqLineWidthVal');
         if (elPts) elPts.textContent = croqFontSizes.pts;
         if (elText) elText.textContent = croqFontSizes.text;
         if (elDim) elDim.textContent = croqFontSizes.dim;
+        if (elLine) elLine.textContent = croqFontSizes.line;
 
         // بناء جدول الأضلاع
         buildSegmentsTable(parcel.segments || []);
@@ -646,7 +651,8 @@
             parcel_index: 0,
             font_size_pts: croqFontSizes.pts,
             font_size_dims: croqFontSizes.dim,
-            font_size_text: croqFontSizes.text
+            font_size_text: croqFontSizes.text,
+            line_width: croqFontSizes.line
           })
         }).then(res => res.json()).then(data => {
           if (data.croquis_url) {
@@ -672,6 +678,52 @@
           return data;
         });
       }
+
+      // =========================================================================
+      // مزامنة أضلاع وحدود المرحلة 1 مع كائن القطعة والذاكرة فورياً (Real-Time Sync)
+      // =========================================================================
+      function syncStage1SegmentsToParcel() {
+        if (!activeParcel) return;
+        const editedSegs = [];
+        const boundaries = { north: '', east: '', south: '', west: '' };
+
+        document.querySelectorAll('#stage1SegmentsTbody tr').forEach((tr, i) => {
+          const dirSel = tr.querySelector('.seg-dir-select');
+          const lenInp = tr.querySelector('.seg-length-input');
+          const neighInp = tr.querySelector('.seg-neighbor-input');
+
+          const dir = dirSel ? dirSel.value : 'north';
+          const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
+          const neigh = neighInp ? neighInp.value.trim() : '';
+
+          editedSegs.push({
+            direction: dir,
+            length_m: len,
+            neighbor: neigh
+          });
+
+          // ربط أول اسم جار غير فارغ بالحد العام
+          if (neigh && (!boundaries[dir] || boundaries[dir] === '')) {
+            boundaries[dir] = neigh;
+          }
+        });
+
+        if (activeParcel.segments && activeParcel.segments.length > 0) {
+          editedSegs.forEach((es, i) => {
+            if (activeParcel.segments[i]) {
+              activeParcel.segments[i].direction = es.direction;
+              activeParcel.segments[i].length_m = es.length_m;
+              activeParcel.segments[i].neighbor = es.neighbor;
+            }
+          });
+        } else {
+          activeParcel.segments = editedSegs;
+        }
+        activeParcel.boundaries = boundaries;
+        currentSegments = JSON.parse(JSON.stringify(activeParcel.segments));
+        stage1IsModified = true;
+      }
+      window.syncStage1SegmentsToParcel = syncStage1SegmentsToParcel;
 
       function buildSegmentsTable(segments) {
         currentSegments = JSON.parse(JSON.stringify(segments));
@@ -703,30 +755,37 @@
           tbody.appendChild(tr);
         });
 
-        // ربط أحداث التغيير لإعادة حساب المجموع وتنبيه الحاجة للتحديث
+        // ربط أحداث التغيير لإعادة حساب المجموع وتنبيه الحاجة للتحديث وتزامن الذاكرة لحظياً
         tbody.querySelectorAll('.seg-dir-select, .seg-length-input, .seg-neighbor-input').forEach(el => {
-          el.addEventListener('input', () => {
+          const onSegmentFieldChange = () => {
             updateRunningSums();
+            syncStage1SegmentsToParcel();
             markCroquisNeedsUpdate();
-          });
+          };
+          el.addEventListener('input', onSegmentFieldChange);
+          el.addEventListener('change', onSegmentFieldChange);
         });
 
         updateRunningSums();
+        syncStage1SegmentsToParcel();
       }
 
-      // ضبط أحجام خطوط الكروكي (يدوي بالكامل - لا يتم التحديث إلا بضغط زر التحديث)
-      let croqFontSizes = { pts: 16, text: 16, dim: 16 };
+      // ضبط أحجام خطوط وسماكة رسم الكروكي (يدوي بالكامل - لا يتم التحديث إلا بضغط زر التحديث)
+      let croqFontSizes = { pts: 16, text: 16, dim: 16, line: 3.0 };
 
       function adjustCroqFont(type, delta) {
         if (!croqFontSizes.hasOwnProperty(type)) return;
         const limits = {
-          pts: { min: 7, max: 26, id: 'croqFontPtsVal' },
-          text: { min: 8, max: 28, id: 'croqFontTextVal' },
-          dim: { min: 8, max: 26, id: 'croqFontDimVal' }
+          pts: { min: 7, max: 26, id: 'croqFontPtsVal', isFloat: false },
+          text: { min: 8, max: 28, id: 'croqFontTextVal', isFloat: false },
+          dim: { min: 8, max: 26, id: 'croqFontDimVal', isFloat: false },
+          line: { min: 1.0, max: 8.0, id: 'croqLineWidthVal', isFloat: true }
         };
         const cfg = limits[type];
         if (!cfg) return;
-        croqFontSizes[type] = Math.max(cfg.min, Math.min(cfg.max, croqFontSizes[type] + delta));
+        let newVal = croqFontSizes[type] + delta;
+        newVal = Math.max(cfg.min, Math.min(cfg.max, newVal));
+        croqFontSizes[type] = cfg.isFloat ? parseFloat(newVal.toFixed(1)) : Math.round(newVal);
         const valElem = document.getElementById(cfg.id);
         if (valElem) valElem.textContent = croqFontSizes[type];
         
@@ -846,6 +905,7 @@
         activeParcel.font_size_pts = croqFontSizes.pts;
         activeParcel.font_size_dims = croqFontSizes.dim;
         activeParcel.font_size_text = croqFontSizes.text;
+        activeParcel.line_width = croqFontSizes.line;
 
         fetch('/api/preview-croquis', {
           method: 'POST',
@@ -856,7 +916,8 @@
             edited_segments: editedSegs,
             font_size_pts: croqFontSizes.pts,
             font_size_dims: croqFontSizes.dim,
-            font_size_text: croqFontSizes.text
+            font_size_text: croqFontSizes.text,
+            line_width: croqFontSizes.line
           })
         })
         .then(res => res.json())

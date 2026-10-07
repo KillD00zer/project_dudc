@@ -110,10 +110,11 @@
         });
       }
 
-      // مراقبة تعديل مسؤولي الخطوة 1 للتزامن مع المسودة
+      // مراقبة تعديل مسؤولي الخطوة 1 للتزامن مع المسودة والاستوديو
       const selTechEl = document.getElementById('selSurveyTech');
       if (selTechEl) {
         selTechEl.addEventListener('change', () => {
+          stage1IsModified = true;
           syncDomToActiveParcel();
           scheduleDraftAutoSave();
         });
@@ -121,18 +122,23 @@
       const selOffEl = document.getElementById('selSysOfficer');
       if (selOffEl) {
         selOffEl.addEventListener('change', () => {
+          stage1IsModified = true;
           syncDomToActiveParcel();
           scheduleDraftAutoSave();
         });
       }
 
-      // مراقبة تعديل جدول الأضلاع والحدود في المرحلة 1
+      // مراقبة تعديل جدول الأضلاع والحدود في المرحلة 1 للتزامن اللحظي مع الاستوديو
       const s1SegsTable = document.getElementById('stage1SegmentsTbody');
       if (s1SegsTable) {
         s1SegsTable.addEventListener('input', () => {
+          stage1IsModified = true;
+          if (typeof syncStage1SegmentsToParcel === 'function') syncStage1SegmentsToParcel();
           scheduleDraftAutoSave();
         });
         s1SegsTable.addEventListener('change', () => {
+          stage1IsModified = true;
+          if (typeof syncStage1SegmentsToParcel === 'function') syncStage1SegmentsToParcel();
           scheduleDraftAutoSave();
         });
       }

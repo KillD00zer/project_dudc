@@ -47,7 +47,7 @@
         }
         
         const centerEl = document.getElementById('valCenter');
-        if (force || !centerEl.textContent.trim() || centerEl.textContent.trim() === 'لا يوجد بيانات متاحة' || centerEl.textContent.trim() === '--') {
+        if (force || activeParcel.district || !centerEl.textContent.trim() || centerEl.textContent.trim() === 'لا يوجد بيانات متاحة' || centerEl.textContent.trim() === '--') {
           centerEl.textContent = activeParcel.district || 'لا يوجد بيانات متاحة';
         }
 
@@ -89,8 +89,10 @@
         }
 
         // التوقيعات المحددة
-        document.getElementById('sigTech').textContent = `أ / ${document.getElementById('selSurveyTech').value}`;
-        document.getElementById('sigGis').textContent = `أ / ${document.getElementById('selSysOfficer').value}`;
+        const techVal = document.getElementById('selSurveyTech')?.value || activeParcel.survey_technician || '';
+        if (techVal) document.getElementById('sigTech').textContent = `أ / ${techVal}`;
+        const offVal = document.getElementById('selSysOfficer')?.value || activeParcel.system_officer || '';
+        if (offVal) document.getElementById('sigGis').textContent = `أ / ${offVal}`;
 
         // إعادة تطبيق التنسيقات المحفوظة على الحقول الديناميكية
         reapplyDynamicTextStyles();
@@ -216,7 +218,7 @@
             if (r === 0) {
               tr.innerHTML = `
                 <td rowspan="${rowCount}" class="cell-dir-title" data-dir-key="${d.key}" style="${titleStyleAttr}" contenteditable="true" spellcheck="false">${customTitle}</td>
-                <td rowspan="${rowCount}" class="cell-dir-neighbor" contenteditable="true" spellcheck="false">${neighborName}</td>
+                <td rowspan="${rowCount}" class="cell-dir-neighbor" data-dir-key="${d.key}" contenteditable="true" spellcheck="false">${neighborName}</td>
                 <td rowspan="${rowCount}" class="cell-dir-betool" style="${betoolStyleAttr}" contenteditable="true" spellcheck="false">${betoolText}</td>
                 <td rowspan="${rowCount}" class="cell-dir-len" style="font-weight: bold;" contenteditable="true" spellcheck="false">${totalLen > 0 ? toArabicNumerals(totalLen.toFixed(2)) : ''}</td>
                 <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${lonStr}</span></td>
@@ -232,6 +234,43 @@
           }
         });
       }
+
+      // =========================================================================
+      // مزامنة عكسية من الاستوديو (المرحلة 2) إلى المرحلة 1 في حال تعديل الجيران بالشهادة
+      // =========================================================================
+      function syncStage2ToStage1() {
+        if (!activeParcel) return;
+        const neighCells = document.querySelectorAll('#certCoordsTbody .cell-dir-neighbor');
+        if (!neighCells || neighCells.length === 0) return;
+
+        const dirNeighbors = {};
+        neighCells.forEach(cell => {
+          const dir = cell.getAttribute('data-dir-key');
+          if (dir) {
+            dirNeighbors[dir] = cell.textContent.trim();
+          }
+        });
+
+        let hasUpdated = false;
+        document.querySelectorAll('#stage1SegmentsTbody tr').forEach(tr => {
+          const dirSel = tr.querySelector('.seg-dir-select');
+          const neighInp = tr.querySelector('.seg-neighbor-input');
+          if (dirSel && neighInp) {
+            const dir = dirSel.value;
+            if (dirNeighbors[dir] !== undefined && dirNeighbors[dir] !== '') {
+              if (neighInp.value !== dirNeighbors[dir]) {
+                neighInp.value = dirNeighbors[dir];
+                hasUpdated = true;
+              }
+            }
+          }
+        });
+
+        if (hasUpdated && typeof syncStage1SegmentsToParcel === 'function') {
+          syncStage1SegmentsToParcel();
+        }
+      }
+      window.syncStage2ToStage1 = syncStage2ToStage1;
 
       /* ==========================================================================
          أدوات استوديو التحرير (Spacing, Typography, Watermark, Zoom & Crop)

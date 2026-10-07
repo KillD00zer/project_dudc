@@ -17,6 +17,7 @@ if (window.location.hostname === 'localhost') {
       var isBrowsingFolder = false;
       var savedTextDefaults = null;
       var hasSavedCurrentPackage = false; // يمنع الطباعة تماماً قبل إتمام حفظ وتصدير حزمة المشروع رسمياً
+      var stage1IsModified = false; // رصد وتتبع أي تعديل يحدث في المرحلة 1 لينعكس فورياً في الاستوديو
 
       // قائمة المراكز الرسمية الـ 18 لمحافظة الدقهلية
       const OFFICIAL_CENTERS_FALLBACK = [
@@ -37,6 +38,7 @@ if (window.location.hostname === 'localhost') {
       const stage3View = document.getElementById('stage3View');
 
       function switchStage(stageNum) {
+        const previousStage = currentStage;
         currentStage = stageNum;
         [stage1View, stage2View, stage3View].forEach((el, i) => {
           el.classList.toggle('active', i + 1 === stageNum);
@@ -46,8 +48,19 @@ if (window.location.hostname === 'localhost') {
           el.classList.toggle('completed', i + 1 < stageNum);
         });
 
-        if (stageNum === 2) {
-          syncStage1ToStage2();
+        if (stageNum === 1) {
+          // العودة إلى المرحلة 1: مزامنة عكسية من الاستوديو إن تم تعديل أي بيانات في الشهادة
+          if (typeof syncStage2ToStage1 === 'function') {
+            syncStage2ToStage1();
+          }
+        } else if (stageNum === 2) {
+          // الانتقال إلى المرحلة 2 (الاستوديو): التقاط أي تعديل في المرحلة 1 وتحديث الشهادة فوراً
+          if (typeof syncStage1SegmentsToParcel === 'function') {
+            syncStage1SegmentsToParcel();
+          }
+          const shouldForce = stage1IsModified || previousStage === 1;
+          syncStage1ToStage2(shouldForce);
+          stage1IsModified = false;
           updateSpacing();
           renderWatermark();
         } else if (stageNum === 3) {
@@ -56,7 +69,12 @@ if (window.location.hostname === 'localhost') {
         }
       }
 
-      stepTab1.addEventListener('click', () => switchStage(1));
+      stepTab1.addEventListener('click', () => {
+        if (currentStage === 2 && typeof syncDomToActiveParcel === 'function') {
+          syncDomToActiveParcel();
+        }
+        switchStage(1);
+      });
       stepTab2.addEventListener('click', () => {
         if (!activeParcel) return;
         if (!activeParcel.district_matched) {
@@ -86,7 +104,12 @@ if (window.location.hostname === 'localhost') {
         }
         switchStage(2);
       });
-      document.getElementById('btnBackToStage1').addEventListener('click', () => switchStage(1));
+      document.getElementById('btnBackToStage1').addEventListener('click', () => {
+        if (typeof syncDomToActiveParcel === 'function') {
+          syncDomToActiveParcel();
+        }
+        switchStage(1);
+      });
       document.getElementById('btnGoToStage3').addEventListener('click', () => switchStage(3));
       document.getElementById('btnBackToStage2').addEventListener('click', () => switchStage(2));
 

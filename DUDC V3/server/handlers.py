@@ -327,10 +327,12 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
             font_size_pts = int(req_data.get('font_size_pts', parcel.get("font_size_pts", 16)))
             font_size_dims = int(req_data.get('font_size_dims', parcel.get("font_size_dims", 16)))
             font_size_text = int(req_data.get('font_size_text', parcel.get("font_size_text", 16)))
+            line_width = float(req_data.get('line_width', parcel.get("line_width", 3.0)))
 
             parcel["font_size_pts"] = font_size_pts
             parcel["font_size_dims"] = font_size_dims
             parcel["font_size_text"] = font_size_text
+            parcel["line_width"] = line_width
 
             croq_name = f"croq_{pid}.png"
             croq_path = os.path.join(TEMP_ASSETS_DIR, croq_name)
@@ -340,7 +342,8 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                 security_token=parcel.get("security_token") or TRIAL_TOKEN,
                 font_size_pts=font_size_pts,
                 font_size_dims=font_size_dims,
-                font_size_text=font_size_text
+                font_size_text=font_size_text,
+                line_width=line_width
             )
 
             sat_name = f"sat_{pid}.jpg"
@@ -490,7 +493,8 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                 security_token=TRIAL_TOKEN,
                 font_size_pts=parcel.get("font_size_pts", 16),
                 font_size_dims=parcel.get("font_size_dims", 16),
-                font_size_text=parcel.get("font_size_text", 16)
+                font_size_text=parcel.get("font_size_text", 16),
+                line_width=parcel.get("line_width", 3.0)
             )
 
             req_handler._send_json({
@@ -558,7 +562,8 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                         security_token=parcel.get("security_token"),
                         font_size_pts=parcel.get("font_size_pts", 16),
                         font_size_dims=parcel.get("font_size_dims", 16),
-                        font_size_text=parcel.get("font_size_text", 16)
+                        font_size_text=parcel.get("font_size_text", 16),
+                        line_width=parcel.get("line_width", 3.0)
                     )
 
             s_b64 = req_data.get('satellite_base64', '')
@@ -727,7 +732,8 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                 security_token=official_token,
                 font_size_pts=parcel.get("font_size_pts", 16),
                 font_size_dims=parcel.get("font_size_dims", 16),
-                font_size_text=parcel.get("font_size_text", 16)
+                font_size_text=parcel.get("font_size_text", 16),
+                line_width=parcel.get("line_width", 3.0)
             )
 
             req_handler._send_json({
