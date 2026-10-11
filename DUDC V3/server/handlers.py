@@ -64,6 +64,11 @@ def handle_get(req_handler, path: str) -> bool:
         req_handler._send_json(check_git_updates())
         return True
 
+    elif clean_path == '/api/get-active-session':
+        session = SESSION_MANAGER.get_active_session()
+        req_handler._send_json({"success": True, "active_session": session})
+        return True
+
     elif clean_path == '/api/get-output-dir':
         out_dir = SESSION_MANAGER.get_output_dir()
         req_handler._send_json({"output_dir": out_dir})
@@ -276,6 +281,11 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
             req_data = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}
             p_idx = req_data.get('parcel_index', 0)
             parcel = SESSION_MANAGER.get_parcel(p_idx)
+            if not parcel:
+                active_s = SESSION_MANAGER.get_active_session()
+                parcel = active_s.get("parcel") or req_data.get("parcel")
+                if parcel:
+                    SESSION_MANAGER.set_parcels([parcel])
 
             if not parcel:
                 req_handler._send_json({"error": "No parcel available"}, status=400)
@@ -289,18 +299,24 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
 
             req_handler._send_json({
                 "success": True,
-                "image_url": f"/temp_assets/{sat_name}?t={int(time.time())}"
+                "image_url": f"/temp_assets/{sat_name}?t={int(time.time())}",
+                "satellite_url": f"/temp_assets/{sat_name}?t={int(time.time())}"
             })
         except Exception as e:
             req_handler._send_json({"error": str(e)}, status=500)
         return True
 
-    # 4. Preview CAD Croquis
+    # 4. Preview CAD Croquis & Satellite Dual-Engine
     elif clean_path == '/api/preview-croquis':
         try:
             req_data = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}
             p_idx = req_data.get('parcel_index', 0)
             parcel = SESSION_MANAGER.get_parcel(p_idx)
+            if not parcel:
+                active_s = SESSION_MANAGER.get_active_session()
+                parcel = active_s.get("parcel") or req_data.get("parcel")
+                if parcel:
+                    SESSION_MANAGER.set_parcels([parcel])
 
             if not parcel:
                 req_handler._send_json({"error": "No parcel available"}, status=400)
@@ -348,8 +364,11 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
 
             sat_name = f"sat_{pid}.jpg"
             sat_path = os.path.join(TEMP_ASSETS_DIR, sat_name)
-            if not os.path.exists(sat_path):
+            refresh_sat = req_data.get('refresh_satellite', True)
+            if refresh_sat or not os.path.exists(sat_path):
                 generate_satellite_image(parcel, sat_path)
+
+            SESSION_MANAGER.update_active_session({"parcel": parcel})
 
             req_handler._send_json({
                 "success": True,
@@ -768,6 +787,17 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
         return True
 
     # 10. Restore Session
+        # Unified Active Session Sync
+    elif clean_path == '/api/sync-session':
+        try:
+            req_data = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}
+            session_data = req_data.get('session_data') or req_data
+            res = SESSION_MANAGER.update_active_session(session_data)
+            req_handler._send_json({"success": True, "message": "تمت مزامنة الجلسة في الذاكرة بنجاح", "active_session": res})
+        except Exception as e:
+            req_handler._send_json({"success": False, "error": str(e)}, status=500)
+        return True
+
     elif clean_path == '/api/restore-session':
         try:
             req_data = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}

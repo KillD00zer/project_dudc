@@ -682,11 +682,32 @@
       // =========================================================================
       // مزامنة أضلاع وحدود المرحلة 1 مع كائن القطعة والذاكرة فورياً (Real-Time Sync)
       // =========================================================================
+      function aggregateNeighbors(neighborList) {
+        if (!Array.isArray(neighborList)) return '';
+        const cleaned = [];
+        const seen = new Set();
+        
+        neighborList.forEach(n => {
+          if (!n) return;
+          const str = String(n).trim();
+          if (!str) return;
+          const norm = str.toLowerCase();
+          if (!seen.has(norm)) {
+            seen.add(norm);
+            cleaned.push(str);
+          }
+        });
+
+        return cleaned.join(' + ');
+      }
+      window.aggregateNeighbors = aggregateNeighbors;
+
       function syncStage1SegmentsToParcel() {
         if (!activeParcel) return;
         const editedSegs = [];
         const boundaries = { north: '', east: '', south: '', west: '' };
 
+        const dirNeighMap = { north: [], east: [], south: [], west: [] };
         document.querySelectorAll('#stage1SegmentsTbody tr').forEach((tr, i) => {
           const dirSel = tr.querySelector('.seg-dir-select');
           const lenInp = tr.querySelector('.seg-length-input');
@@ -702,10 +723,13 @@
             neighbor: neigh
           });
 
-          // ربط أول اسم جار غير فارغ بالحد العام
-          if (neigh && (!boundaries[dir] || boundaries[dir] === '')) {
-            boundaries[dir] = neigh;
+          if (neigh && dirNeighMap[dir]) {
+            dirNeighMap[dir].push(neigh);
           }
+        });
+
+        ['north', 'east', 'south', 'west'].forEach(d => {
+          boundaries[d] = aggregateNeighbors(dirNeighMap[d]);
         });
 
         if (activeParcel.segments && activeParcel.segments.length > 0) {
@@ -772,6 +796,7 @@
 
       // ضبط أحجام خطوط وسماكة رسم الكروكي (يدوي بالكامل - لا يتم التحديث إلا بضغط زر التحديث)
       let croqFontSizes = { pts: 16, text: 16, dim: 16, line: 3.0 };
+      window.croqFontSizes = croqFontSizes;
 
       function adjustCroqFont(type, delta) {
         if (!croqFontSizes.hasOwnProperty(type)) return;
@@ -788,6 +813,13 @@
         croqFontSizes[type] = cfg.isFloat ? parseFloat(newVal.toFixed(1)) : Math.round(newVal);
         const valElem = document.getElementById(cfg.id);
         if (valElem) valElem.textContent = croqFontSizes[type];
+
+        if (activeParcel) {
+          if (type === 'pts') activeParcel.font_size_pts = croqFontSizes.pts;
+          if (type === 'dim') activeParcel.font_size_dims = croqFontSizes.dim;
+          if (type === 'text') activeParcel.font_size_text = croqFontSizes.text;
+          if (type === 'line') activeParcel.line_width = croqFontSizes.line;
+        }
         
         // تنبيه بصري بأن هناك تعديلات تنتظر ضغط زر التحديث
         markCroquisNeedsUpdate();
@@ -798,6 +830,11 @@
         if (btn && !btn.disabled) {
           btn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.75)';
           btn.style.borderColor = 'var(--accent-green-light)';
+        }
+        const sBtn = document.getElementById('btnStudioRefreshEngines');
+        if (sBtn && !sBtn.disabled) {
+          sBtn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.75)';
+          sBtn.style.borderColor = 'var(--accent-green-light)';
         }
       }
 
@@ -844,109 +881,202 @@
         document.body.removeChild(ta);
       }
 
-      // تحديث رسم الكروكي الهندسي بالكامل (يتم فقط عند الضغط على زر التحديث)
-      function updateCroquisDiagram() {
-        if (!activeParcel) {
-          alert('يرجى تحميل ملف الرفع المساحي أولاً لمعاينة وتحديث الكروكي.');
+      // تحديث وسحب صور المحركين بالكامل (الكروكي الهندسي والقمر الصناعي)
+      async function updateAllEngineImages() {
+        if (!activeParcel && !window.activeParcel) {
+          alert('يرجى تحميل ملف الرفع المساحي أو استيراد مسودة أولاً لمعاينة وتحديث الصورتين.');
           return;
         }
+        const parcel = activeParcel || window.activeParcel;
 
         const btn = document.getElementById('btnUpdateCroquis');
         const quickBtn = document.getElementById('btnQuickRefreshCroquis');
-        const defaultBtnHtml = '<span>🔄 تحديث رسم الكروكي</span>';
+        const quickSatBtn = document.getElementById('btnQuickRefreshSat');
+        const studioBtn = document.getElementById('btnStudioRefreshEngines');
+
+        const defaultBtnHtml = '<span>🔄 تحديث الصورتين (الكروكي والقمر)</span>';
+        const defaultStudioHtml = '<span>🔄</span> سحب وتحديث الصورتين من المحركين';
         
         if (btn) {
           btn.style.boxShadow = '';
           btn.style.borderColor = '';
-          btn.innerHTML = '<span>⏳ جاري الرسم...</span>';
+          btn.innerHTML = '<span>⏳ جاري التوليد...</span>';
           btn.disabled = true;
         }
         if (quickBtn) {
           quickBtn.textContent = '⏳ جاري...';
           quickBtn.disabled = true;
         }
+        if (quickSatBtn) {
+          quickSatBtn.textContent = '⏳ جاري...';
+          quickSatBtn.disabled = true;
+        }
+        if (studioBtn) {
+          studioBtn.style.boxShadow = '';
+          studioBtn.style.borderColor = '';
+          studioBtn.innerHTML = '<span>⏳ جاري التوليد...</span>';
+          studioBtn.disabled = true;
+        }
 
         // قراءة وتجميع بيانات الأضلاع المعدلة
         const editedSegs = [];
         const boundaries = { north: '', east: '', south: '', west: '' };
 
-        document.querySelectorAll('#stage1SegmentsTbody tr').forEach((tr, i) => {
-          const dirSel = tr.querySelector('.seg-dir-select');
-          const lenInp = tr.querySelector('.seg-length-input');
-          const neighInp = tr.querySelector('.seg-neighbor-input');
+        const dirNeighMap = { north: [], east: [], south: [], west: [] };
+        const rows = document.querySelectorAll('#stage1SegmentsTbody tr');
+        if (rows.length > 0) {
+          rows.forEach((tr, i) => {
+            const dirSel = tr.querySelector('.seg-dir-select');
+            const lenInp = tr.querySelector('.seg-length-input');
+            const neighInp = tr.querySelector('.seg-neighbor-input');
 
-          const dir = dirSel ? dirSel.value : 'north';
-          const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
-          const neigh = neighInp ? neighInp.value.trim() : '';
+            const dir = dirSel ? dirSel.value : 'north';
+            const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
+            const neigh = neighInp ? neighInp.value.trim() : '';
 
-          editedSegs.push({
-            direction: dir,
-            length_m: len,
-            neighbor: neigh
-          });
+            editedSegs.push({
+              direction: dir,
+              length_m: len,
+              neighbor: neigh
+            });
 
-          // ربط اسم الجار بالحد العام
-          if (neigh && (!boundaries[dir] || boundaries[dir] === '')) {
-            boundaries[dir] = neigh;
-          }
-        });
-
-        // تحديث كائن الـ activeParcel
-        if (activeParcel.segments) {
-          editedSegs.forEach((es, i) => {
-            if (activeParcel.segments[i]) {
-              activeParcel.segments[i].direction = es.direction;
-              activeParcel.segments[i].length_m = es.length_m;
-              activeParcel.segments[i].neighbor = es.neighbor;
+            if (neigh && dirNeighMap[dir]) {
+              dirNeighMap[dir].push(neigh);
             }
           });
-        }
-        activeParcel.boundaries = boundaries;
-        activeParcel.font_size_pts = croqFontSizes.pts;
-        activeParcel.font_size_dims = croqFontSizes.dim;
-        activeParcel.font_size_text = croqFontSizes.text;
-        activeParcel.line_width = croqFontSizes.line;
 
-        fetch('/api/preview-croquis', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            parcel_index: 0,
-            boundaries: boundaries,
-            edited_segments: editedSegs,
-            font_size_pts: croqFontSizes.pts,
-            font_size_dims: croqFontSizes.dim,
-            font_size_text: croqFontSizes.text,
-            line_width: croqFontSizes.line
-          })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.croquis_url) {
-            const croq1 = document.getElementById('stage1CroquisImg');
-            const croq2 = document.getElementById('imgCroquis');
-            const bustUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + Date.now();
-            if (croq1) croq1.src = bustUrl;
-            if (croq2) croq2.src = bustUrl;
+          ['north', 'east', 'south', 'west'].forEach(d => {
+            boundaries[d] = aggregateNeighbors(dirNeighMap[d]);
+          });
+
+          if (parcel.segments) {
+            editedSegs.forEach((es, i) => {
+              if (parcel.segments[i]) {
+                parcel.segments[i].direction = es.direction;
+                parcel.segments[i].length_m = es.length_m;
+                parcel.segments[i].neighbor = es.neighbor;
+              }
+            });
           }
+          parcel.boundaries = boundaries;
+        } else if (parcel.segments) {
+          parcel.segments.forEach(s => {
+            editedSegs.push({
+              direction: s.direction,
+              length_m: s.length_m,
+              neighbor: s.neighbor || ''
+            });
+            if (s.neighbor && s.direction && dirNeighMap[s.direction]) {
+              dirNeighMap[s.direction].push(s.neighbor);
+            }
+          });
+          ['north', 'east', 'south', 'west'].forEach(d => {
+            boundaries[d] = aggregateNeighbors(dirNeighMap[d]);
+          });
+          parcel.boundaries = boundaries;
+        }
+
+        // قراءة وتحديث أحجام الخطوط وسماكة الرسم
+        const fPts = (typeof croqFontSizes !== 'undefined' && croqFontSizes.pts) ? croqFontSizes.pts : (parcel.font_size_pts || 16);
+        const fDim = (typeof croqFontSizes !== 'undefined' && croqFontSizes.dim) ? croqFontSizes.dim : (parcel.font_size_dims || 16);
+        const fText = (typeof croqFontSizes !== 'undefined' && croqFontSizes.text) ? croqFontSizes.text : (parcel.font_size_text || 16);
+        const fLine = (typeof croqFontSizes !== 'undefined' && croqFontSizes.line) ? croqFontSizes.line : (parcel.line_width || 3.0);
+
+        parcel.font_size_pts = fPts;
+        parcel.font_size_dims = fDim;
+        parcel.font_size_text = fText;
+        parcel.line_width = fLine;
+
+        // فك أي قفل لصور مسودة سابقة لضمان ظهور النتائج المولدة حديثاً من المحركين
+        if (typeof customUploadedImages !== 'undefined') {
+          customUploadedImages.croquis = null;
+          customUploadedImages.satellite = null;
+        }
+        parcel.croquis_base64 = null;
+        parcel.satellite_base64 = null;
+
+        try {
+          const res = await fetch('/api/preview-croquis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              parcel_index: 0,
+              parcel: parcel,
+              boundaries: parcel.boundaries || boundaries,
+              edited_segments: editedSegs,
+              font_size_pts: fPts,
+              font_size_dims: fDim,
+              font_size_text: fText,
+              line_width: fLine,
+              refresh_satellite: true
+            })
+          });
+
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            throw new Error(data.error || 'تعذر توليد الصور من المحركين');
+          }
+
+          const tBust = Date.now();
+
+          // تحديث الكروكي في المرحلتين 1 و 2
+          if (data.croquis_url) {
+            const croqUrl = data.croquis_url + (data.croquis_url.includes('?') ? '&_t=' : '?_t=') + tBust;
+            parcel.croquis_url = croqUrl;
+            const cImg1 = document.getElementById('stage1CroquisImg');
+            const cImg2 = document.getElementById('imgCroquis');
+            if (cImg1) cImg1.src = croqUrl;
+            if (cImg2) cImg2.src = croqUrl;
+          }
+
+          // تحديث صورة القمر الصناعي في المرحلتين 1 و 2
+          if (data.satellite_url) {
+            const satUrl = data.satellite_url + (data.satellite_url.includes('?') ? '&_t=' : '?_t=') + tBust;
+            parcel.satellite_url = satUrl;
+            const sImg1 = document.getElementById('stage1SatImg');
+            const sImg2 = document.getElementById('imgSatellite');
+            if (sImg1) sImg1.src = satUrl;
+            if (sImg2) sImg2.src = satUrl;
+          }
+
+          // مزامنة حالة المعاملة بالكامل للذاكرة الموحدة في الباك إند
+          if (typeof window.syncSessionToBackend === 'function') {
+            window.syncSessionToBackend();
+          }
+          if (typeof updateRunningSums === 'function') {
+            updateRunningSums();
+          }
+
           if (btn) {
-            btn.innerHTML = '<span>✔ تم تحديث الكروكي</span>';
+            btn.innerHTML = '<span>✔ تم تحديث وسحب الصورتين</span>';
             setTimeout(() => {
               btn.innerHTML = defaultBtnHtml;
               btn.disabled = false;
-            }, 1200);
+            }, 1400);
           }
           if (quickBtn) {
             quickBtn.textContent = '✔ تم';
             setTimeout(() => {
               quickBtn.textContent = '🔄 تحديث';
               quickBtn.disabled = false;
-            }, 1200);
+            }, 1400);
           }
-          updateRunningSums();
-        })
-        .catch(err => {
-          alert('خطأ في تحديث الكروكي: ' + err.message);
+          if (quickSatBtn) {
+            quickSatBtn.textContent = '✔ تم';
+            setTimeout(() => {
+              quickSatBtn.textContent = '🔄 تحديث';
+              quickSatBtn.disabled = false;
+            }, 1400);
+          }
+          if (studioBtn) {
+            studioBtn.innerHTML = '<span>✔ تم سحب الصورتين بنجاح</span>';
+            setTimeout(() => {
+              studioBtn.innerHTML = defaultStudioHtml;
+              studioBtn.disabled = false;
+            }, 1400);
+          }
+        } catch (err) {
+          alert('خطأ في تحديث وسحب الصورتين من المحركين: ' + err.message);
           if (btn) {
             btn.innerHTML = defaultBtnHtml;
             btn.disabled = false;
@@ -955,8 +1085,19 @@
             quickBtn.textContent = '🔄 تحديث';
             quickBtn.disabled = false;
           }
-        });
+          if (quickSatBtn) {
+            quickSatBtn.textContent = '🔄 تحديث';
+            quickSatBtn.disabled = false;
+          }
+          if (studioBtn) {
+            studioBtn.innerHTML = defaultStudioHtml;
+            studioBtn.disabled = false;
+          }
+        }
       }
+
+      window.updateAllEngineImages = updateAllEngineImages;
+      window.updateCroquisDiagram = updateAllEngineImages;
 
       const customUploadedImages = { croquis: null, satellite: null };
 

@@ -39,6 +39,17 @@ if (window.location.hostname === 'localhost') {
 
       function switchStage(stageNum) {
         const previousStage = currentStage;
+
+        // التقاط وحفظ كافة التنسيقات وتعديلات الخطوط التي أجراها المستخدم في الاستوديو قبل مغادرته
+        if (previousStage === 2) {
+          if (typeof saveCurrentStudioTextState === 'function') {
+            saveCurrentStudioTextState();
+          }
+          if (typeof syncDomToActiveParcel === 'function') {
+            syncDomToActiveParcel();
+          }
+        }
+
         currentStage = stageNum;
         [stage1View, stage2View, stage3View].forEach((el, i) => {
           el.classList.toggle('active', i + 1 === stageNum);
@@ -54,18 +65,25 @@ if (window.location.hostname === 'localhost') {
             syncStage2ToStage1();
           }
         } else if (stageNum === 2) {
-          // الانتقال إلى المرحلة 2 (الاستوديو): التقاط أي تعديل في المرحلة 1 وتحديث الشهادة فوراً
+          // الانتقال إلى المرحلة 2 (الاستوديو): سحب أحدث الأضلاع والحدود والأبعاد دائماً
           if (typeof syncStage1SegmentsToParcel === 'function') {
             syncStage1SegmentsToParcel();
           }
-          const shouldForce = stage1IsModified || previousStage === 1;
-          syncStage1ToStage2(shouldForce);
+          syncStage1ToStage2(true);
           stage1IsModified = false;
           updateSpacing();
           renderWatermark();
+          // إعادة تطبيق كافة تخصيصات وتنسيقات الخطوط المحفوظة للاستوديو
+          if (typeof applySavedTextDefaults === 'function' && window.savedTextDefaults) {
+            applySavedTextDefaults(window.savedTextDefaults, false);
+          }
         } else if (stageNum === 3) {
           syncDomToActiveParcel();
           syncStage2ToStage3();
+        }
+
+        if (typeof window.syncSessionToBackend === 'function') {
+          window.syncSessionToBackend();
         }
       }
 

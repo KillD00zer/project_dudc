@@ -180,13 +180,33 @@
           if (typeof renderWatermark === 'function') renderWatermark();
 
           // 7. استعادة تخصيصات النصوص إن وجدت
-          if (data.text_customs) {
-            savedTextDefaults = data.text_customs;
-            applySavedTextDefaults(data.text_customs);
+          const textCustoms = data.text_customs || (data.session_data && data.session_data.text_customs) || (rawData.session_data && rawData.session_data.text_customs) || rawData.text_customs;
+          if (textCustoms && typeof applySavedTextDefaults === 'function') {
+            savedTextDefaults = textCustoms;
+            applySavedTextDefaults(textCustoms, true);
           }
 
           if (typeof croqFontSizes !== 'undefined') {
-            const lw = data.line_width || parcelData.line_width;
+            const pts = data.font_size_pts || parcelData.font_size_pts || (data.session_data && data.session_data.font_size_pts);
+            const dim = data.font_size_dims || parcelData.font_size_dims || (data.session_data && data.session_data.font_size_dims);
+            const text = data.font_size_text || parcelData.font_size_text || (data.session_data && data.session_data.font_size_text);
+            const lw = data.line_width || parcelData.line_width || (data.session_data && data.session_data.line_width);
+
+            if (pts) {
+              croqFontSizes.pts = Number(pts);
+              const elPts = document.getElementById('croqFontPtsVal');
+              if (elPts) elPts.textContent = croqFontSizes.pts;
+            }
+            if (dim) {
+              croqFontSizes.dim = Number(dim);
+              const elDim = document.getElementById('croqFontDimVal');
+              if (elDim) elDim.textContent = croqFontSizes.dim;
+            }
+            if (text) {
+              croqFontSizes.text = Number(text);
+              const elText = document.getElementById('croqFontTextVal');
+              if (elText) elText.textContent = croqFontSizes.text;
+            }
             if (lw) {
               croqFontSizes.line = Number(lw);
               const elLine = document.getElementById('croqLineWidthVal');
@@ -194,12 +214,33 @@
             }
           }
 
+          if (activeParcel) {
+            if (typeof croqFontSizes !== 'undefined') {
+              activeParcel.font_size_pts = croqFontSizes.pts;
+              activeParcel.font_size_dims = croqFontSizes.dim;
+              activeParcel.font_size_text = croqFontSizes.text;
+              activeParcel.line_width = croqFontSizes.line;
+            }
+          }
+
           // 8. المزامنة إلى استوديو التحرير (Stage 2)
           syncStage1ToStage2(true);
 
-          if (data.deal_type) document.getElementById('valDealType').textContent = data.deal_type;
-          if (data.site_desc) document.getElementById('valSiteDesc').textContent = data.site_desc;
-          if (data.order_no) document.getElementById('valOrderNo').textContent = data.order_no;
+          const rDeal = data.deal_type || (data.session_data && data.session_data.deal_type);
+          if (rDeal) document.getElementById('valDealType').textContent = rDeal;
+          const rSite = data.site_desc || (data.session_data && data.session_data.site_desc);
+          if (rSite) document.getElementById('valSiteDesc').textContent = rSite;
+          const rOrder = data.order_no || (data.session_data && data.session_data.order_no);
+          if (rOrder) document.getElementById('valOrderNo').textContent = rOrder;
+          const rVil = data.village || (data.session_data && data.session_data.village);
+          if (rVil) document.getElementById('valVillage').textContent = rVil;
+          const rAddr = data.address || (data.session_data && data.session_data.address);
+          if (rAddr) document.getElementById('valAddress').textContent = rAddr;
+
+          // إعادة تطبيق تخصيصات وتنسيقات النصوص لضمان عدم مسح أي تنسيق أو بولد بعد syncStage1ToStage2
+          if (textCustoms && typeof applySavedTextDefaults === 'function') {
+            applySavedTextDefaults(textCustoms, true);
+          }
 
           // 9. مزامنة الجلسة مع الباك إند
           fetch('/api/restore-session', {
@@ -279,17 +320,16 @@
       // منطق حفظ واسترجاع وإدارة المسودات (Drafts Queue Management)
       // --------------------------------------------------------------------------
       function getDraftPayload() {
+        // alias
+
         if (!activeParcel) return null;
         const citizenName = document.getElementById('valApplicantName')?.textContent?.trim() || activeParcel.applicant_name || 'بدون اسم';
         const centerName = document.getElementById('valCenter')?.textContent?.trim() || activeParcel.district || '';
         const areaVal = document.getElementById('valArea')?.textContent?.trim() || (activeParcel.calculated_area_m2 ? `${activeParcel.calculated_area_m2} م²` : '--');
 
         function extractElementBase64(imgEl, fallbackVal) {
-          if (fallbackVal && typeof fallbackVal === 'string' && fallbackVal.startsWith('data:image/')) {
-            return fallbackVal;
-          }
-          if (imgEl) {
-            if (imgEl.src && imgEl.src.startsWith('data:image/')) return imgEl.src;
+          if (imgEl && imgEl.src && !imgEl.src.endsWith('/') && imgEl.src !== window.location.href) {
+            if (imgEl.src.startsWith('data:image/')) return imgEl.src;
             try {
               if (imgEl.complete && imgEl.naturalWidth > 0) {
                 const canvas = document.createElement('canvas');
@@ -301,9 +341,10 @@
                 return canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.95);
               }
             } catch(e) {}
-            if (imgEl.src && !imgEl.src.endsWith('/') && imgEl.src !== window.location.href) {
-              return imgEl.src;
-            }
+            return imgEl.src;
+          }
+          if (fallbackVal && typeof fallbackVal === 'string' && fallbackVal.startsWith('data:image/')) {
+            return fallbackVal;
           }
           return fallbackVal || '';
         }
@@ -314,15 +355,20 @@
         const satEl = document.getElementById('imgSatellite') || document.getElementById('stage1SatImg');
         const satSrc = extractElementBase64(satEl, customUploadedImages.satellite || activeParcel.satellite_base64 || (document.getElementById('stage1SatImg')?.src || ''));
 
+        const currentTextCustoms = typeof collectAllTextCustomizations === 'function' ? collectAllTextCustomizations(false) : (savedTextDefaults || null);
         return {
           draft_id: currentActiveDraftId,
           applicant_name: citizenName,
           district: centerName,
           area: areaVal,
           line_width: (typeof croqFontSizes !== 'undefined' && croqFontSizes.line) ? croqFontSizes.line : (activeParcel.line_width || 3.0),
+          font_size_pts: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.pts : (activeParcel.font_size_pts || 16)),
+          font_size_dims: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.dim : (activeParcel.font_size_dims || 16)),
+          font_size_text: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.text : (activeParcel.font_size_text || 16)),
           parcel: activeParcel,
           croquis_base64: croqSrc,
           satellite_base64: satSrc,
+          text_customs: currentTextCustoms,
           session_data: {
             applicant_name: citizenName,
             receipt_no: document.getElementById('valReceiptNo')?.textContent?.trim() || activeParcel.receipt_no || '',
@@ -338,9 +384,13 @@
             system_officer: document.getElementById('selSysOfficer')?.value || activeParcel.system_officer || '',
             security_token: activeParcel.security_token || '',
             parcel: activeParcel,
+            line_width: (typeof croqFontSizes !== 'undefined' && croqFontSizes.line) ? croqFontSizes.line : (activeParcel.line_width || 3.0),
+            font_size_pts: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.pts : (activeParcel.font_size_pts || 16)),
+            font_size_dims: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.dim : (activeParcel.font_size_dims || 16)),
+            font_size_text: (typeof croqFontSizes !== 'undefined' ? croqFontSizes.text : (activeParcel.font_size_text || 16)),
             croquis_base64: croqSrc,
             satellite_base64: satSrc,
-            text_customs: typeof collectAllTextCustomizations === 'function' ? collectAllTextCustomizations() : null,
+            text_customs: currentTextCustoms,
             sliders: {
               margin: rngMargin.value, gapHeader: rngGapHeader.value, gapApplicant: rngGapApplicant.value,
               gapCoords: rngGapCoords.value, gapImages: rngGapImages.value, tablePad: rngTablePad.value,
@@ -540,6 +590,9 @@
           }
         });
       }
+
+      window.collectFullSessionData = getDraftPayload;
+      window.getDraftPayload = getDraftPayload;
 
       function refreshDraftsBadge() {
         fetch('/api/list-drafts')

@@ -164,3 +164,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
+// =========================================================================
+// Dropdown & Popover UI Controllers
+// =========================================================================
+window.toggleDropdown = function(id, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const target = document.getElementById(id);
+  if (!target) return;
+  const isAlreadyOpen = target.classList.contains('open');
+  closeAllDropdowns();
+  if (!isAlreadyOpen) {
+    target.classList.add('open');
+  }
+};
+
+window.closeAllDropdowns = function() {
+  document.querySelectorAll('.hdr-dropdown.open, .croq-popover-container.open').forEach(function(el) {
+    el.classList.remove('open');
+  });
+};
+
+window.toggleCroqSettings = function(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const container = document.getElementById('croqSettingsPopoverContainer');
+  if (!container) return;
+  const isAlreadyOpen = container.classList.contains('open');
+  closeAllDropdowns();
+  if (!isAlreadyOpen) {
+    container.classList.add('open');
+  }
+};
+
+// Global click outside listener
+document.addEventListener('click', function(e) {
+  // If clicked inside the croquis settings popover, do not close (user adjusting values)
+  if (e.target.closest('#croqSettingsPopoverContainer')) {
+    return;
+  }
+  // If clicked an item inside a dropdown menu, close menu smoothly after click
+  if (e.target.closest('.hdr-dropdown-item')) {
+    setTimeout(window.closeAllDropdowns, 80);
+    return;
+  }
+  // If clicked outside any dropdown, close all
+  if (!e.target.closest('.hdr-dropdown')) {
+    window.closeAllDropdowns();
+  }
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    window.closeAllDropdowns();
+  }
+});
+
+
+// =========================================================================
+// Real-Time Active Session Synchronization to Backend Memory
+// =========================================================================
+var sessionSyncTimer = null;
+
+window.syncSessionToBackend = function() {
+  if (sessionSyncTimer) {
+    clearTimeout(sessionSyncTimer);
+    sessionSyncTimer = null;
+  }
+  if (!activeParcel || typeof window.collectFullSessionData !== 'function') return;
+
+  if (typeof saveCurrentStudioTextState === 'function') {
+    saveCurrentStudioTextState();
+  }
+
+  const sessionData = window.collectFullSessionData();
+  fetch('/api/sync-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_data: sessionData })
+  }).catch(() => {});
+};
+
+window.scheduleSessionSync = function(delay = 500) {
+  if (sessionSyncTimer) clearTimeout(sessionSyncTimer);
+  sessionSyncTimer = setTimeout(window.syncSessionToBackend, delay);
+};
+
+// Monitor text edits in studio and sync in real time
+document.addEventListener('DOMContentLoaded', () => {
+  const cPage = document.getElementById('certPage');
+  if (cPage) {
+    cPage.addEventListener('input', () => {
+      window.scheduleSessionSync(400);
+    });
+    cPage.addEventListener('focusout', () => {
+      window.syncSessionToBackend();
+    });
+  }
+
+  // Floating toolbar buttons
+  ['fltFontInc', 'fltFontDec', 'fltBold', 'fltColorBlue', 'fltColorBlack', 'fltAlignRight', 'fltAlignCenter', 'fltAlignLeft', 'fltFontFamily'].forEach(btnId => {
+    document.getElementById(btnId)?.addEventListener('click', () => {
+      window.scheduleSessionSync(200);
+    });
+  });
+});

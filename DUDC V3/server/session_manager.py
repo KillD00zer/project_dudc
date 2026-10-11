@@ -11,7 +11,10 @@ from typing import List, Dict, Any, Optional, Tuple
 
 from core_gis.security import generate_dudc_token
 from core_gis.jurisdictions import resolve_center
-from .config import load_saved_config, save_persistent_config, validate_or_fallback_output_dir, get_safe_default_output_dir
+import os
+import json
+import base64
+from .config import load_saved_config, save_persistent_config, validate_or_fallback_output_dir, get_safe_default_output_dir, TEMP_ASSETS_DIR
 
 ARABIC_DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 ARABIC_TO_ENG = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
@@ -52,6 +55,7 @@ class SessionManager:
         self.current_parcels: List[Dict[str, Any]] = []
         self.current_survey_file_path: Optional[str] = None
         self.current_survey_filename: Optional[str] = None
+        self.active_session: Dict[str, Any] = {}
 
         cfg = load_saved_config()
         raw_out = cfg.get("output_dir")
@@ -85,6 +89,11 @@ class SessionManager:
         with self._lock:
             if 0 <= idx < len(self.current_parcels):
                 return self.current_parcels[idx]
+            if self.active_session and isinstance(self.active_session, dict):
+                p = self.active_session.get("parcel")
+                if p:
+                    self.current_parcels = [p]
+                    return p
             return None
 
     def update_parcel(self, idx: int, data: Dict[str, Any]) -> None:
@@ -172,6 +181,84 @@ class SessionManager:
             survey_technician=technician
         )
 
+
+
+    def update_active_session(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
+        with self._lock:
+            if not isinstance(session_data, dict):
+                return dict(self.active_session)
+
+            self.active_session.update(session_data)
+
+            # Synchronize parcel in memory
+            parcel = session_data.get("parcel") or self.active_session.get("parcel")
+            if not parcel:
+                parcel = dict(self.current_parcels[0]) if self.current_parcels else {}
+
+            for field in [
+                "applicant_name", "receipt_no", "national_id", "district", "district_id",
+                "village", "address", "deal_type", "transaction_type", "site_desc", "site_status",
+                "order_no", "request_no", "survey_technician", "system_officer", "security_token",
+                "boundaries", "segments", "vertices", "stated_area_m2", "calculated_area_m2",
+                "line_width", "font_size_pts", "font_size_dims", "font_size_text"
+            ]:
+                if field in session_data and session_data[field] is not None:
+                    parcel[field] = session_data[field]
+
+            self.active_session["parcel"] = parcel
+            if self.current_parcels:
+                self.current_parcels[0].update(parcel)
+            else:
+                self.current_parcels = [parcel]
+
+            # Cache croquis image to disk if base64 provided
+            croq_b64 = session_data.get("croquis_base64")
+            if croq_b64 and isinstance(croq_b64, str) and "data:image" in croq_b64 and "," in croq_b64:
+                try:
+                    c_path = os.path.join(TEMP_ASSETS_DIR, "croq_0.png")
+                    c_raw = croq_b64.split(",", 1)[1]
+                    with open(c_path, "wb") as f:
+                        f.write(base64.b64decode(c_raw))
+                except Exception as ce:
+                    pass
+
+            # Cache satellite image to disk if base64 provided
+            sat_b64 = session_data.get("satellite_base64")
+            if sat_b64 and isinstance(sat_b64, str) and "data:image" in sat_b64 and "," in sat_b64:
+                try:
+                    s_path = os.path.join(TEMP_ASSETS_DIR, "sat_0.jpg")
+                    s_raw = sat_b64.split(",", 1)[1]
+                    with open(s_path, "wb") as f:
+                        f.write(base64.b64decode(s_raw))
+                except Exception as se:
+                    pass
+
+            # Write recovery snapshot to temp_assets/active_session.json
+            try:
+                state_file = os.path.join(TEMP_ASSETS_DIR, "active_session.json")
+                snapshot = dict(self.active_session)
+                if snapshot.get("croquis_base64") and len(snapshot["croquis_base64"]) > 500:
+                    snapshot["croquis_base64"] = "/temp_assets/croq_0.png"
+                if snapshot.get("satellite_base64") and len(snapshot["satellite_base64"]) > 500:
+                    snapshot["satellite_base64"] = "/temp_assets/sat_0.jpg"
+                with open(state_file, "w", encoding="utf-8") as f:
+                    json.dump(snapshot, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+
+            return dict(self.active_session)
+
+    def get_active_session(self) -> Dict[str, Any]:
+        with self._lock:
+            if not self.active_session:
+                state_file = os.path.join(TEMP_ASSETS_DIR, "active_session.json")
+                if os.path.exists(state_file):
+                    try:
+                        with open(state_file, "r", encoding="utf-8") as f:
+                            self.active_session = json.load(f)
+                    except Exception:
+                        pass
+            return dict(self.active_session)
 
     def clear_session_cache(self, temp_assets_dir: str = "") -> dict:
         """

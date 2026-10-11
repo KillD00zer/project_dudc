@@ -1,3 +1,23 @@
+      function aggregateNeighbors(neighborList) {
+        if (!Array.isArray(neighborList)) return '';
+        const cleaned = [];
+        const seen = new Set();
+        
+        neighborList.forEach(n => {
+          if (!n) return;
+          const str = String(n).trim();
+          if (!str) return;
+          const norm = str.toLowerCase();
+          if (!seen.has(norm)) {
+            seen.add(norm);
+            cleaned.push(str);
+          }
+        });
+
+        return cleaned.join(' + ');
+      }
+      window.aggregateNeighbors = aggregateNeighbors;
+
 /**
  * DUDC V4.0 - Stage 2: Studio Live Preview, Typography & Watermark (stage2.js)
  */
@@ -17,6 +37,22 @@
           .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
       }
 
+      function updateTextPreservingStyles(el, newText) {
+        if (!el) return;
+        const s = {
+          fontFamily: el.style.fontFamily,
+          fontSize: el.style.fontSize,
+          fontWeight: el.style.fontWeight,
+          color: el.style.color,
+          textAlign: el.style.textAlign,
+          lineHeight: el.style.lineHeight
+        };
+        el.textContent = newText;
+        Object.entries(s).forEach(([k, v]) => {
+          if (v) el.style[k] = v;
+        });
+      }
+
       function syncStage1ToStage2(force = false) {
         if (!activeParcel) return;
 
@@ -31,40 +67,40 @@
         // Only overwrite elements if forced OR if currently blank/placeholder
         const nameEl = document.getElementById('valApplicantName');
         if (force || !nameEl.textContent.trim() || nameEl.textContent.trim() === 'لا يوجد بيانات متاحة' || nameEl.textContent.trim() === '--') {
-          nameEl.textContent = activeParcel.applicant_name || 'لا يوجد بيانات متاحة';
+          updateTextPreservingStyles(nameEl, activeParcel.applicant_name || 'لا يوجد بيانات متاحة');
         }
         
         const rcpEl = document.getElementById('valReceiptNo');
         if (force || !rcpEl.textContent.trim() || rcpEl.textContent.trim() === 'لا يوجد بيانات متاحة' || rcpEl.textContent.trim() === '--') {
           const rcp = (activeParcel.receipt_no && String(activeParcel.receipt_no).trim() !== '0') ? String(activeParcel.receipt_no).trim() : '';
-          rcpEl.textContent = rcp ? toArabicNumerals(rcp) : 'لا يوجد بيانات متاحة';
+          updateTextPreservingStyles(rcpEl, rcp ? toArabicNumerals(rcp) : 'لا يوجد بيانات متاحة');
         }
         
         const nidEl = document.getElementById('valNationalId');
         if (force || !nidEl.textContent.trim() || nidEl.textContent.trim() === 'لا يوجد بيانات متاحة' || nidEl.textContent.trim() === '--') {
           const nid = (activeParcel.national_id && String(activeParcel.national_id).trim() !== '0') ? String(activeParcel.national_id).trim() : '';
-          nidEl.textContent = nid ? toArabicNumerals(nid) : 'لا يوجد بيانات متاحة';
+          updateTextPreservingStyles(nidEl, nid ? toArabicNumerals(nid) : 'لا يوجد بيانات متاحة');
         }
         
         const centerEl = document.getElementById('valCenter');
         if (force || activeParcel.district || !centerEl.textContent.trim() || centerEl.textContent.trim() === 'لا يوجد بيانات متاحة' || centerEl.textContent.trim() === '--') {
-          centerEl.textContent = activeParcel.district || 'لا يوجد بيانات متاحة';
+          updateTextPreservingStyles(centerEl, activeParcel.district || 'لا يوجد بيانات متاحة');
         }
 
         const vilEl = document.getElementById('valVillage');
         if (force || !vilEl.textContent.trim() || vilEl.textContent.trim() === '--------' || vilEl.textContent.trim() === '--') {
-          vilEl.textContent = activeParcel.village || '--------';
+          updateTextPreservingStyles(vilEl, activeParcel.village || '--------');
         }
 
         const addrEl = document.getElementById('valAddress');
         if (force || !addrEl.textContent.trim() || addrEl.textContent.trim() === 'لا يوجد بيانات متاحة' || addrEl.textContent.trim() === '--') {
-          addrEl.textContent = activeParcel.address || activeParcel.village || 'لا يوجد بيانات متاحة';
+          updateTextPreservingStyles(addrEl, activeParcel.address || activeParcel.village || 'لا يوجد بيانات متاحة');
         }
         
         const areaEl = document.getElementById('valArea');
         if (force || !areaEl.textContent.trim() || areaEl.textContent.trim() === '-- م²' || areaEl.textContent.trim() === '--') {
           const areaVal = (parseFloat(activeParcel.calculated_area_m2) || 0).toFixed(2);
-          areaEl.textContent = `${toArabicNumerals(areaVal)} م²`;
+          updateTextPreservingStyles(areaEl, `${toArabicNumerals(areaVal)} م²`);
         }
 
         const orderEl = document.getElementById('valOrderNo');
@@ -74,18 +110,18 @@
           } else {
             const rawOrder = activeParcel.request_no || activeParcel.order_no || '';
             const reqNo = (rawOrder && String(rawOrder).trim() !== '0') ? String(rawOrder).trim() : '';
-            orderEl.textContent = reqNo ? `${toArabicNumerals(reqNo)}s` : 'لا يوجد بيانات متاحة';
+            updateTextPreservingStyles(orderEl, reqNo ? `${toArabicNumerals(reqNo)}s` : 'لا يوجد بيانات متاحة');
           }
         }
 
         const dealEl = document.getElementById('valDealType');
         if (force || !dealEl.textContent.trim() || dealEl.textContent.trim() === '--') {
-          dealEl.textContent = activeParcel.transaction_type || activeParcel.deal_type || 'إنشاء';
+          updateTextPreservingStyles(dealEl, activeParcel.transaction_type || activeParcel.deal_type || 'إنشاء');
         }
 
         const siteEl = document.getElementById('valSiteDesc');
         if (force || !siteEl.textContent.trim() || siteEl.textContent.trim() === '--') {
-          siteEl.textContent = activeParcel.site_status || activeParcel.site_desc || 'أرض فضاء';
+          updateTextPreservingStyles(siteEl, activeParcel.site_status || activeParcel.site_desc || 'أرض فضاء');
         }
 
         // التوقيعات المحددة
@@ -94,8 +130,12 @@
         const offVal = document.getElementById('selSysOfficer')?.value || activeParcel.system_officer || '';
         if (offVal) document.getElementById('sigGis').textContent = `أ / ${offVal}`;
 
-        // إعادة تطبيق التنسيقات المحفوظة على الحقول الديناميكية
-        reapplyDynamicTextStyles();
+        // إعادة تطبيق التنسيقات المحفوظة على الحقول الديناميكية وكافة عناصر الاستوديو
+        if (typeof applySavedTextDefaults === 'function' && window.savedTextDefaults) {
+          applySavedTextDefaults(window.savedTextDefaults, !force);
+        } else {
+          reapplyDynamicTextStyles();
+        }
 
         // تاريخ اليوم بالأرقام العربية
         const now = new Date();
@@ -119,9 +159,13 @@
           }
         }
 
-        // مزامنة الصورتين مع الاستوديو (سواء كانت صورة مخصصة مرفوعة أو معاينة افتراضية)
-        if (customUploadedImages.croquis || (activeParcel && activeParcel.croquis_base64)) {
-          document.getElementById('imgCroquis').src = customUploadedImages.croquis || activeParcel.croquis_base64;
+        // مزامنة الصورتين مع الاستوديو (سواء كانت صورة مخصصة مرفوعة أو معاينة افتراضية أو ناتجة من المحرك)
+        if (customUploadedImages.croquis) {
+          document.getElementById('imgCroquis').src = customUploadedImages.croquis;
+        } else if (activeParcel && activeParcel.croquis_url) {
+          document.getElementById('imgCroquis').src = activeParcel.croquis_url;
+        } else if (activeParcel && activeParcel.croquis_base64) {
+          document.getElementById('imgCroquis').src = activeParcel.croquis_base64;
         } else {
           const s1Croq = document.getElementById('stage1CroquisImg');
           if (s1Croq && s1Croq.src && !s1Croq.src.endsWith('/') && s1Croq.src !== window.location.href) {
@@ -129,8 +173,12 @@
           }
         }
 
-        if (customUploadedImages.satellite || (activeParcel && activeParcel.satellite_base64)) {
-          document.getElementById('imgSatellite').src = customUploadedImages.satellite || activeParcel.satellite_base64;
+        if (customUploadedImages.satellite) {
+          document.getElementById('imgSatellite').src = customUploadedImages.satellite;
+        } else if (activeParcel && activeParcel.satellite_url) {
+          document.getElementById('imgSatellite').src = activeParcel.satellite_url;
+        } else if (activeParcel && activeParcel.satellite_base64) {
+          document.getElementById('imgSatellite').src = activeParcel.satellite_base64;
         } else {
           const s1Sat = document.getElementById('stage1SatImg');
           if (s1Sat && s1Sat.src && !s1Sat.src.endsWith('/') && s1Sat.src !== window.location.href) {
@@ -138,11 +186,8 @@
           }
         }
 
-        // بناء جدول الحدود والإحداثيات بالدمج الرأسي الدقيق (فقط إذا كان فارغاً أو إجباري)
-        const coordsTbody = document.getElementById('certCoordsTbody');
-        if (force || !coordsTbody || coordsTbody.children.length === 0) {
-          buildCertCoordsTable();
-        }
+        // بناء وتحديث جدول الحدود والأبعاد والإحداثيات دائماً من المرحلة 1
+        buildCertCoordsTable();
       }
 
       function buildCertCoordsTable() {
@@ -156,16 +201,30 @@
           { key: 'west', title: 'الحد الغربي' }
         ];
 
-        // تجميع الأضلاع حسب الاتجاه
+        // تجميع الأضلاع حسب الاتجاه من جدول المرحلة 1 أو من كائن القطعة
         const segRows = document.querySelectorAll('#stage1SegmentsTbody tr');
         let dirGroups = { north: [], east: [], south: [], west: [] };
 
-        segRows.forEach(tr => {
-          const dir = tr.querySelector('.seg-dir-select').value;
-          const neighbor = tr.querySelector('.seg-neighbor-input').value.trim();
-          const len = parseFloat(tr.querySelector('.seg-length-input').value) || 0;
-          dirGroups[dir].push({ neighbor, len });
-        });
+        if (segRows && segRows.length > 0) {
+          segRows.forEach(tr => {
+            const dirSel = tr.querySelector('.seg-dir-select');
+            const neighInp = tr.querySelector('.seg-neighbor-input');
+            const lenInp = tr.querySelector('.seg-length-input');
+            if (dirSel) {
+              const dir = dirSel.value;
+              const neighbor = neighInp ? neighInp.value.trim() : '';
+              const len = lenInp ? (parseFloat(lenInp.value) || 0) : 0;
+              if (dirGroups[dir]) dirGroups[dir].push({ neighbor, len });
+            }
+          });
+        } else if (activeParcel && Array.isArray(activeParcel.segments)) {
+          activeParcel.segments.forEach(seg => {
+            const dir = seg.direction || 'north';
+            const neighbor = (seg.neighbor || '').trim();
+            const len = parseFloat(seg.length_m) || 0;
+            if (dirGroups[dir]) dirGroups[dir].push({ neighbor, len });
+          });
+        }
 
         // قراءة الإحداثيات من النقاط
         const verts = activeParcel.vertices || [];
@@ -203,7 +262,8 @@
         directions.forEach((d, dIdx) => {
           const group = dirGroups[d.key];
           const totalLen = group.reduce((acc, curr) => acc + curr.len, 0);
-          const neighborName = group.map(g => g.neighbor).filter(Boolean).join(' • ') || '';
+          const rawNeighbors = group.map(g => g.neighbor);
+          const neighborName = aggregateNeighbors(rawNeighbors);
           const rowCount = Math.max(1, group.length);
 
           const customTitle = (savedTextDefaults && savedTextDefaults[`__dir_${d.key}`]) ? savedTextDefaults[`__dir_${d.key}`] : d.title;
@@ -236,39 +296,13 @@
       }
 
       // =========================================================================
-      // مزامنة عكسية من الاستوديو (المرحلة 2) إلى المرحلة 1 في حال تعديل الجيران بالشهادة
+      // الوراثة أحادية الاتجاه: جدول الشهادة يرث من المرحلة 1 ولا يتعدى على أضلاع الكروكي
       // =========================================================================
       function syncStage2ToStage1() {
-        if (!activeParcel) return;
-        const neighCells = document.querySelectorAll('#certCoordsTbody .cell-dir-neighbor');
-        if (!neighCells || neighCells.length === 0) return;
-
-        const dirNeighbors = {};
-        neighCells.forEach(cell => {
-          const dir = cell.getAttribute('data-dir-key');
-          if (dir) {
-            dirNeighbors[dir] = cell.textContent.trim();
-          }
-        });
-
-        let hasUpdated = false;
-        document.querySelectorAll('#stage1SegmentsTbody tr').forEach(tr => {
-          const dirSel = tr.querySelector('.seg-dir-select');
-          const neighInp = tr.querySelector('.seg-neighbor-input');
-          if (dirSel && neighInp) {
-            const dir = dirSel.value;
-            if (dirNeighbors[dir] !== undefined && dirNeighbors[dir] !== '') {
-              if (neighInp.value !== dirNeighbors[dir]) {
-                neighInp.value = dirNeighbors[dir];
-                hasUpdated = true;
-              }
-            }
-          }
-        });
-
-        if (hasUpdated && typeof syncStage1SegmentsToParcel === 'function') {
-          syncStage1SegmentsToParcel();
-        }
+        // تم اعتماد الوراثة أحادية الاتجاه (One-Way Inheritance):
+        // بيانات الرفع المساحي في المرحلة 1 تحتفظ بجيران أضلاعها الفردية بدقة لمنع تشويه كروكي الـ CAD،
+        // بينما جدول الشهادة يقدم صياغة تجميعية قانونية مستقلة دون التأثير على المرحلة 1.
+        return;
       }
       window.syncStage2ToStage1 = syncStage2ToStage1;
 
@@ -508,6 +542,7 @@
             const s = Math.min(36, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) + 1);
             activeEditableElement.style.fontSize = `${s}px`;
             if (fltFontSizeVal) fltFontSizeVal.textContent = `${s}px`;
+            triggerStudioTextSave();
           }
         });
       }
@@ -517,6 +552,7 @@
             const s = Math.max(8, (parseInt(window.getComputedStyle(activeEditableElement).fontSize) || 12) - 1);
             activeEditableElement.style.fontSize = `${s}px`;
             if (fltFontSizeVal) fltFontSizeVal.textContent = `${s}px`;
+            triggerStudioTextSave();
           }
         });
       }
@@ -534,6 +570,7 @@
             activeEditableElement.style.fontWeight = isBold ? 'normal' : 'bold';
             fltBold.classList.toggle('active', !isBold);
           }
+          triggerStudioTextSave();
         });
       }
 
@@ -546,6 +583,7 @@
         } else {
           activeEditableElement.style.color = color;
         }
+        triggerStudioTextSave();
       }
 
       if (fltColorBlue) {
@@ -557,17 +595,26 @@
 
       if (fltAlignRight) {
         fltAlignRight.addEventListener('click', () => {
-          if (activeEditableElement) activeEditableElement.style.textAlign = 'right';
+          if (activeEditableElement) {
+            activeEditableElement.style.textAlign = 'right';
+            triggerStudioTextSave();
+          }
         });
       }
       if (fltAlignCenter) {
         fltAlignCenter.addEventListener('click', () => {
-          if (activeEditableElement) activeEditableElement.style.textAlign = 'center';
+          if (activeEditableElement) {
+            activeEditableElement.style.textAlign = 'center';
+            triggerStudioTextSave();
+          }
         });
       }
       if (fltAlignLeft) {
         fltAlignLeft.addEventListener('click', () => {
-          if (activeEditableElement) activeEditableElement.style.textAlign = 'left';
+          if (activeEditableElement) {
+            activeEditableElement.style.textAlign = 'left';
+            triggerStudioTextSave();
+          }
         });
       }
 
@@ -702,14 +749,21 @@
       // ==========================================================================
       // (savedTextDefaults تم تعريفها بالأعلى)
 
-      function collectAllTextCustomizations() {
+      function collectAllTextCustomizations(forDefaults = false) {
         const customs = {};
 
-        // جمع كافة العناصر التي تحتوي على data-text-id أو id أو نصوص الملاحظات
-        const elements = certPage.querySelectorAll('[data-text-id], [id^="val"], [id^="sig"], .cert-notes p');
-        elements.forEach(el => {
-          const key = el.getAttribute('data-text-id') || el.id;
-          if (!key) return;
+        // جمع كافة العناصر التي تحتوي على data-text-id أو id أو نصوص الملاحظات أو الجيران
+        const elements = certPage.querySelectorAll('[data-text-id], [id^="val"], [id^="sig"], .cert-notes p, .cell-dir-neighbor');
+        elements.forEach((el, idx) => {
+          let key = el.getAttribute('data-text-id') || el.id;
+          if (!key) {
+            if (el.classList.contains('cell-dir-neighbor')) {
+              const d = el.getAttribute('data-dir-key') || idx;
+              key = `__neighbor_${d}`;
+            } else {
+              key = `__note_${idx}`;
+            }
+          }
 
           const isDynamic = el.getAttribute('data-dynamic') === 'true';
 
@@ -719,14 +773,17 @@
           if (el.style.fontWeight) styles.fontWeight = el.style.fontWeight;
           if (el.style.color) styles.color = el.style.color;
           if (el.style.textAlign) styles.textAlign = el.style.textAlign;
+          if (el.style.lineHeight) styles.lineHeight = el.style.lineHeight;
 
           const item = {
             isDynamic: isDynamic,
-            styles: styles
+            styles: styles,
+            text: el.textContent.trim()
           };
 
-          // حفظ محتوى النص للعناصر الثابتة والرسمية (الملاحظات، العناوين، مدير المركز، إلخ)
-          if (!isDynamic) {
+          // عند حفظ المسودة أو الجلسة: نحفظ HTML الكامل بما فيه التعديلات والتنسيقات
+          // أما عند حفظ الافتراضي الدائم defaults.json: لا نحفظ أسماء المواطنين لتفادي تكرارها لمعاملات قادمة
+          if (!forDefaults || !isDynamic) {
             item.html = el.innerHTML;
           }
 
@@ -774,18 +831,88 @@
 
         return customs;
       }
+      window.collectAllTextCustomizations = collectAllTextCustomizations;
 
-      function applySavedTextDefaults(textData) {
+      function saveCurrentStudioTextState() {
+        const certPage = document.getElementById('certPage');
+        if (!certPage || typeof collectAllTextCustomizations !== 'function') return;
+        const current = collectAllTextCustomizations(false);
+        if (!window.savedTextDefaults) {
+          window.savedTextDefaults = {};
+        }
+        Object.assign(window.savedTextDefaults, current);
+        savedTextDefaults = window.savedTextDefaults;
+        if (activeParcel) {
+          activeParcel.text_customs = window.savedTextDefaults;
+        }
+        return window.savedTextDefaults;
+      }
+      window.saveCurrentStudioTextState = saveCurrentStudioTextState;
+
+      function triggerStudioTextSave() {
+        if (typeof saveCurrentStudioTextState === 'function') {
+          saveCurrentStudioTextState();
+        }
+        if (typeof scheduleSessionSync === 'function') {
+          scheduleSessionSync(300);
+        }
+      }
+      window.triggerStudioTextSave = triggerStudioTextSave;
+
+      function applySavedTextDefaults(textData, isDraftRestore = false) {
         if (!textData) return;
+        const certPage = document.getElementById('certPage');
+        if (!certPage) return;
 
         for (const [key, item] of Object.entries(textData)) {
-          if (key.startsWith('__')) continue;
+          if (key.startsWith('__')) {
+            if (key.startsWith('__note_')) {
+              const noteIdx = parseInt(key.replace('__note_', ''));
+              const notes = certPage.querySelectorAll('.cert-notes p');
+              if (notes && notes[noteIdx]) {
+                const el = notes[noteIdx];
+                if (item.html) el.innerHTML = item.html;
+                else if (item.text) el.textContent = item.text;
+                if (item.styles) Object.assign(el.style, item.styles);
+              }
+            } else if (key.startsWith('__neighbor_')) {
+              const dir = key.replace('__neighbor_', '');
+              const cell = certPage.querySelector(`.cell-dir-neighbor[data-dir-key="${dir}"]`);
+              if (cell) {
+                // تطبيق التنسيقات فقط (اللون، الخط، الحجم) دون مسح بيانات الجار القادمة من أضلاع المرحلة 1
+                if (item.styles) Object.assign(cell.style, item.styles);
+                if (isDraftRestore && (!activeParcel || !activeParcel.segments || activeParcel.segments.length === 0)) {
+                  if (item.html) cell.innerHTML = item.html;
+                  else if (item.text) cell.textContent = item.text;
+                }
+              }
+            } else if (key === '__coords_title_styles') {
+              certPage.querySelectorAll('.cell-dir-title').forEach(el => Object.assign(el.style, item));
+            } else if (key === '__coord_num_styles') {
+              certPage.querySelectorAll('.coord-num').forEach(el => Object.assign(el.style, item));
+            } else if (key === '__coords_betool_styles') {
+              certPage.querySelectorAll('.cell-dir-betool').forEach(el => Object.assign(el.style, item));
+            } else if (key === '__coords_betool_text') {
+              certPage.querySelectorAll('.cell-dir-betool').forEach(el => el.textContent = item);
+            } else if (key.startsWith('__dir_')) {
+              const dirKey = key.replace('__dir_', '');
+              const el = certPage.querySelector(`.cell-dir-title[data-dir-key="${dirKey}"]`);
+              if (el && typeof item === 'string') el.textContent = item;
+            }
+            continue;
+          }
 
           const el = certPage.querySelector(`[data-text-id="${key}"]`) || document.getElementById(key);
           if (!el) continue;
 
-          // 1. استعادة النص أو الصياغة للعناصر غير الديناميكية
-          if (!item.isDynamic && item.html !== undefined && item.html !== null) {
+          // 1. استعادة النص أو الصياغة HTML
+          if (isDraftRestore) {
+            if (item.html !== undefined && item.html !== null) {
+              el.innerHTML = item.html;
+            } else if (item.text !== undefined && item.text !== null) {
+              el.textContent = item.text;
+            }
+          } else if (!item.isDynamic && item.html !== undefined && item.html !== null) {
             el.innerHTML = item.html;
           }
 
@@ -796,14 +923,16 @@
             if (item.styles.fontWeight) el.style.fontWeight = item.styles.fontWeight;
             if (item.styles.color) el.style.color = item.styles.color;
             if (item.styles.textAlign) el.style.textAlign = item.styles.textAlign;
+            if (item.styles.lineHeight) el.style.lineHeight = item.styles.lineHeight;
           }
         }
       }
+      window.applySavedTextDefaults = applySavedTextDefaults;
 
       function reapplyDynamicTextStyles() {
         if (!savedTextDefaults) return;
         for (const [key, item] of Object.entries(savedTextDefaults)) {
-          if (!item.isDynamic || !item.styles) continue;
+          if (!item.styles || key.startsWith('__')) continue;
           const el = certPage.querySelector(`[data-text-id="${key}"]`) || document.getElementById(key);
           if (!el) continue;
           if (item.styles.fontFamily) el.style.fontFamily = item.styles.fontFamily;
@@ -811,8 +940,10 @@
           if (item.styles.fontWeight) el.style.fontWeight = item.styles.fontWeight;
           if (item.styles.color) el.style.color = item.styles.color;
           if (item.styles.textAlign) el.style.textAlign = item.styles.textAlign;
+          if (item.styles.lineHeight) el.style.lineHeight = item.styles.lineHeight;
         }
       }
+      window.reapplyDynamicTextStyles = reapplyDynamicTextStyles;
 
       function applyLayoutDefaults(data) {
         if (data) {
@@ -861,7 +992,7 @@
       // حفظ كإعدادات افتراضية (Layout + النصوص والتنسيقات)
       const saveToast = document.getElementById('saveToast');
       document.getElementById('btnSaveAsDefault').addEventListener('click', () => {
-        const textCustoms = collectAllTextCustomizations();
+        const textCustoms = collectAllTextCustomizations(true);
         savedTextDefaults = textCustoms;
 
         const defs = {

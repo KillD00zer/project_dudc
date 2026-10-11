@@ -831,3 +831,176 @@
       color: #fbbf24;
     }
 
+
+
+/* ==========================================================================
+   DROPDOWN & POPOVER COMPONENTS (UI Grouping Pass)
+   ========================================================================== */
+
+/* 1. Header Dropdown Menus */
+.hdr-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.hdr-dd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+}
+
+.hdr-dd-arrow {
+  font-size: 9px;
+  transition: transform 0.25s ease;
+  opacity: 0.8;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.hdr-dropdown.open .hdr-dd-arrow,
+.croq-popover-container.open .hdr-dd-arrow {
+  transform: rotate(180deg);
+}
+
+.hdr-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  min-width: 210px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 189, 248, 0.12);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1200;
+  animation: hdrDDFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hdr-dropdown.open .hdr-dropdown-menu {
+  display: flex;
+}
+
+@keyframes hdrDDFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hdr-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: right;
+  direction: rtl;
+  transition: all 0.18s ease;
+}
+
+.hdr-dropdown-item:hover {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  transform: translateX(-3px);
+}
+
+.hdr-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 6px;
+}
+
+/* 2. Croquis Settings Popover */
+.croq-popover-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.croq-popover-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  min-width: 270px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.15);
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1200;
+  animation: hdrDDFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.croq-popover-container.open .croq-popover-menu {
+  display: flex;
+}
+
+.croq-popover-header {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.croq-popover-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.croq-popover-row span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+/* 3. Button Group (Unified side-by-side buttons) */
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.btn-group .btn {
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+}

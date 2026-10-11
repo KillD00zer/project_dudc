@@ -63,36 +63,55 @@
         <span id="serverStatusText">السيرفر متصل</span>
       </div>
 
+      <!-- زر معاملة جديدة الرئيسي البارز -->
       <button class="btn btn-glass" id="btnNewSessionReset" title="تفريغ مساحة العمل ومسح الكاش لبدء معاملة مساحية جديدة"
         style="border-color: rgba(239, 68, 68, 0.45); color: #f87171; font-weight: 700;">
         <span>🔄</span> معاملة جديدة
       </button>
 
-      <button class="btn btn-star" id="btnSaveAsDefault" title="حفظ الإعدادات الحالية وتعديلات النصوص كافتراضي دائم">
-        <span>⭐</span> حفظ كإعدادات افتراضية
-      </button>
+      <!-- قائمة: الجلسات والمسودات -->
+      <div class="hdr-dropdown" id="dropdownSessions">
+        <button type="button" class="btn btn-glass hdr-dd-btn" id="btnDDSessions" onclick="toggleDropdown('dropdownSessions', event)"
+          title="إدارة الجلسات السابقة ومسودات اليوم">
+          <span>📁</span>
+          <span>الجلسات والمسودات</span>
+          <span id="draftsBadgeCount"
+            style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
+          <span class="hdr-dd-arrow">▾</span>
+        </button>
+        <div class="hdr-dropdown-menu">
+          <button type="button" class="hdr-dropdown-item" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
+            <span>📂</span> استيراد جلسة (JSON)
+          </button>
+          <button type="button" class="hdr-dropdown-item" id="btnOpenDraftsBox" title="صندوق المسودات والشهادات المؤجلة">
+            <span>📑</span> مسودات اليوم
+          </button>
+        </div>
+      </div>
 
-      <button class="btn btn-glass" id="btnResetDefaultSettings" title="استعادة الإعدادات الأصلية المصنعية">
-        <span>↺</span> استعادة الافتراضي
-      </button>
-
-      <button class="btn btn-glass" id="btnImportJson" title="استيراد وتعديل جلسة شهادة سابقة">
-        <span>📂</span> استيراد جلسة
-      </button>
-
-      <button class="btn btn-glass" id="btnOpenDraftsBox" title="صندوق المسودات والشهادات المؤجلة"
-        style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24; position: relative;">
-        <span>📑</span> مسودات اليوم
-        <span id="draftsBadgeCount"
-          style="display: none; background: #ef4444; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">0</span>
-      </button>
-
-      <button class="btn btn-glass" id="btnCheckAppUpdate" title="فحص وتحديث المنظومة من GitHub"
-        style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; position: relative;" onclick="openUpdateModal()">
-        <span>🔄</span> تحديث المنظومة
-        <span id="updateAvailableBadge"
-          style="display: none; background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">جديد!</span>
-      </button>
+      <!-- قائمة: الإعدادات والنظام -->
+      <div class="hdr-dropdown" id="dropdownSettings">
+        <button type="button" class="btn btn-glass hdr-dd-btn" id="btnDDSettings" onclick="toggleDropdown('dropdownSettings', event)"
+          title="الإعدادات الافتراضية وتحديث المنظومة">
+          <span>⚙️</span>
+          <span>الإعدادات والنظام</span>
+          <span id="updateAvailableBadge"
+            style="display: none; background: #10b981; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-right: 4px;">جديد!</span>
+          <span class="hdr-dd-arrow">▾</span>
+        </button>
+        <div class="hdr-dropdown-menu">
+          <button type="button" class="hdr-dropdown-item" id="btnSaveAsDefault" title="حفظ الإعدادات الحالية وتعديلات النصوص كافتراضي دائم">
+            <span>⭐</span> حفظ كإعدادات افتراضية
+          </button>
+          <button type="button" class="hdr-dropdown-item" id="btnResetDefaultSettings" title="استعادة الإعدادات الأصلية المصنعية">
+            <span>↺</span> استعادة الافتراضي المصنعي
+          </button>
+          <div class="hdr-dropdown-divider"></div>
+          <button type="button" class="hdr-dropdown-item" id="btnCheckAppUpdate" title="فحص وتحديث المنظومة من GitHub" onclick="openUpdateModal()">
+            <span>🔄</span> فحص تحديثات المنظومة
+          </button>
+        </div>
+      </div>
       <input type="file" id="fileJsonInput" accept=".json" style="display: none;">
       <input type="file" id="inputUploadCroquis" accept="image/*" style="display: none;"
         onchange="handleImageFileSelected(this, 'croquis')">
@@ -126,16 +145,18 @@
             </button>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-green" onclick="openFolderExplorerModal()"
-              style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"
-              title="مستعرض مجلدات مرئي وسريع داخل الصفحة">
-              <span>📂</span> تصفح المجلدات (مدمج)
-            </button>
-            <button type="button" class="btn btn-glass" onclick="browseOutputDirNative()"
-              style="padding: 7px 10px; font-size: 0.78rem; opacity: 0.75; white-space: nowrap;"
-              title="استخدام مستعرض ملفات ويندوز التقليدي">
-              🪟 ويندوز
-            </button>
+            <div class="btn-group">
+              <button type="button" class="btn btn-green" onclick="openFolderExplorerModal()"
+                style="padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;"
+                title="مستعرض مجلدات مرئي وسريع داخل الصفحة">
+                <span>📂</span> تصفح المجلدات (مدمج)
+              </button>
+              <button type="button" class="btn btn-glass" onclick="browseOutputDirNative()"
+                style="padding: 7px 10px; font-size: 0.78rem; opacity: 0.85; white-space: nowrap;"
+                title="استخدام مستعرض ملفات ويندوز التقليدي">
+                🪟 ويندوز
+              </button>
+            </div>
           </div>
         </div>
 
@@ -285,10 +306,16 @@
           <div class="card">
             <div class="card-title" style="justify-content: space-between; align-items: center;">
               <span>🛰️ صورة فضائية (Google Satellite)</span>
-              <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('satellite')"
-                title="رفع صورة فضائية مخصصة من جهازك">
-                📁 إضافة صورة من الجهاز
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" class="btn-stage1-upload" onclick="triggerImageUpload('satellite')"
+                  title="رفع صورة فضائية مخصصة من جهازك">
+                  📁 إضافة صورة من الجهاز
+                </button>
+                <button type="button" class="btn btn-glass" id="btnQuickRefreshSat" onclick="updateAllEngineImages()"
+                  style="padding: 3px 8px; font-size: 11px; gap: 4px;" title="إعادة توليد وتحديث صورة القمر الصناعي">
+                  🔄 تحديث
+                </button>
+              </div>
             </div>
             <div id="dropZoneSat" class="stage1-dropzone" onclick="triggerImageUpload('satellite')"
               title="انقر لاختيار صورة من جهازك أو اسحب الصورة هنا">
@@ -306,42 +333,56 @@
             style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span>🗺️ الحدود الأربعة وتفصيل أضلاع الكروكي</span>
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <!-- 1. أرقام النقط -->
-              <div class="croq-font-pill" title="حجم خط أرقام النقط على الكروكي (1..N)">
-                <span>🔢 النقط:</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('pts', -1)">−</button>
-                <span id="croqFontPtsVal" class="croq-step-val">16</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('pts', 1)">+</button>
+              <!-- قائمة ضبط خطوط وسُمك الكروكي -->
+              <div class="croq-popover-container" id="croqSettingsPopoverContainer">
+                <button type="button" class="btn btn-glass" id="btnCroqSettingsToggle" onclick="toggleCroqSettings(event)"
+                  style="font-size: 11.5px; padding: 5px 12px; gap: 5px;" title="ضبط أحجام الخطوط وسُمك رسم الكروكي">
+                  <span>⚙️ خيارات الخطوط والرسم</span>
+                  <span class="hdr-dd-arrow">▾</span>
+                </button>
+                <div class="croq-popover-menu" id="croqSettingsMenu">
+                  <div class="croq-popover-header">
+                    <span>⚙️ خيارات الخطوط وسُمك الكروكي</span>
+                  </div>
+                  <div class="croq-popover-row">
+                    <span>🔢 أرقام النقط:</span>
+                    <div class="croq-font-pill" title="حجم خط أرقام النقط على الكروكي">
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('pts', -1)">−</button>
+                      <span id="croqFontPtsVal" class="croq-step-val">16</span>
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('pts', 1)">+</button>
+                    </div>
+                  </div>
+                  <div class="croq-popover-row">
+                    <span>🏷️ أسماء الجيران:</span>
+                    <div class="croq-font-pill" title="حجم خط أسماء الجيران والشوارع على الكروكي">
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('text', -1)">−</button>
+                      <span id="croqFontTextVal" class="croq-step-val">16</span>
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('text', 1)">+</button>
+                    </div>
+                  </div>
+                  <div class="croq-popover-row">
+                    <span>📏 خط الأبعاد:</span>
+                    <div class="croq-font-pill" title="حجم خط الأبعاد وأطوال الأضلاع على الكروكي">
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('dim', -1)">−</button>
+                      <span id="croqFontDimVal" class="croq-step-val">16</span>
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('dim', 1)">+</button>
+                    </div>
+                  </div>
+                  <div class="croq-popover-row">
+                    <span>✏️ سمك خط الرسم:</span>
+                    <div class="croq-font-pill" title="سماكة خط حدود المضلع في الكروكي (1 إلى 8 pt)">
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('line', -0.5)">−</button>
+                      <span id="croqLineWidthVal" class="croq-step-val">3</span>
+                      <button type="button" class="btn-step" onclick="adjustCroqFont('line', 0.5)">+</button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <!-- 2. خط الكتابة / أسماء الجيران -->
-              <div class="croq-font-pill" title="حجم خط أسماء الجيران والشوارع على الكروكي">
-                <span>🏷️ الجيران:</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('text', -1)">−</button>
-                <span id="croqFontTextVal" class="croq-step-val">16</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('text', 1)">+</button>
-              </div>
-
-              <!-- 3. خط الأبعاد -->
-              <div class="croq-font-pill" title="حجم خط الأبعاد وأطوال الأضلاع على الكروكي">
-                <span>📏 الأبعاد:</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('dim', -1)">−</button>
-                <span id="croqFontDimVal" class="croq-step-val">16</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('dim', 1)">+</button>
-              </div>
-
-              <!-- 4. سماكة خط الرسم -->
-              <div class="croq-font-pill" title="سماكة خط حدود المضلع في الكروكي (1 إلى 8 pt)">
-                <span>✏️ سمك الخط:</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('line', -0.5)">−</button>
-                <span id="croqLineWidthVal" class="croq-step-val">3</span>
-                <button type="button" class="btn-step" onclick="adjustCroqFont('line', 0.5)">+</button>
-              </div>
-
-              <!-- زر تحديث رسم الكروكي -->
-              <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateCroquisDiagram()"
-                style="padding: 5px 12px; font-size: 11.5px; gap: 4px;">
-                <span>🔄 تحديث رسم الكروكي</span>
+              <!-- زر تحديث رسم الكروكي وصورة القمر الصناعي -->
+              <button type="button" class="btn btn-green" id="btnUpdateCroquis" onclick="updateAllEngineImages()"
+                style="padding: 5px 12px; font-size: 11.5px; gap: 4px;" title="إعادة توليد وتحديث رسم الكروكي وصورة القمر الصناعي معاً">
+                <span>🔄 تحديث الصورتين (الكروكي والقمر)</span>
               </button>
             </div>
           </div>
@@ -438,6 +479,11 @@
             <button class="btn btn-glass" id="btnOpenCropSat" style="font-size: 11px; justify-content: center;">✂️ قص
               قمر</button>
           </div>
+          <button type="button" class="btn btn-green" id="btnStudioRefreshEngines" onclick="updateAllEngineImages()"
+            style="width: 100%; margin-top: 8px; font-size: 11.5px; padding: 7px 10px; justify-content: center; gap: 6px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);"
+            title="سحب وتوليد أحدث نسختين من محرك الكروكي الهندسي والقمر الصناعي واستبدال الصور السابقة في الشهادة والمسودة">
+            <span>🔄</span> سحب وتحديث الصورتين من المحركين
+          </button>
         </div>
 
         <!-- كارت 2: محرك العلامة المائية (الكود السري المولد) -->
