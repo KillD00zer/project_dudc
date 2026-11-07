@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Dict, Any, Tuple
 
 from core_gis.geo import read_survey_file
+from core_gis.docx_parser import docx_to_survey_csv
 from core_gis.croquis import generate_croquis_image
 from core_gis.satellite import generate_satellite_image
 from core_gis.security import confirm_cloud_issuance, TRIAL_TOKEN
@@ -107,6 +108,16 @@ def handle_get(req_handler, path: str) -> bool:
         except Exception as e:
             req_handler._send_json({"error": str(e)}, status=500)
         return True
+
+    elif clean_path == '/api/download-survey-csv':
+        csv_path = SESSION_MANAGER.current_survey_file_path
+        if csv_path and os.path.exists(csv_path):
+            fname = SESSION_MANAGER.current_survey_filename or os.path.basename(csv_path)
+            req_handler._send_file(csv_path, 'text/csv; charset=utf-8-sig', attachment_name=fname)
+            return True
+        else:
+            req_handler._send_json({"error": "No survey CSV available"}, status=404)
+            return True
 
     # Static CSS
     elif clean_path.startswith('/css/'):
@@ -271,6 +282,125 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                 })
             else:
                 req_handler._send_json({"error": "Unsupported upload format"}, status=400)
+        except Exception as e:
+            req_handler._send_json({"error": str(e)}, status=500)
+        return True
+
+    # 2b. Upload Cadastral Certificate (.docx) -> Synthesize Standard Survey CSV & Ingest
+    elif clean_path == '/api/upload-docx':
+        try:
+            SESSION_MANAGER.clear_session_cache(temp_assets_dir=TEMP_ASSETS_DIR)
+            content_type = req_handler.headers.get('Content-Type', '')
+
+            saved_docx_path = None
+            orig_filename = "certificate.docx"
+            sys_officer = "شريف محمد"
+            survey_tech = "محمد ابراهيم بدير"
+
+            if 'multipart/form-data' in content_type:
+                boundary = content_type.split("boundary=")[1].encode()
+                parts = body_bytes.split(boundary)
+
+                for part in parts:
+                    if b'name="system_officer"' in part:
+                        try:
+                            _, v_body = part.split(b'\r\n\r\n', 1)
+                            sys_officer = v_body.decode('utf-8', errors='ignore').split('\r\n')[0].strip()
+                        except Exception:
+                            pass
+                    if b'name="survey_technician"' in part:
+                        try:
+                            _, v_body = part.split(b'\r\n\r\n', 1)
+                            survey_tech = v_body.decode('utf-8', errors='ignore').split('\r\n')[0].strip()
+                        except Exception:
+                            pass
+                    if b'filename="' in part:
+                        header_part, file_body = part.split(b'\r\n\r\n', 1)
+                        file_body = file_body.rstrip(b'\r\n--')
+                        header_str = header_part.decode('utf-8', errors='ignore')
+
+                        match = re.search(r'filename="([^"]+)"', header_str)
+                        if match:
+                            orig_filename = os.path.basename(match.group(1))
+
+                        tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.docx', dir=TEMP_ASSETS_DIR)
+                        tfile.write(file_body)
+                        tfile.close()
+                        saved_docx_path = tfile.name
+
+            elif 'application/json' in content_type:
+                req_data = json.loads(body_bytes.decode('utf-8'))
+                saved_docx_path = req_data.get('file_path')
+                if saved_docx_path:
+                    orig_filename = os.path.basename(saved_docx_path)
+                sys_officer = req_data.get('system_officer', sys_officer)
+                survey_tech = req_data.get('survey_technician', survey_tech)
+
+            if not saved_docx_path or not os.path.exists(saved_docx_path):
+                req_handler._send_json({"error": "فشل استلام ملف شهادة الوورد (.docx)"}, status=400)
+                return True
+
+            # Convert Word document to standardized survey CSV
+            temp_csv_path = os.path.join(TEMP_ASSETS_DIR, f"survey_{int(time.time())}.csv")
+            try:
+                _, parsed_data = docx_to_survey_csv(saved_docx_path, temp_csv_path)
+            except Exception as pe:
+                req_handler._send_json({"error": f"خطأ في قراءة ملف شهادة الوورد: {pe}"}, status=400)
+                return True
+
+            # Determine clean applicant and district names for permanent CSV storage
+            meta = parsed_data.get("metadata", {})
+            raw_applicant = meta.get("applicant_name") or "مواطن"
+            raw_district = meta.get("district") or ""
+            clean_name = re.sub(r'[\\/*?:"<>|]', '_', raw_applicant.strip())
+            clean_dist = re.sub(r'[\\/*?:"<>|]', '_', raw_district.strip())
+            base_name = f"{clean_name}-{clean_dist}" if clean_dist else clean_name
+            csv_filename = f"{base_name}_survey.csv"
+
+            # MANDATORY PERMANENT SAVE:
+            # Save the CSV permanently into the current output_dir
+            out_dir = SESSION_MANAGER.get_output_dir()
+            try:
+                os.makedirs(out_dir, exist_ok=True)
+            except Exception:
+                out_dir = get_safe_default_output_dir()
+                SESSION_MANAGER.set_output_dir(out_dir)
+                os.makedirs(out_dir, exist_ok=True)
+
+            permanent_csv_path = os.path.join(out_dir, csv_filename)
+            shutil.copy2(temp_csv_path, permanent_csv_path)
+
+            # Ingest parcels into engine
+            raw_parcels = read_survey_file(permanent_csv_path)
+            parcels = SESSION_MANAGER.enrich_parcels_with_security_tokens(
+                raw_parcels,
+                system_officer=sys_officer,
+                survey_technician=survey_tech
+            )
+            SESSION_MANAGER.set_survey_data(parcels, permanent_csv_path, csv_filename)
+
+            # Generate initial preview Croquis and Satellite for parcel 0
+            if parcels:
+                p0 = parcels[0]
+                pid = p0.get("parcel_id", "1")
+                croq_path = os.path.join(TEMP_ASSETS_DIR, f"croq_{pid}.png")
+                sat_path = os.path.join(TEMP_ASSETS_DIR, f"sat_{pid}.jpg")
+                try:
+                    generate_croquis_image(p0, croq_path)
+                    generate_satellite_image(p0, sat_path)
+                except Exception as img_err:
+                    print(f"[!] Warning generating preview images: {img_err}")
+
+            req_handler._send_json({
+                "success": True,
+                "filename": orig_filename,
+                "csv_filename": csv_filename,
+                "saved_csv_path": permanent_csv_path,
+                "total": len(parcels),
+                "parcels": parcels,
+                "official_centers": list_all_centers(),
+                "message": f"تم استخراج الرفع المساحي وحفظ ملف CSV دائم في: {permanent_csv_path}"
+            })
         except Exception as e:
             req_handler._send_json({"error": str(e)}, status=500)
         return True

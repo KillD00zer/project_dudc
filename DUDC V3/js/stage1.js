@@ -212,6 +212,11 @@
         // 8. تنظيف مدخل ملف الرفع لتمكين إعادة اختيار نفس الملف
         const fileInp = document.getElementById('surveyFileInput');
         if (fileInp) fileInp.value = '';
+        const docxInp = document.getElementById('docxFileInput');
+        if (docxInp) docxInp.value = '';
+
+        const banner = document.getElementById('surveyFileSavedBanner');
+        if (banner) banner.style.display = 'none';
 
         // 9. إعادة ضبط حالة تأكيد الشهادة والرمز الأمني
         if (typeof resetConfirmationState === 'function') resetConfirmationState();
@@ -313,9 +318,10 @@
           highlightStep1Requirement();
           return;
         }
-        if (e.target !== document.getElementById('btnLoadSample')) {
-          surveyFileInput.click();
+        if (e.target.closest('#btnLoadSample') || e.target.closest('#btnImportDocx')) {
+          return;
         }
+        surveyFileInput.click();
       });
 
       dropzone.addEventListener('dragenter', (e) => {
@@ -352,7 +358,12 @@
           return;
         }
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          uploadFile(e.dataTransfer.files[0]);
+          const file = e.dataTransfer.files[0];
+          if (file.name.toLowerCase().endsWith('.docx')) {
+            uploadDocxFile(file);
+          } else {
+            uploadFile(file);
+          }
         }
       });
 
@@ -361,8 +372,39 @@
           highlightStep1Requirement();
           return;
         }
-        if (e.target.files.length > 0) uploadFile(e.target.files[0]);
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          if (file.name.toLowerCase().endsWith('.docx')) {
+            uploadDocxFile(file);
+          } else {
+            uploadFile(file);
+          }
+        }
       });
+
+      const btnImportDocx = document.getElementById('btnImportDocx');
+      const docxFileInput = document.getElementById('docxFileInput');
+
+      if (btnImportDocx && docxFileInput) {
+        btnImportDocx.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isStep1Complete()) {
+            highlightStep1Requirement();
+            return;
+          }
+          docxFileInput.click();
+        });
+
+        docxFileInput.addEventListener('change', (e) => {
+          if (!isStep1Complete()) {
+            highlightStep1Requirement();
+            return;
+          }
+          if (e.target.files.length > 0) {
+            uploadDocxFile(e.target.files[0]);
+          }
+        });
+      }
 
       function uploadFile(file) {
         if (!isStep1Complete()) {
@@ -397,6 +439,14 @@
                 setLoadingStep(1, 'done');
                 setLoadingStep(2, 'active');
                 if (data.official_centers) officialCentersList = data.official_centers;
+
+                const banner = document.getElementById('surveyFileSavedBanner');
+                const bannerName = document.getElementById('bannerSavedCsvName');
+                if (banner && bannerName) {
+                  bannerName.textContent = data.filename || file.name;
+                  banner.style.display = 'flex';
+                }
+
                 loadParcelData(data.parcels[0], () => {
                   setLoadingStep(4, 'done');
                   hideLoading();
@@ -414,6 +464,67 @@
             });
 
         }); // end clearClientSession().then
+      }
+
+      function uploadDocxFile(file) {
+        if (!isStep1Complete()) {
+          highlightStep1Requirement();
+          return;
+        }
+        const techVal = document.getElementById('selSurveyTech').value;
+        const officerVal = document.getElementById('selSysOfficer').value;
+
+        clearClientSession().then(() => {
+          showLoading(
+            `استيراد وتحويل شهادة الوورد (${file.name})`,
+            `جاري استخراج الحدود والإحداثيات وحفظ شيت CSV دائم • المسؤول: ${officerVal}`,
+            () => uploadDocxFile(file)
+          );
+
+          setLoadingStep(1, 'active');
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('survey_technician', techVal);
+          formData.append('system_officer', officerVal);
+
+          fetch('/api/upload-docx', { method: 'POST', body: formData })
+            .then(res => {
+              if (!res.ok) throw new Error(`كود الاستجابة من السيرفر: ${res.status}`);
+              return res.json();
+            })
+            .then(data => {
+              if (data.success && data.parcels && data.parcels.length > 0) {
+                setLoadingStep(1, 'done');
+                setLoadingStep(2, 'active');
+                if (data.official_centers) officialCentersList = data.official_centers;
+
+                // Show permanent saved CSV banner
+                const banner = document.getElementById('surveyFileSavedBanner');
+                const bannerName = document.getElementById('bannerSavedCsvName');
+                if (banner && bannerName) {
+                  bannerName.textContent = data.csv_filename || 'survey.csv';
+                  banner.style.display = 'flex';
+                }
+
+                loadParcelData(data.parcels[0], () => {
+                  setLoadingStep(4, 'done');
+                  hideLoading();
+                  if (typeof showSaveToast === 'function') {
+                    showSaveToast(`✔ تم استيراد شهادة الوورد وحفظ ملف CSV دائم: ${data.csv_filename || ''}`);
+                  }
+                });
+              } else {
+                showLoadingError('خطأ في معالجة شهادة الوورد', data.error || 'تأكد من احتواء ملف الوورد على جداول الحدود والإحداثيات', () => uploadDocxFile(file));
+              }
+            })
+            .catch(err => {
+              showLoadingError(
+                'تعذر الاتصال بالسيرفر أثناء رفع ملف الوورد',
+                `تفاصيل الخطأ: ${err.message}. يرجى التحقق من تشغيل السيرفر على 8765`,
+                () => uploadDocxFile(file)
+              );
+            });
+        });
       }
 
       // التحديث اللحظي لحالة الخطوة 1 عند تغيير الفني أو المسؤول

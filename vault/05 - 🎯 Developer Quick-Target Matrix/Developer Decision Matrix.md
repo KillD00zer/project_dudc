@@ -13,6 +13,8 @@ Use this table to immediately identify which source files and functions need mod
 |---|---|---|
 | **Change Area Tolerance Calculation or Limit ($\pm 2.00\text{ m}^2$)** | `DUDC V3/core_gis/geo.py` | `validate_and_enrich_parcel()` |
 | **Change Excel/CSV parsing, column headers, or fuzzy matching** | `DUDC V3/core_gis/geo.py` | `read_survey_file()` & `find_col()` |
+| **Word certificate (.docx) parsing, table extraction, CSV synthesis** | `DUDC V3/core_gis/docx_parser.py` | `parse_docx_certificate()` & `docx_to_survey_csv()` |
+| **Word certificate upload endpoint & permanent CSV disk saving** | `DUDC V3/server/handlers.py` | `handle_post()` at `/api/upload-docx` |
 | **Fix coordinate jitter deduplication or ring closure** | `DUDC V3/core_gis/geo.py` | `read_survey_file()` (lines 170-186) |
 | **Modify CAD Croquis colors, line thickness, node style** | `DUDC V3/core_gis/croquis.py` | `generate_croquis_image()` |
 | **Modify CAD Croquis font sizes or inside/outside offsets** | `DUDC V3/core_gis/croquis.py` | `generate_croquis_image()` & `in_nx`, `out_nx` |

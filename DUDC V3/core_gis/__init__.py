@@ -7,6 +7,7 @@ Can be imported into any web server, QGIS plugin, ArcGIS Pro toolbox, or CLI scr
 
 from .models import CadastralParcel, Vertex, Segment, Boundaries
 from .geo import read_survey_file, validate_and_enrich_parcel, clean_id_field, clean_num_str
+from .docx_parser import parse_docx_certificate, docx_to_survey_csv
 from .croquis import generate_croquis_image
 from .satellite import generate_satellite_image
 from .security import generate_dudc_token, confirm_cloud_issuance, TRIAL_TOKEN
@@ -30,6 +31,8 @@ __all__ = [
     "validate_and_enrich_parcel",
     "clean_id_field",
     "clean_num_str",
+    "parse_docx_certificate",
+    "docx_to_survey_csv",
     "generate_croquis_image",
     "generate_satellite_image",
     "generate_dudc_token",

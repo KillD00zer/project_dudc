@@ -36,6 +36,7 @@ flowchart TD
 
     GIS --> MODELS["Cadastral Models (models.py)"]
     GIS --> GEO["Geodesic Engine & Tolerance (geo.py)"]
+    GIS --> DOCX["Word Docx Parser & CSV Synthesizer (docx_parser.py)"]
     GIS --> CROQ["CAD Croquis Generator (croquis.py)"]
     GIS --> SAT["Satellite Tile Engine (satellite.py)"]
     GIS --> JURIS["Jurisdictions & 18 Centers (jurisdictions)"]
@@ -66,6 +67,7 @@ When asked to inspect or modify a feature, skip repo scanning and jump directly 
 | Task / Feature Request | Target Note in Vault | Target Source File(s) in Codebase |
 |---|---|---|
 | **Area tolerance ($\pm 2.0\text{ m}^2$), Excel/CSV reading, coordinate parsing** | [[Geodesic Engine & Tolerance (geo.py)]] | [`DUDC V3/core_gis/geo.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/core_gis/geo.py) |
+| **Word certificate (.docx) parsing & permanent CSV generation** | [[Word Certificate (.docx) Parser & CSV Generator]] | [`DUDC V3/core_gis/docx_parser.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/core_gis/docx_parser.py) |
 | **CAD Croquis appearance, label positions, font sizes, line width, compass** | [[CAD Croquis Generator (croquis.py)]] | [`DUDC V3/core_gis/croquis.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/core_gis/croquis.py) |
 | **Google Satellite tiles, tile stitching, polygon overlay** | [[Satellite Tile Engine (satellite.py)]] | [`DUDC V3/core_gis/satellite.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/core_gis/satellite.py) |
 | **Modal.com cloud token API, audit log confirmation** | [[Security Token Protocol (Modal Cloud)]] | [`DUDC V3/core_gis/security.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/core_gis/security.py) |

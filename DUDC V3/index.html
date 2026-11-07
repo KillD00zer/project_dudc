@@ -222,7 +222,8 @@
 
       <!-- بطاقة رفع الملف / التجربة السريعة (الخطوة 2: غير مفعلة حتى اكتمال الخطوة 1) -->
       <div class="dropzone-card locked" id="dropzone">
-        <input type="file" id="surveyFileInput" accept=".xls,.xlsx,.csv" style="display: none;" disabled>
+        <input type="file" id="surveyFileInput" accept=".xls,.xlsx,.csv,.docx" style="display: none;" disabled>
+        <input type="file" id="docxFileInput" accept=".docx" style="display: none;" disabled>
 
         <div id="dropzoneLockedNotice" class="dropzone-lock-overlay">
           <span>🔒 الخطوة 2 مقفولة:</span>
@@ -230,11 +231,14 @@
         </div>
 
         <div style="font-size: 40px; margin-bottom: 8px;">📥</div>
-        <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">الخطوة 2: اسحب وأفلت شيت الإحداثيات هنا
-          (.xls, .xlsx, .csv)</h2>
+        <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">الخطوة 2: اسحب وأفلت شيت الإحداثيات هنا (.xls, .xlsx, .csv) أو شهادة Word (.docx)</h2>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">أو انقر لاختيار ملف من جهازك</p>
-        <button class="btn btn-green" id="btnLoadSample" disabled style="pointer-events: none;">⚡ تجربة العينة المرفقة
-          (ف.xls)</button>
+        <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-green" id="btnLoadSample" disabled style="pointer-events: none;">⚡ تجربة العينة المرفقة (ف.xls)</button>
+          <button class="btn" id="btnImportDocx" disabled style="pointer-events: none; opacity: 0.5; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; border: 1px solid #38bdf8; font-weight: bold; padding: 7px 16px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="استيراد شهادة مساحية من ملف وورد (.docx) وتحويلها تلقائياً إلى شيت مساحي وحفظه الدائم">
+            <span>📄</span> استيراد من شهادة Word (.docx)
+          </button>
+        </div>
       </div>
 
       <!-- نتائج المعالجة الهندسية والتحقق (الخطوة 3: تظهر فقط بعد تحميل ومعالجة الملف بنجاح) -->
@@ -276,6 +280,19 @@
                   title="نسخ كود التأمين للحافظة">📋 نسخ</button>
               </div>
             </div>
+          </div>
+
+          <!-- شريط ملف الرفع المساحي النشط والتحميل الدائم -->
+          <div id="surveyFileSavedBanner" style="display: none; margin-top: 12px; padding: 8px 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 6px; font-size: 12px; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 15px;">💾</span>
+              <span style="color: #94a3b8; font-weight: 600;">ملف الرفع المساحي الدائم:</span>
+              <strong id="bannerSavedCsvName" style="color: #38bdf8; font-family: monospace; direction: ltr;">--</strong>
+              <span id="bannerSavedCsvNotice" style="color: #34d399; font-weight: bold; font-size: 11px;">(تم الحفظ تلقائياً في مجلد المخرجات)</span>
+            </div>
+            <a id="btnDownloadCsvDirect" href="/api/download-survey-csv" class="btn btn-glass" style="padding: 4px 12px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" download title="تحميل شيت الرفع المساحي مباشرة بصيغة CSV">
+              ⬇️ تحميل نسخة شيت CSV
+            </a>
           </div>
         </div>
 

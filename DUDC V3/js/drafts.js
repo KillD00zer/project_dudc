@@ -998,7 +998,9 @@
         const badge = document.getElementById('step1StatusBadge');
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('surveyFileInput');
+        const docxInput = document.getElementById('docxFileInput');
         const btnSample = document.getElementById('btnLoadSample');
+        const btnImportDocx = document.getElementById('btnImportDocx');
         const lockNotice = document.getElementById('dropzoneLockedNotice');
         const step1Card = document.getElementById('step1Card');
 
@@ -1014,9 +1016,15 @@
             dropzone.classList.remove('locked');
           }
           if (fileInput) fileInput.disabled = false;
+          if (docxInput) docxInput.disabled = false;
           if (btnSample) {
             btnSample.disabled = false;
             btnSample.style.pointerEvents = 'auto';
+          }
+          if (btnImportDocx) {
+            btnImportDocx.disabled = false;
+            btnImportDocx.style.pointerEvents = 'auto';
+            btnImportDocx.style.opacity = '1';
           }
           if (lockNotice) {
             lockNotice.style.display = 'none';
@@ -1033,9 +1041,15 @@
             dropzone.classList.add('locked');
           }
           if (fileInput) fileInput.disabled = true;
+          if (docxInput) docxInput.disabled = true;
           if (btnSample) {
             btnSample.disabled = true;
             btnSample.style.pointerEvents = 'none';
+          }
+          if (btnImportDocx) {
+            btnImportDocx.disabled = true;
+            btnImportDocx.style.pointerEvents = 'none';
+            btnImportDocx.style.opacity = '0.5';
           }
           if (lockNotice) {
             lockNotice.style.display = 'flex';

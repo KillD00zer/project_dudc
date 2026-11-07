@@ -81,7 +81,7 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
         except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):
             pass
 
-    def _send_file(self, file_path, content_type='text/html; charset=utf-8'):
+    def _send_file(self, file_path, content_type='text/html; charset=utf-8', attachment_name=None):
         if not os.path.exists(file_path):
             try:
                 self.send_error(404, "File not found")
@@ -94,6 +94,8 @@ class DUDCV3RequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', content_type)
             self.send_header('Content-Length', str(len(content)))
+            if attachment_name:
+                self.send_header('Content-Disposition', f'attachment; filename="{urllib.parse.quote(attachment_name)}"')
             self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
             self.send_header('Pragma', 'no-cache')
             self.send_header('Expires', '0')

@@ -27,6 +27,7 @@ Contains the complete routing table for all GET and POST HTTP endpoints.
 | `/api/get-defaults` | Fetches persisted user styling defaults | `{"success": bool, "defaults": {...}}` |
 | `/api/get-centers` | Returns the 18 official Dakahlia centers | `{"centers": [[0, "المنصورة"], ...]}` |
 | `/api/list-drafts` | Lists all saved JSON drafts in `drafts/` | `{"success": true, "drafts": [...], "count": int}` |
+| `/api/download-survey-csv` | Directly downloads active standardized survey CSV | `text/csv; charset=utf-8-sig` attachment |
 | `/css/*` | Serves modular CSS style sheets | `text/css; charset=utf-8` |
 | `/js/*` | Serves modular JavaScript files | `application/javascript; charset=utf-8` |
 | `/assets/*` | Serves static assets, icons, logos | Image MIME types (`image/png`, `image/jpeg`, `image/x-icon`) |
@@ -39,6 +40,7 @@ Contains the complete routing table for all GET and POST HTTP endpoints.
 | Endpoint | Description | Request Body (JSON / Multipart) | Key Output |
 |---|---|---|---|
 | `/api/upload` | Ingests Excel (`.xls`, `.xlsx`) or `.csv` survey file | Multipart form data (file) or JSON `{use_sample: true}` | Parsed parcel list with calculated areas, segments, and validation statuses |
+| `/api/upload-docx` | Ingests Word cadastral certificate (`.docx`), synthesizes standard CSV, saves permanently to disk, and ingests into engine | Multipart form data (`.docx` file + officers) | Parcel list, `saved_csv_path`, `csv_filename`, and auto-previews |
 | `/api/preview-satellite` | Re-generates satellite imagery for a parcel | `{parcel_index: 0, stated_area_m2: float}` | `{"success": true, "satellite_url": "/temp_assets/sat_0.jpg?t=..."}` |
 | `/api/preview-croquis` | Re-generates CAD Croquis image with custom fonts | `{parcel_index: 0, font_size_pts: 16, font_size_dims: 16, ...}` | `{"success": true, "croquis_url": "/temp_assets/croq_0.png?t=..."}` |
 | `/api/upload-parcel-image` | Uploads user-provided custom Croquis or Satellite image | `{parcel_index: 0, image_type: "croquis"\|"satellite", image_base64: "..."}` | Overwrites asset in `temp_assets/` and parcel memory |
