@@ -3,8 +3,12 @@
 
 > **الغرض:** دليل هندسي شامل ومركّز يوضح مسار البيانات، الترابط بين الواجهة والباك إند، ووظائف كل ملف بدقة بعد تطبيق المعيارية (Modularity) لتسهيل الصيانة وإعادة الاستخدام.
 
-👉 **النسخة الكاملة المفصلة متوفرة داخل مجلد النظام:**  
-[DUDC V3/PROJECT_MAP.md](file:///d:/Work/GIS_tools/project_dudc/DUDC%20V3/PROJECT_MAP.md)
+👉 **قاعدة المعرفة التفاعلية الشاملة (Obsidian Vault):**  
+افتح مجلد `vault/` في برنامج **Obsidian** أو تصفح الخريطة المركزية مباشرة:  
+[00 - 🗺️ Vault Map of Content (MOC)](file:///d:/Work/certi_processing_tools/project_dudc/vault/00%20-%20%F0%9F%97%BA%EF%B8%8F%20Vault%20Map%20of%20Content%20(MOC).md) | [Developer Decision Matrix](file:///d:/Work/certi_processing_tools/project_dudc/vault/05%20-%20%F0%9F%8E%AF%20Developer%20Quick-Target%20Matrix/Developer%20Decision%20Matrix.md)
+
+👉 **النسخة الكاملة المفصلة داخل مجلد النظام:**  
+[DUDC V3/PROJECT_MAP.md](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/PROJECT_MAP.md)
 
 ---
 
@@ -57,8 +61,8 @@ d:\Work\GIS_tools\project_dudc\
 │       ├── stage3.js                # الاعتماد السحابي وتصدير الحزمة والطباعة
 │       └── app.js                   # ربط الأحداث وبدء التشغيل
 │
-├── Run_DUDC_V3.bat                  # مشغل النظام بنقرة واحدة
-├── Update_DUDC_V3.bat               # اختصار التحديث من GitHub
+├── Run_DUDC_V4.bat                  # مشغل النظام بنقرة واحدة
+├── Update_DUDC_V4.bat               # اختصار التحديث من GitHub
 └── README.md                        # التوثيق الشامل للنظام
 ```
 

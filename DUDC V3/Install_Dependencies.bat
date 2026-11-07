@@ -18,8 +18,8 @@ if exist "%~dp0runtime\python.exe" (
     echo   All dependencies are already bundled and verified.
     echo ======================================================================
     echo.
-    set /p LAUNCH="Do you want to launch DUDC V3 now? (Y/N, default Y): "
-    if /i not "%LAUNCH%"=="N" call "%~dp0Run_DUDC_V3.bat"
+    set /p LAUNCH="Do you want to launch DUDC V4 now? (Y/N, default Y): "
+    if /i not "%LAUNCH%"=="N" call "%~dp0Run_DUDC_V4.bat"
     exit /b 0
 )
 
@@ -229,9 +229,9 @@ echo ======================================================================
 echo   [SUCCESS] All required dependencies are installed and verified!
 echo ======================================================================
 echo.
-set /p LAUNCH="Do you want to launch DUDC V3 now? (Y/N, default Y): "
+set /p LAUNCH="Do you want to launch DUDC V4 now? (Y/N, default Y): "
 if /i "%LAUNCH%"=="N" goto end
 
-call "%~dp0Run_DUDC_V3.bat"
+call "%~dp0Run_DUDC_V4.bat"
 
 :end
