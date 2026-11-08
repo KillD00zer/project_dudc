@@ -372,6 +372,27 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
 
             # Ingest parcels into engine
             raw_parcels = read_survey_file(permanent_csv_path)
+
+            # Ensure parsed boundaries and segment neighbors from Word certificate are fully linked
+            if raw_parcels and parsed_data.get("boundaries"):
+                p0 = raw_parcels[0]
+                p_bounds = p0.setdefault("boundaries", {})
+                for bk, bv in parsed_data["boundaries"].items():
+                    if bv and not p_bounds.get(bk):
+                        p_bounds[bk] = bv
+                for seg in p0.get("segments", []):
+                    if not seg.get("neighbor"):
+                        seg["neighbor"] = p_bounds.get(seg.get("direction"), "")
+
+            # Attach extracted Word images to parcel 0 if available
+            docx_imgs = parsed_data.get("images", {})
+            if raw_parcels and docx_imgs:
+                p0 = raw_parcels[0]
+                if docx_imgs.get("croquis"):
+                    p0["docx_croquis_base64"] = docx_imgs["croquis"]
+                if docx_imgs.get("satellite"):
+                    p0["docx_satellite_base64"] = docx_imgs["satellite"]
+
             parcels = SESSION_MANAGER.enrich_parcels_with_security_tokens(
                 raw_parcels,
                 system_officer=sys_officer,
@@ -398,6 +419,12 @@ def handle_post(req_handler, path: str, body_bytes: bytes) -> bool:
                 "saved_csv_path": permanent_csv_path,
                 "total": len(parcels),
                 "parcels": parcels,
+                "docx_images": {
+                    "has_croquis": bool(docx_imgs.get("croquis")),
+                    "has_satellite": bool(docx_imgs.get("satellite")),
+                    "croquis": docx_imgs.get("croquis", ""),
+                    "satellite": docx_imgs.get("satellite", "")
+                },
                 "official_centers": list_all_centers(),
                 "message": f"تم استخراج الرفع المساحي وحفظ ملف CSV دائم في: {permanent_csv_path}"
             })

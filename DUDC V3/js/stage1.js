@@ -217,6 +217,7 @@
 
         const banner = document.getElementById('surveyFileSavedBanner');
         if (banner) banner.style.display = 'none';
+        updateDocxImageButtons(null);
 
         // 9. إعادة ضبط حالة تأكيد الشهادة والرمز الأمني
         if (typeof resetConfirmationState === 'function') resetConfirmationState();
@@ -446,6 +447,7 @@
                   bannerName.textContent = data.filename || file.name;
                   banner.style.display = 'flex';
                 }
+                updateDocxImageButtons(null);
 
                 loadParcelData(data.parcels[0], () => {
                   setLoadingStep(4, 'done');
@@ -504,6 +506,15 @@
                 if (banner && bannerName) {
                   bannerName.textContent = data.csv_filename || 'survey.csv';
                   banner.style.display = 'flex';
+                }
+
+                if (data.docx_images) {
+                  updateDocxImageButtons(data.docx_images);
+                } else if (data.parcels && data.parcels[0]) {
+                  updateDocxImageButtons({
+                    croquis: data.parcels[0].docx_croquis_base64 || '',
+                    satellite: data.parcels[0].docx_satellite_base64 || ''
+                  });
                 }
 
                 loadParcelData(data.parcels[0], () => {
@@ -719,6 +730,14 @@
         // بناء جدول الأضلاع
         buildSegmentsTable(parcel.segments || []);
 
+        // تحديث أزرار صور الوورد إذا كانت متوفرة في الطرد
+        if (parcel.docx_croquis_base64 || parcel.docx_satellite_base64) {
+          updateDocxImageButtons({
+            croquis: parcel.docx_croquis_base64 || '',
+            satellite: parcel.docx_satellite_base64 || ''
+          });
+        }
+
         // مزامنة فورية ونظيفة للمرحلة 2 لبناء جدول الإحداثيات وتحديث النصوص دون أي كاش قديم
         if (typeof syncStage1ToStage2 === 'function') {
           syncStage1ToStage2(true);
@@ -840,7 +859,14 @@
         });
 
         ['north', 'east', 'south', 'west'].forEach(d => {
-          boundaries[d] = aggregateNeighbors(dirNeighMap[d]);
+          const agg = aggregateNeighbors(dirNeighMap[d]);
+          if (agg) {
+            boundaries[d] = agg;
+          } else if (activeParcel.boundaries && activeParcel.boundaries[d]) {
+            boundaries[d] = activeParcel.boundaries[d];
+          } else {
+            boundaries[d] = '';
+          }
         });
 
         if (activeParcel.segments && activeParcel.segments.length > 0) {
@@ -869,6 +895,7 @@
           const tr = document.createElement('tr');
           const pFrom = seg.from_point !== undefined ? seg.from_point : (seg.from_pt !== undefined ? seg.from_pt : (i + 1));
           const pTo = seg.to_point !== undefined ? seg.to_point : (seg.to_pt !== undefined ? seg.to_pt : ((i + 1) % segments.length + 1));
+          const segNeighbor = seg.neighbor || (activeParcel && activeParcel.boundaries ? activeParcel.boundaries[seg.direction] : '') || '';
           tr.innerHTML = `
             <td><strong style="color: var(--accent-green-light); font-size: 13px;">P${pFrom} - P${pTo}</strong></td>
             <td>
@@ -880,7 +907,7 @@
               </select>
             </td>
             <td>
-              <input type="text" class="stage1-input seg-neighbor-input" data-index="${i}" placeholder="اسم الجار أو الشارع..." value="${seg.neighbor || ''}">
+              <input type="text" class="stage1-input seg-neighbor-input" data-index="${i}" placeholder="اسم الجار أو الشارع..." value="${segNeighbor}">
             </td>
             <td><strong>${(parseFloat(seg.length_m) || 0).toFixed(2)} م</strong></td>
             <td>
@@ -1211,6 +1238,58 @@
       window.updateCroquisDiagram = updateAllEngineImages;
 
       const customUploadedImages = { croquis: null, satellite: null };
+      let currentDocxImages = { croquis: null, satellite: null };
+
+      function updateDocxImageButtons(info) {
+        const btnAll = document.getElementById('btnApplyAllDocxImages');
+        const btnCroq = document.getElementById('btnUseDocxCroquis');
+        const btnSat = document.getElementById('btnUseDocxSat');
+
+        if (!info || (!info.croquis && !info.satellite)) {
+          currentDocxImages = { croquis: null, satellite: null };
+          if (btnAll) btnAll.style.display = 'none';
+          if (btnCroq) btnCroq.style.display = 'none';
+          if (btnSat) btnSat.style.display = 'none';
+          return;
+        }
+
+        currentDocxImages = {
+          croquis: info.croquis || null,
+          satellite: info.satellite || null
+        };
+
+        const hasCroq = !!currentDocxImages.croquis;
+        const hasSat = !!currentDocxImages.satellite;
+
+        if (btnCroq) btnCroq.style.display = hasCroq ? 'inline-flex' : 'none';
+        if (btnSat) btnSat.style.display = hasSat ? 'inline-flex' : 'none';
+        if (btnAll) btnAll.style.display = (hasCroq || hasSat) ? 'inline-flex' : 'none';
+      }
+
+      function useDocxImage(targetType) {
+        if (!currentDocxImages || !currentDocxImages[targetType]) {
+          alert(`لا توجد صورة ${targetType === 'croquis' ? 'كروكي' : 'قمر صناعي'} مستخرجة من ملف الوورد`);
+          return;
+        }
+        applyUploadedImageData(targetType, currentDocxImages[targetType]);
+      }
+
+      function useAllDocxImages() {
+        let count = 0;
+        if (currentDocxImages && currentDocxImages.croquis) {
+          applyUploadedImageData('croquis', currentDocxImages.croquis);
+          count++;
+        }
+        if (currentDocxImages && currentDocxImages.satellite) {
+          applyUploadedImageData('satellite', currentDocxImages.satellite);
+          count++;
+        }
+        if (count > 0) {
+          showSaveToast('✔ تم إدراج صور ملف الوورد الأصلية (الكروكي والقمر الصناعي) بنجاح');
+        } else {
+          alert('لا توجد صور مستخرجة من ملف الوورد الحالي');
+        }
+      }
 
       function triggerImageUpload(targetType) {
         if (targetType === 'croquis') {
@@ -1334,6 +1413,9 @@
       window.handleDistrictChange = handleDistrictChange;
       window.triggerImageUpload = triggerImageUpload;
       window.handleImageFileSelected = handleImageFileSelected;
+      window.updateDocxImageButtons = updateDocxImageButtons;
+      window.useDocxImage = useDocxImage;
+      window.useAllDocxImages = useAllDocxImages;
 
       function updateRunningSums() {
         let sums = { north: 0, east: 0, south: 0, west: 0 };

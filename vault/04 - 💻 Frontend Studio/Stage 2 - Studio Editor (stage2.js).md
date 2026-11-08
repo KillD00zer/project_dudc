@@ -8,7 +8,7 @@ related_files:
 
 # 💻 Stage 2 - Studio Editor (`stage2.js`)
 
-File: [`DUDC V3/js/stage2.js`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/js/stage2.js)
+File: [`DUDC V3/js/stage2.js`](file:///d:/Work/GIS_tools/project_dudc/DUDC%20V3/js/stage2.js)
 
 The interactive certificate layout studio. Provides real-time document styling, typography controls, layout spacing sliders, watermark generation, and inline editing.
 
@@ -42,7 +42,8 @@ Surveyors can customize fonts for individual certificate fields (e.g. applicant 
 
 ---
 
-## 🔄 Bidirectional Synchronization
+## 🔄 Bidirectional Synchronization & Coordinate Rendering
+- `buildCertCoordsTable()`: Renders the official boundary and coordinate table. Iterates through all coordinates in `verts` sequentially (1-to-1) as they appear in the survey file without mathematical jumping or duplicate modulo wraparounds. Any extra points beyond the cardinal direction rows are appended with empty boundary titles to preserve complete survey accuracy.
 - `syncStage1ToStage2(force)`: Copies coordinates, boundaries, areas, and citizen details into the certificate DOM elements.
 - `syncStage2ToStage1()`: If the surveyor edits an applicant name or boundary description inside the certificate table, this function updates the underlying `activeParcel` model and Stage 1 inputs.
 

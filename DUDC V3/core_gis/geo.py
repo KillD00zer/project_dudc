@@ -124,6 +124,10 @@ def read_survey_file(file_path: str) -> List[Dict[str, Any]]:
     c_trans = find_col("وصف التعامل", "وصف_التعامل", "transaction")
     c_site = find_col("وصف الموقع", "وصف_الموقع", "site")
     c_req = find_col("رقم الطلب", "رقم_الطلب", "request")
+    c_north = find_col("الحد_البحري", "الحد البحري", "الحد_البحرى", "الحد البحرى", "الحد الشمالي", "الحد_الشمالي", "بحري", "north")
+    c_south = find_col("الحد_القبلي", "الحد القبلي", "الحد_القبلى", "الحد القبلى", "الحد الجنوبي", "الحد_الجنوبي", "قبلي", "south")
+    c_east = find_col("الحد_الشرقي", "الحد الشرقي", "الحد_الشرقى", "الحد الشرقى", "شرقي", "east")
+    c_west = find_col("الحد_الغربي", "الحد الغربي", "الحد_الغربى", "الحد الغربى", "غربي", "west")
     c_x = find_col("POINT_X", "POINT X", "LONG", "Easting", "X")
     c_y = find_col("POINT_Y", "POINT Y", "LAT", "Northing", "Y")
 
@@ -206,10 +210,10 @@ def read_survey_file(file_path: str) -> List[Dict[str, Any]]:
             "request_no": request_no,
             "vertices": vertices,
             "boundaries": {
-                "north": clean_text_val(first_row.get("الحد_البحري", first_row.get("الحد البحري", ""))),
-                "south": clean_text_val(first_row.get("الحد_القبلي", first_row.get("الحد القبلي", ""))),
-                "east": clean_text_val(first_row.get("الحد_الشرقي", first_row.get("الحد الشرقي", ""))),
-                "west": clean_text_val(first_row.get("الحد_الغربي", first_row.get("الحد الغربي", "")))
+                "north": clean_text_val(first_row[c_north]) if c_north and not pd.isna(first_row[c_north]) else "",
+                "south": clean_text_val(first_row[c_south]) if c_south and not pd.isna(first_row[c_south]) else "",
+                "east": clean_text_val(first_row[c_east]) if c_east and not pd.isna(first_row[c_east]) else "",
+                "west": clean_text_val(first_row[c_west]) if c_west and not pd.isna(first_row[c_west]) else ""
             }
         }
 
@@ -248,6 +252,7 @@ def validate_and_enrich_parcel(parcel: Dict[str, Any]) -> Dict[str, Any]:
     }
     default_dir_names = ["الحد البحري", "الحد الشرقي", "الحد القبلي", "الحد الغربي"]
 
+    bounds = parcel.get("boundaries", {})
     segments = []
     for i in range(n_pts):
         next_i = (i + 1) % n_pts
@@ -278,6 +283,7 @@ def validate_and_enrich_parcel(parcel: Dict[str, Any]) -> Dict[str, Any]:
             "to_point": p2["point_index"],
             "direction": side,
             "direction_name": dir_name,
+            "neighbor": bounds.get(side, "") if bounds else "",
             "length_m": dist_m,
             "azimuth_deg": fwd_az
         })

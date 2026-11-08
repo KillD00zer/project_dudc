@@ -259,21 +259,28 @@
           if (betoolStyle.color) betoolStyleAttr += ` color: ${betoolStyle.color};`;
         }
 
+        let vertIdx = 0;
+
         directions.forEach((d, dIdx) => {
           const group = dirGroups[d.key];
           const totalLen = group.reduce((acc, curr) => acc + curr.len, 0);
           const rawNeighbors = group.map(g => g.neighbor);
-          const neighborName = aggregateNeighbors(rawNeighbors);
+          let neighborName = aggregateNeighbors(rawNeighbors);
+          if (!neighborName && activeParcel && activeParcel.boundaries && activeParcel.boundaries[d.key]) {
+            neighborName = activeParcel.boundaries[d.key];
+          }
           const rowCount = Math.max(1, group.length);
 
           const customTitle = (savedTextDefaults && savedTextDefaults[`__dir_${d.key}`]) ? savedTextDefaults[`__dir_${d.key}`] : d.title;
 
           for (let r = 0; r < rowCount; r++) {
             const tr = document.createElement('tr');
-            let v = verts[(dIdx * 2 + r) % Math.max(1, verts.length)] || { lon: 31.27530894, lat: 30.80509232 };
-            // الإحداثيات تبقى أرقام إنجليزية لعدم تغيير صيغة الـ GPS
-            const lonStr = v.lon ? parseFloat(v.lon).toFixed(8) : '';
-            const latStr = v.lat ? parseFloat(v.lat).toFixed(8) : '';
+            // قراءة الإحداثيات بتسلسلها الطبيعي نقطة بنقطة كما وردت دون قفز أو تكرار
+            let v = (vertIdx < verts.length) ? verts[vertIdx] : null;
+            vertIdx++;
+
+            const lonStr = (v && v.lon != null) ? parseFloat(v.lon).toFixed(8) : '';
+            const latStr = (v && v.lat != null) ? parseFloat(v.lat).toFixed(8) : '';
 
             if (r === 0) {
               tr.innerHTML = `
@@ -293,6 +300,23 @@
             tbody.appendChild(tr);
           }
         });
+
+        // إذا كان ملف الرفع يحتوي على نقاط إضافية تفوق أسطر الاتجاهات، تُدرج تباعاً بكامل إحداثياتها
+        while (vertIdx < verts.length) {
+          const v = verts[vertIdx++];
+          const tr = document.createElement('tr');
+          const lonStr = (v && v.lon != null) ? parseFloat(v.lon).toFixed(8) : '';
+          const latStr = (v && v.lat != null) ? parseFloat(v.lat).toFixed(8) : '';
+          tr.innerHTML = `
+            <td class="cell-dir-title" style="${titleStyleAttr}"></td>
+            <td class="cell-dir-neighbor"></td>
+            <td class="cell-dir-betool" style="${betoolStyleAttr}"></td>
+            <td class="cell-dir-len"></td>
+            <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${lonStr}</span></td>
+            <td><span class="coord-num" style="${coordStyleAttr}" contenteditable="true" spellcheck="false">${latStr}</span></td>
+          `;
+          tbody.appendChild(tr);
+        }
       }
 
       // =========================================================================

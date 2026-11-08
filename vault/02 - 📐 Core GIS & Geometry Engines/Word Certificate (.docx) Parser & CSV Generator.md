@@ -49,11 +49,19 @@ The parser scans table header cells to locate explicit coordinate columns:
 - **Northing / Lat (Y):** Matches `شماليات`, `y`, `n`, `northing`, `دائرة العرض`, `دوائر العرض`.
 - **Boundaries:** Matches `الحد البحري`, `الحد القبلي`, `الحد الشرقي`, `الحد الغربي`.
 
-### 2. Headerless Coordinate Fallback
-When no explicit headers exist:
-- Detects neighbor descriptions by skipping length keywords (`بطول`) and coordinates.
-- Filters out parcel boundary lengths (which precede coordinates or follow `بطول`).
-- Selects coordinate pairs with geodesic validation (WGS84 Egyptian range: $20^\circ \le \text{coord} \le 40^\circ$, or projected ETM range: $100,000 \le \text{coord} \le 5,000,000$).
+### 2. Headerless Coordinate Fallback & Robust Boundary Extraction
+When parsing tables:
+- **Direct Neighbor Extraction:** If a row starts with a cardinal direction (`detect_cardinal(row[0])`), the second column (`row[1]`) is extracted directly as the neighbor description (e.g., `شارع عرض 10 متر`, `مبنى سكنى`), bypassing coordinate checks.
+- **Interior Number Whitespace Tolerance:** In Word justified tables, Arabic numbers often contain accidental spaces (e.g., `3 0.760004 °` or `31. 342446 °`). The parser normalizes interior whitespaces between digits and decimal points before coordinate extraction.
+- **Descriptive Text Immunity:** Cells containing Arabic descriptive words (`شارع`, `جار`, `مبنى`, `فضاء`, `أرض`, `عرض`) are strictly preserved as text and never misclassified as GPS coordinates.
+- **Segment Neighbor Propagation:** `validate_and_enrich_parcel()` automatically injects the extracted boundary descriptions into `parcel["segments"][i]["neighbor"]`, pre-filling Stage 1 input fields and Stage 2 certificate tables without manual intervention.
+
+### 3. Official Embedded Images Extraction (`extract_docx_images`)
+Official cadastral Word certificates frequently embed the original survey sketch (`كروكى الموقع`) and satellite imagery (`صورة فضائية`) inside document tables:
+- **Zero-Dependency OpenXML Extraction:** Reads `word/_rels/document.xml.rels` to map relationship IDs (`r:embed`) to media paths (`word/media/image*.ext`).
+- **Header-Bound Table Resolution:** Matches table rows containing `كروكى الموقع` and `صورة فضائية` and pairs their respective cells to embedded drawings (`<a:blip>`).
+- **Base64 Payload Delivery:** Converts extracted image bytes into standard Data URLs (`data:image/jpeg;base64,...` or `data:image/png;base64,...`) returned in the parse payload under `images: {"croquis": "...", "satellite": "..."}`.
+- **Stage 1 UI Insertion:** Users can either click the 1-click banner button (`📸 إدراج صور ملف الوورد الأصلية`) to apply both images at once, or use the card title buttons (`📄 صورة الوورد`) to swap individual images.
 
 ---
 
@@ -85,12 +93,13 @@ The generated CSV conforms strictly to `core_gis/geo.py`:
 
 ## Integration Endpoints
 
-- **`POST /api/upload-docx`** in [`handlers.py`](file:///d:/Work/certi_processing_tools/project_dudc/DUDC%20V3/server/handlers.py):
+- **`POST /api/upload-docx`** in [`handlers.py`](file:///d:/Work/GIS_tools/project_dudc/DUDC%20V3/server/handlers.py):
   1. Accepts uploaded `.docx` file.
   2. Synthesizes permanent CSV in `SESSION_MANAGER.get_output_dir()`.
   3. Registers CSV in `SESSION_MANAGER.set_survey_data()`.
-  4. Pre-generates Croquis & Satellite preview images.
-  5. Returns parcel data to Stage 1.
+  4. Enriches parcels so that boundaries and segment neighbors are bound to the session.
+  5. Pre-generates Croquis & Satellite preview images.
+  6. Returns parcel data to Stage 1.
 - **`GET /api/download-survey-csv`**:
   Allows downloading the synthesized CSV file directly from the browser.
 - **`POST /api/export-package`**:

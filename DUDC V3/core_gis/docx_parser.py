@@ -10,8 +10,10 @@ Zero external dependencies: Uses Python standard library (zipfile, xml.etree.Ele
 
 import os
 import re
+import io
 import csv
 import zipfile
+import base64
 import xml.etree.ElementTree as ET
 from typing import Dict, Any, List, Tuple, Optional
 
@@ -28,6 +30,9 @@ def clean_num_val(val: Any) -> str:
     s = str(val).translate(ARABIC_TO_ENG).replace(',', '.')
     # Strip unit words and symbols first to prevent unit numbers (like 2 in m2) from corrupting the value
     s = re.sub(r'متر\s*مربع|م\s*2|م\s*²|متر|\bم\b', '', s, flags=re.IGNORECASE)
+    # Remove interior spaces between digits and decimal points (common in Word justified Arabic tables)
+    s = re.sub(r'(?<=\d)\s+(?=\d|\.)', '', s)
+    s = re.sub(r'(?<=\.)\s+(?=\d)', '', s)
     # Match the first floating-point or integer number in the string
     m = re.search(r'[-+]?\d*\.?\d+', s)
     return m.group(0) if m else ""
@@ -45,7 +50,8 @@ def extract_docx_tables(docx_file_or_bytes) -> List[List[List[str]]]:
     Extracts all tables from a .docx file as 2D grids of text strings.
     Properly handles vertical cell merges (<w:vMerge>) by propagating values downward.
     """
-    with zipfile.ZipFile(docx_file_or_bytes, 'r') as z:
+    file_obj = io.BytesIO(docx_file_or_bytes) if isinstance(docx_file_or_bytes, (bytes, bytearray)) else docx_file_or_bytes
+    with zipfile.ZipFile(file_obj, 'r') as z:
         xml_bytes = z.read("word/document.xml")
 
     root = ET.fromstring(xml_bytes)
@@ -246,6 +252,17 @@ def parse_coords_and_bounds_table(table_grid: List[List[str]]) -> Tuple[List[Dic
         return None
 
     def extract_coord_num(s: str) -> Optional[float]:
+        clean_text = clean_text_val(s)
+        if not clean_text:
+            return None
+        # Reject if string has descriptive Arabic words indicating text/neighbor description
+        ar_letters = re.findall(r'[\u0600-\u06FF]', clean_text)
+        if ar_letters:
+            if any(w in clean_text for w in ["شارع", "جار", "فضاء", "مبنى", "مبني", "فاصل", "أرض", "ارض", "بطول", "متر", "ملك", "طريق", "مصرف", "ترعة", "سكنى", "سكني", "مهدوم"]):
+                return None
+            if len(ar_letters) > 1:
+                return None
+
         clean = clean_num_val(s)
         if not clean:
             return None
@@ -254,6 +271,11 @@ def parse_coords_and_bounds_table(table_grid: List[List[str]]) -> Tuple[List[Dic
             # In Egypt WGS84: longitude is ~20.0 to 40.0, latitude is ~20.0 to 35.0
             # Or projected coordinate (ETM / Red Belt / UTM): Easting ~100,000-900,000, Northing ~600,000-4,000,000
             if (20.0 <= num <= 40.0) or (100000.0 <= num <= 5000000.0):
+                # If it's a decimal degree candidate (20-40), ensure it has a decimal point or degree symbol
+                # to prevent integers (like street widths 20, 30, 40) from being misidentified as coordinates
+                if 20.0 <= num <= 40.0:
+                    if '.' not in str(clean) and '°' not in s and 'deg' not in s.lower():
+                        return None
                 return num
         except ValueError:
             pass
@@ -276,6 +298,13 @@ def parse_coords_and_bounds_table(table_grid: List[List[str]]) -> Tuple[List[Dic
 
         # Extract neighbor description
         if current_cardinal:
+            # Direct check: in standard tables, if row[0] is the cardinal direction and len(row) > 1:
+            if len(row) > 1 and not boundaries[current_cardinal]:
+                c1 = clean_text_val(row[1])
+                if c1 and not detect_cardinal(c1) and not c1.startswith("بطول") and "بطول" not in c1:
+                    if re.search(r'[\u0600-\u06FFa-zA-Z]', c1) and not any(kw in c1 for kw in ("إحداثيات", "شرقيات", "شماليات", "LONG", "LAT")):
+                        boundaries[current_cardinal] = c1
+
             if col_neighbor_idx is not None and col_neighbor_idx < len(row):
                 cand = clean_text_val(row[col_neighbor_idx])
                 if cand and not boundaries[current_cardinal]:
@@ -291,7 +320,7 @@ def parse_coords_and_bounds_table(table_grid: List[List[str]]) -> Tuple[List[Dic
                         continue
                     if cell_clean in ("م", "م.", "م/", "نقطة", "رقم", "مسلسل"):
                         continue
-                    if any(kw in cell_clean for kw in ("الحدود", "إحداثيات", "شرقيات", "شماليات")):
+                    if any(kw in cell_clean for kw in ("الحدود", "إحداثيات", "شرقيات", "شماليات", "LONG", "LAT")):
                         continue
                     if extract_coord_num(cell_clean) is not None:
                         continue
@@ -390,11 +419,101 @@ def parse_docx_certificate(docx_path_or_bytes) -> Dict[str, Any]:
                 if val and not boundaries.get(k):
                     boundaries[k] = val
 
+    # 3. Extract embedded official survey images (Croquis & Satellite)
+    images = extract_docx_images(docx_path_or_bytes)
+
     return {
         "metadata": meta,
         "vertices": vertices,
-        "boundaries": boundaries
+        "boundaries": boundaries,
+        "images": images
     }
+
+
+def extract_docx_images(docx_file_or_bytes) -> Dict[str, str]:
+    """
+    Extracts embedded official survey images (Croquis sketch and Satellite imagery)
+    directly from the Word document archive as pure Base64 data URLs.
+    Returns {"croquis": "data:image/...;base64,...", "satellite": "data:image/...;base64,..."}.
+    """
+    images = {"croquis": "", "satellite": ""}
+    try:
+        file_obj = io.BytesIO(docx_file_or_bytes) if isinstance(docx_file_or_bytes, (bytes, bytearray)) else docx_file_or_bytes
+        with zipfile.ZipFile(file_obj, 'r') as z:
+            rels_path = "word/_rels/document.xml.rels"
+            if rels_path not in z.namelist():
+                return images
+
+            rels_root = ET.fromstring(z.read(rels_path))
+            rel_map = {}
+            for rel in rels_root:
+                r_id = rel.get("Id")
+                target = rel.get("Target", "")
+                if "image" in rel.get("Type", "").lower() or target.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                    if not target.startswith("word/"):
+                        target = "word/" + target.lstrip("/")
+                    rel_map[r_id] = target
+
+            doc_root = ET.fromstring(z.read("word/document.xml"))
+            W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+            A_NS = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+            R_NS = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
+
+            croq_target = None
+            sat_target = None
+
+            last_headers = []
+            for tr in doc_root.iter(f"{W_NS}tr"):
+                cells = list(tr.iter(f"{W_NS}tc"))
+                txts = ["".join(c.itertext()).strip() for c in cells]
+
+                if any("كروك" in t for t in txts) or any("فضائ" in t for t in txts):
+                    last_headers = txts
+                    continue
+
+                row_targets = []
+                for idx, tc in enumerate(cells):
+                    cell_targets = []
+                    for blip in tc.iter(f"{A_NS}blip"):
+                        embed = blip.get(f"{R_NS}embed")
+                        if embed in rel_map:
+                            cell_targets.append(rel_map[embed])
+                    row_targets.append(cell_targets)
+
+                flat = [t for cell in row_targets for t in cell]
+                if flat:
+                    if last_headers and len(row_targets) >= 2:
+                        for idx, cell_t in enumerate(row_targets):
+                            hdr = last_headers[idx] if idx < len(last_headers) else ""
+                            if cell_t:
+                                if "كروك" in hdr or idx == 0:
+                                    if not croq_target:
+                                        croq_target = cell_t[0]
+                                elif "فضائ" in hdr or idx == 1:
+                                    if not sat_target:
+                                        sat_target = cell_t[0]
+                    else:
+                        if not croq_target and len(flat) > 0:
+                            croq_target = flat[0]
+                        if not sat_target and len(flat) > 1:
+                            sat_target = flat[1]
+                    break
+
+            def to_b64(path: Optional[str]) -> str:
+                if not path or path not in z.namelist():
+                    return ""
+                raw_bytes = z.read(path)
+                ext = path.split(".")[-1].lower()
+                mime = "image/png" if ext == "png" else "image/jpeg"
+                encoded = base64.b64encode(raw_bytes).decode("ascii")
+                return f"data:{mime};base64,{encoded}"
+
+            images["croquis"] = to_b64(croq_target)
+            images["satellite"] = to_b64(sat_target)
+    except Exception as e:
+        print(f"[!] Warning extracting docx images: {e}")
+
+    return images
 
 
 def docx_to_survey_csv(docx_path_or_bytes, output_csv_path: str) -> Tuple[str, Dict[str, Any]]:

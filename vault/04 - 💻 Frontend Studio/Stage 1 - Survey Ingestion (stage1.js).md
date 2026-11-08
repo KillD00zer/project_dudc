@@ -43,3 +43,10 @@ Controls data import, legal tolerance validation, coordinate visualization, and 
 - Allows surveyors to upload pre-existing AutoCAD screenshots or custom drone imagery.
 - Strictly restricted to Stage 1 to prevent layout disruption in Stage 2.
 
+### 7. Word Certificate (.docx) Ingestion & Original Embedded Photo Insertion
+- **Import Button (`#btnImportDocx`):** Allows selecting `.docx` cadastral certificates.
+- **Permanent Saved CSV Banner (`#surveyFileSavedBanner`):** Displays synthesized permanent CSV filename and download button.
+- **1-Click Docx Images Insertion (`#btnApplyAllDocxImages`):** Simple button (`📸 إدراج صور ملف الوورد الأصلية`) on the banner to apply both original embedded Word images (Croquis sketch & Satellite photo) simultaneously.
+- **Individual Card Insertion (`#btnUseDocxCroquis`, `#btnUseDocxSat`):** Context buttons (`📄 صورة الوورد`) in Croquis and Satellite preview cards to selectively apply or revert each image individually.
+
+
